@@ -1,6 +1,5 @@
 #pragma once
 
-
 #ifndef MATH_USE_CPP17
 #if __cplusplus >= 201703 || _HAS_CXX17
 #define MATH_USE_CPP17 1
