@@ -5,30 +5,30 @@ _FUNCPROG_BEGIN
 // Function application
 template<typename Ret, typename Arg0, typename... Args>
 function_t<Ret(Args...)> operator<<(
-	function_t<Ret(Arg0, Args...)> const& f,
-	fdecay<Arg0> const& arg0)
+    function_t<Ret(Arg0, Args...)> const& f,
+    fdecay<Arg0> const& arg0)
 {
-	return [f, arg0](Args... args) { return f(arg0, args...); };
+    return [f, arg0](Args... args) { return f(arg0, args...); };
 }
 
 // Application to the function without parameters
 template<typename Ret, typename Arg0, typename... Args>
 function_t<Ret(Args...)> operator<<(
-	function_t<Ret(Arg0, Args...)> const& f,
-	f0<fdecay<Arg0> > const& arg0)
+    function_t<Ret(Arg0, Args...)> const& f,
+    f0<fdecay<Arg0> > const& arg0)
 {
-	return [f, arg0](Args... args) { return f(arg0(), args...); };
+    return [f, arg0](Args... args) { return f(arg0(), args...); };
 }
 
 // Function dereference - same as func()
 template<typename Ret>
 Ret operator*(f0<Ret> const& f) {
-	return f();
+    return f();
 }
 
 template<typename T>
 T deref(f0<T> const& f) {
-	return f();
+    return f();
 }
 
 _FUNCPROG_END
@@ -37,12 +37,12 @@ namespace std {
 
 template<typename Ret>
 ostream& operator<<(ostream &os, _FUNCPROG::f0<Ret> const& f) {
-	return os << f();
+    return os << f();
 }
 
 template<typename Ret>
 wostream& operator<<(wostream &os, _FUNCPROG::f0<Ret> const& f) {
-	return os << f();
+    return os << f();
 }
 
 template<typename T1, typename T2>

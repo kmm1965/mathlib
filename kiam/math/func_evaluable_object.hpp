@@ -43,7 +43,7 @@ DECARE_FUNC_EVAL_OBJ(cospi)
 DECARE_FUNC_EVAL_OBJ(exp2)
 DECARE_FUNC_EVAL_OBJ(log1p)
 DECARE_FUNC_EVAL_OBJ(log2)
-#endif	// __CUDACC__
+#endif  // __CUDACC__
 
 // Special case for sqrt and sqr
 template<class EO>

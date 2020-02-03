@@ -25,11 +25,11 @@ _FUNCPROG_BEGIN
 -- This class is used in the translation of the recursive @do@ notation
 -- supported by GHC and Hugs.
 class (Monad m) => MonadFix m where
-		-- | The fixed point of a monadic computation.
-		-- @'mfix' f@ executes the action @f@ only once, with the eventual
-		-- output fed back as the input.  Hence @f@ should not be strict,
-		-- for then @'mfix' f@ would diverge.
-		mfix :: (a -> m a) -> m a
+        -- | The fixed point of a monadic computation.
+        -- @'mfix' f@ executes the action @f@ only once, with the eventual
+        -- output fed back as the input.  Hence @f@ should not be strict,
+        -- for then @'mfix' f@ would diverge.
+        mfix :: (a -> m a) -> m a
 */
 template<typename T>
 struct MonadFix;
@@ -40,11 +40,11 @@ using MonadFix_t = MonadFix<base_class_t<T> >;
 template<class Fun>
 function_t<Fun> fix(Fun &&f)
 {
-	using A = first_argument_type_t<function_t<Fun> >;
-	const y_combinator_result<Fun> comb = y_combinator(f);
-	return [comb](A const& a) {
-		return comb(a);
-	};
+    using A = first_argument_type_t<function_t<Fun> >;
+    const y_combinator_result<Fun> comb = y_combinator(f);
+    return [comb](A const& a) {
+        return comb(a);
+    };
 }
 
 _FUNCPROG_END

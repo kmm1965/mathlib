@@ -7,7 +7,7 @@ _KIAM_MATH_BEGIN
 template<class T>
 struct math_object_base
 {
-	typedef T final_type;
+    typedef T final_type;
 
     __DEVICE __HOST
     final_type& self() {
@@ -21,13 +21,13 @@ struct math_object_base
 
     __DEVICE __HOST
     final_type& operator()(){
-		return self();
-	}
+        return self();
+    }
 
-	__DEVICE __HOST
+    __DEVICE __HOST
     CONSTEXPR const final_type& operator()() const {
-		return self();
-	}
+        return self();
+    }
 
 protected: // protect from direct construction
     CONSTEXPR math_object_base() {}
@@ -36,11 +36,11 @@ protected: // protect from direct construction
 template<class T, class _Proxy = T>
 struct math_object : math_object_base<T>
 {
-	typedef _Proxy proxy_type;
+    typedef _Proxy proxy_type;
 
     CONSTEXPR proxy_type get_proxy() const {
-		return (*this)();
-	}
+        return (*this)();
+    }
 
 protected: // protect from direct construction
     CONSTEXPR math_object() {}

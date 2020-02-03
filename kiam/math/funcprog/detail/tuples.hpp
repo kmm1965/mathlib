@@ -8,13 +8,13 @@ DEFINE_FUNCTION_2(2, PAIR_T(T0, T1), comma, T0 const&, a, T1 const&, b, return P
 // fst
 template<typename T0, typename T1>
 T0 fst(pair_t<T0, T1> const & p) {
-	return p.first;
+    return p.first;
 }
 
 // snd
 template<typename T0, typename T1>
 T1 snd(pair_t<T0, T1> const & p) {
-	return p.second;
+    return p.second;
 }
 
 // curry

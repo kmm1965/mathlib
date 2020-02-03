@@ -18,7 +18,7 @@ DEFINE_FUNCTION_3_NOTEMPL(SourcePos, newPos, SourceName const&, name, int, line,
     return SourcePos(name, line, column);)
 
 inline SourcePos initialPos(SourceName const& name) {
-	return SourcePos(name, 1, 1);
+    return SourcePos(name, 1, 1);
 }
 
 // Increments the line number of a source position.

@@ -26,8 +26,8 @@ private:
 #define PARSECMAP_UNPARSER(S, U, M, Ret, T, P) typename PARSECMAP_UNPARSER_(S, U, M, Ret, T, P)
 
 DEFINE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)), parsecMap,
-	function_t<T3(T4)> const&, f, PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p,
-	return PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5))(PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)(f, p));)
+    function_t<T3(T4)> const&, f, PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p,
+    return PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5))(PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)(f, p));)
 
 _PARSEC_END
 
@@ -43,11 +43,11 @@ struct is_same_functor<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M> > 
 template<typename S, typename U, typename _M>
 struct Functor<parsec::_ParsecT<S, U, _M> >
 {
-	template<typename Ret, typename Arg, typename P>
-	static parsec::ParsecT<S, U, _M, Ret, parsec::parsecMap_unParser<S, U, _M, Ret, fdecay<Arg>, P> >
-	fmap(function_t<Ret(Arg)> const& f, parsec::ParsecT<S, U, _M, fdecay<Arg>, P> const& p) {
-		return parsec::parsecMap<S, U, _M, Ret, fdecay<Arg>, P>(f, p);
-	}
+    template<typename Ret, typename Arg, typename P>
+    static parsec::ParsecT<S, U, _M, Ret, parsec::parsecMap_unParser<S, U, _M, Ret, fdecay<Arg>, P> >
+    fmap(function_t<Ret(Arg)> const& f, parsec::ParsecT<S, U, _M, fdecay<Arg>, P> const& p) {
+        return parsec::parsecMap<S, U, _M, Ret, fdecay<Arg>, P>(f, p);
+    }
 };
 
 template<typename S, typename U, typename M, typename Ret, typename Arg, typename P>
@@ -57,15 +57,15 @@ using parsec_fmap_type = parsec::ParsecT<S, U, M, Ret, parsec::parsecMap_unParse
 #define PARSEC_FMAP_TYPE(S, U, M, Ret, Arg, P) typename PARSEC_FMAP_TYPE_(S, U, M, Ret, Arg, P)
 
 DEFINE_FUNCTION_2(6, PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), fmap, function_t<T3(T4)> const&, f,
-	PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (Functor<parsec::_ParsecT<T0, T1, T2> >::template fmap<T3, T4, T5>(f, p));)
+    PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (Functor<parsec::_ParsecT<T0, T1, T2> >::template fmap<T3, T4, T5>(f, p));)
 
 template<typename S, typename U, typename M, typename Ret, typename Arg, typename P>
 parsec_fmap_type<S, U, M, Ret, Arg, P> operator/(function_t<Ret(Arg)> const& f, parsec::ParsecT<S, U, M, fdecay<Arg>, P> const& p) {
-	return fmap<S, U, M, Ret, Arg, P>(f, p);
+    return fmap<S, U, M, Ret, Arg, P>(f, p);
 }
 
 // liftA == fmap
 DEFINE_FUNCTION_2(6, PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), liftM, function_t<T3(T4)> const&, f,
-	PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (fmap<T0, T1, T2, T3, T4, T5>(f, p));)
+    PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (fmap<T0, T1, T2, T3, T4, T5>(f, p));)
 
 _FUNCPROG_END

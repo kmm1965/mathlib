@@ -24,22 +24,22 @@ struct is_same_traversable : std::false_type {};
     traverse(function_t<AP(Arg)> const& f, T<fdecay<Arg> > const& x); \
     \
     /* sequenceA :: Applicative f => t (f a) -> f (t a) */ \
-	template<typename A> \
+    template<typename A> \
     static typename std::enable_if<is_applicative_t<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
     sequenceA(T<A> const& x);
 
 #define DEFAULT_SEQUENCEA_IMPL(T, _T) \
-	template<typename A> \
-	typename std::enable_if<is_applicative_t<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
-	Traversable<_T>::sequenceA(T<A> const& x) { \
-		return traverse(_(id<A>), x); \
-	}
+    template<typename A> \
+    typename std::enable_if<is_applicative_t<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
+    Traversable<_T>::sequenceA(T<A> const& x) { \
+        return traverse(_(id<A>), x); \
+    }
 
 #define IMPLEMENT_TRAVERSABLE(T) \
-	template<typename A> \
-	struct is_traversable<T<A> > : std::true_type {}; \
-	template<typename A1, typename A2> \
-	struct is_same_traversable<T<A1>, T<A2> > : std::true_type {};
+    template<typename A> \
+    struct is_traversable<T<A> > : std::true_type {}; \
+    template<typename A1, typename A2> \
+    struct is_same_traversable<T<A1>, T<A2> > : std::true_type {};
 
 // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 template<typename T, typename AP, typename Arg>
@@ -63,7 +63,7 @@ using sequenceA_type = typename std::enable_if<
 
 template<typename T>
 sequenceA_type<T> sequenceA(T const& x) {
-	return Traversable_t<T>::sequenceA(x);
+    return Traversable_t<T>::sequenceA(x);
 }
 
 // mapM :: Monad m => (a -> m b) -> t a -> m (t b)
@@ -88,7 +88,7 @@ using sequence_type = typename std::enable_if<
 
 template<typename T>
 sequence_type<T> sequence(T const& x) {
-	return sequenceA(x);
+    return sequenceA(x);
 }
 
 _FUNCPROG_END

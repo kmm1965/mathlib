@@ -5,7 +5,7 @@ _FUNCPROG_BEGIN
 // Constructors
 template<typename A>
 Either<A, void> Left(A const& value) {
-	return _Left<A>(value);
+    return _Left<A>(value);
 }
 
 template<typename A>
@@ -15,7 +15,7 @@ Either<A, void> Left(f0<A> const& value) {
 
 template<typename B>
 Either<void, B> Right(B const& value) {
-	return _Right<B>(value);
+    return _Right<B>(value);
 }
 
 template<typename B>
@@ -42,7 +42,7 @@ Either<void, remove_f0_t<function_t<Ret(Args...)> > >
 Functor<_Either<void> >::fmap(function_t<Ret(Arg, Args...)> const& f, Either<void, fdecay<Arg> > const& x)
 {
     assert(x.index() == Right_);
-	return _Right<remove_f0_t<function_t<Ret(Args...)> > >(f << *(x.right()));
+    return _Right<remove_f0_t<function_t<Ret(Args...)> > >(f << *(x.right()));
 }
 
 // Applicative
@@ -85,7 +85,7 @@ Monad<_Either<A> >::mbind(Either<A, fdecay<Arg> > const& m, function_t<Either<A,
 {
     if (m.index() == Left_)
         return m.left();
-	else return f << m.right().value;
+    else return f << m.right().value;
 }
 
 template<typename C, typename Arg, typename... Args>
@@ -102,7 +102,7 @@ Monad<_Either<void> >::mbind(Either<void, fdecay<Arg> > const& m, function_t<Eit
 template<typename A>
 template<typename B>
 Either<A, B> MonadError<_Either<A> >::throwError(A const& x) {
-	return _Left<A>(x);
+    return _Left<A>(x);
 }
 
 // catchError :: m a -> (e -> m a) -> m a
@@ -111,7 +111,7 @@ Either<A, B> MonadError<_Either<A> >::throwError(A const& x) {
 template<typename A>
 template<typename B>
 Either<A, B> MonadError<_Either<A> >::catchError(Either<A, B> const& x, function_t<Either<A, B>(A const&)> const& f) {
-	return x.index() == Left_ ? f(*(x.left())) : x;
+    return x.index() == Left_ ? f(*(x.left())) : x;
 }
 
 // either                  :: (a -> c) -> (b -> c) -> Either a b -> c
@@ -119,7 +119,7 @@ Either<A, B> MonadError<_Either<A> >::catchError(Either<A, B> const& x, function
 // either _ g (Right y)    =  g y
 DEFINE_FUNCTION_3_ARGS(3, remove_f0_t<function_t<T2(Args...)> >, either, function_t<T2(T0, Args...)> const&, f, function_t<T2(T1, Args...)> const&, g,
     EITHER(fdecay<T0>, fdecay<T1>) const&, x,
-	return invoke_f0(x.index() == Left_ ? f << *(x.left()) : g << *(x.right()));)
+    return invoke_f0(x.index() == Left_ ? f << *(x.left()) : g << *(x.right()));)
 
 _FUNCPROG_END
 
@@ -127,9 +127,9 @@ namespace std {
 
 template<typename A, typename B>
 ostream& operator<<(ostream& os, _FUNCPROG::Either<A, B> const& v) {
-	return v.index() == _FUNCPROG::Left_ ?
+    return v.index() == _FUNCPROG::Left_ ?
         os << "Left(" << (*v.left()) << ')' :
-		os << "Right(" << *(v.right()) << ')';
+        os << "Right(" << *(v.right()) << ')';
 }
 
 template<typename A>
@@ -146,9 +146,9 @@ ostream& operator<<(ostream& os, _FUNCPROG::Either<void, B> const& v) {
 
 template<typename A, typename B>
 wostream& operator<<(wostream& os, _FUNCPROG::Either<A, B> const& v) {
-	return v.index() == _FUNCPROG::Left_ ?
+    return v.index() == _FUNCPROG::Left_ ?
         os << L"Left(" << v.left().value << L')' :
-		os << L"Right(" << v.right().value << L')';
+        os << L"Right(" << v.right().value << L')';
 }
 
 template<typename A>

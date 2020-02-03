@@ -14,41 +14,41 @@ _FUNCPROG_BEGIN
 class maybe_error : monad_error
 {
 public:
-	maybe_error(const char* msg) : monad_error(msg) {}
+    maybe_error(const char* msg) : monad_error(msg) {}
 };
 
 class maybe_nothing_error : maybe_error
 {
 public:
-	maybe_nothing_error(const char* msg) : maybe_error(msg) {}
+    maybe_nothing_error(const char* msg) : maybe_error(msg) {}
 };
 
 struct _Maybe
 {
-	using base_class = _Maybe;
+    using base_class = _Maybe;
 
-	template<typename A>
-	using type = Maybe<A>;
+    template<typename A>
+    using type = Maybe<A>;
 };
 
 template<typename A>
 struct Maybe : optional_t<fdata<A> >, _Maybe
 {
-	using value_type = A;
+    using value_type = A;
     using super = optional_t<fdata<value_type> >;
 
-	Maybe() {}
-	Maybe(value_type const& value) : super(value) {}
-	Maybe(f0<value_type> const& fvalue) : super(fvalue) {}
-	Maybe(fdata<value_type> const& value) : super(value) {}
-	Maybe(Maybe const& mvalue) : super(mvalue ? super(mvalue.value()) : super()) {}
-	Maybe(f0<Maybe> const& fmvalue) : super(*fmvalue ? super((*fmvalue).value()) : super()) {}
+    Maybe() {}
+    Maybe(value_type const& value) : super(value) {}
+    Maybe(f0<value_type> const& fvalue) : super(fvalue) {}
+    Maybe(fdata<value_type> const& value) : super(value) {}
+    Maybe(Maybe const& mvalue) : super(mvalue ? super(mvalue.value()) : super()) {}
+    Maybe(f0<Maybe> const& fmvalue) : super(*fmvalue ? super((*fmvalue).value()) : super()) {}
 
-	value_type value() const
-	{
-		assert(super::operator bool());
-		return super::value();
-	}
+    value_type value() const
+    {
+        assert(super::operator bool());
+        return super::value();
+    }
 };
 
 // Functor
@@ -57,7 +57,7 @@ IMPLEMENT_FUNCTOR(Maybe, _Maybe)
 template<>
 struct Functor<_Maybe>
 {
-	DECLARE_FUNCTOR_CLASS(Maybe)
+    DECLARE_FUNCTOR_CLASS(Maybe)
 };
 
 // Applicative
@@ -81,9 +81,9 @@ struct Monad<_Maybe> : Applicative<_Maybe>
 
     DECLARE_MONAD_CLASS(Maybe, _Maybe)
 
-	static Maybe<const char*> fail(const char*) {
-		return Nothing<const char*>();
-	}
+    static Maybe<const char*> fail(const char*) {
+        return Nothing<const char*>();
+    }
 };
 
 // Alternative
@@ -101,9 +101,9 @@ IMPLEMENT_MONADPLUS(Maybe, _Maybe)
 template<>
 struct MonadPlus<_Maybe> : Monad<_Maybe>, Alternative<_Maybe>
 {
-	using super = Alternative<_Maybe>;
+    using super = Alternative<_Maybe>;
 
-	DECLARE_MONADPLUS_CLASS(Maybe)
+    DECLARE_MONADPLUS_CLASS(Maybe)
 };
 
 // Semigroup
@@ -121,10 +121,10 @@ IMPLEMENT_MONOID(Maybe,_Maybe)
 template<>
 struct Monoid<_Maybe> : _Monoid, Semigroup<_Maybe>
 {
-	template<typename A>
-	static Maybe<A> mempty() {
-		return Nothing<A>();
-	}
+    template<typename A>
+    static Maybe<A> mempty() {
+        return Nothing<A>();
+    }
 };
 
 // Foldable
@@ -149,49 +149,49 @@ struct Traversable<_Maybe>
 template<>
 struct MonadError<_Maybe> : MonadError_base<_Maybe>
 {
-	template<typename A>
-	using error_type = EmptyData<A>;
+    template<typename A>
+    using error_type = EmptyData<A>;
 
-	DECLARE_MONADERROR_CLASS(Maybe)
+    DECLARE_MONADERROR_CLASS(Maybe)
 };
 
 // MonadFix
 /*
 instance MonadFix Maybe where
-	mfix f = let a = f (unJust a) in a
-			 where unJust (Just x) = x
-				   unJust Nothing  = errorWithoutStackTrace "mfix Maybe: Nothing"
+    mfix f = let a = f (unJust a) in a
+             where unJust (Just x) = x
+                   unJust Nothing  = errorWithoutStackTrace "mfix Maybe: Nothing"
 */
 template<>
 struct MonadFix<_Maybe>
 {
-	// mfix :: (a -> m a) -> m a
-	template<typename Arg>
-	static Maybe<fdecay<Arg> > mfix(function_t<Maybe<fdecay<Arg> >(Arg)> const& f)
-	{
-		using A = fdecay<Arg>;
-		const function_t<A(Maybe<A> const&)> unJust = [](Maybe<A> const& m)
-		{
-			if (!m) throw maybe_error("mfix Maybe: Nothing");
-			return m.value();
-		};
-		return Nothing<A>();
-	}
+    // mfix :: (a -> m a) -> m a
+    template<typename Arg>
+    static Maybe<fdecay<Arg> > mfix(function_t<Maybe<fdecay<Arg> >(Arg)> const& f)
+    {
+        using A = fdecay<Arg>;
+        const function_t<A(Maybe<A> const&)> unJust = [](Maybe<A> const& m)
+        {
+            if (!m) throw maybe_error("mfix Maybe: Nothing");
+            return m.value();
+        };
+        return Nothing<A>();
+    }
 };
 
 // MonadZip
 template<>
 struct MonadZip<_Maybe> : _MonadZip<MonadZip<_Maybe> >
 {
-	// mzipWith :: (a -> b -> c) -> m a -> m b -> m c
-	// mzipWith = liftM2
-	template<typename A, typename B, typename C, typename ArgA, typename ArgB>
-	static Maybe<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, Maybe<A> const& ma, Maybe<B> const& mb)
-	{
-		static_assert(is_same_as<ArgA, A>::value, "Should be the same");
-		static_assert(is_same_as<ArgB, B>::value, "Should be the same");
-		return liftM2(f, ma, mb);
-	}
+    // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
+    // mzipWith = liftM2
+    template<typename A, typename B, typename C, typename ArgA, typename ArgB>
+    static Maybe<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, Maybe<A> const& ma, Maybe<B> const& mb)
+    {
+        static_assert(is_same_as<ArgA, A>::value, "Should be the same");
+        static_assert(is_same_as<ArgB, B>::value, "Should be the same");
+        return liftM2(f, ma, mb);
+    }
 };
 
 template<typename T>

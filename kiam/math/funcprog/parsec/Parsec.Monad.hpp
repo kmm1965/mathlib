@@ -25,7 +25,7 @@ private:
 
 template<typename S, typename U, typename _M, typename A>
 ParsecT<S, U, _M, A, parserReturn_unParser<S, U, _M, A> > parserReturn(A const& x) {
-	return ParsecT<S, U, _M, A, parserReturn_unParser<S, U, _M, A> >(parserReturn_unParser<S, U, _M, A>(x));
+    return ParsecT<S, U, _M, A, parserReturn_unParser<S, U, _M, A> >(parserReturn_unParser<S, U, _M, A>(x));
 }
 
 /*
@@ -109,22 +109,22 @@ struct parserBind_unParser
             // we still return in the consumed continuation
             // peok x s err' = cok x s (mergeError err err')
             const typename ParsecT_base_t::template ok_type<BB> peok =
-				[cok, err](const B &y, const State_t &s, ParseError const& err_) {
-					return cok(y, s, mergeError(err, err_));
-				};
+                [cok, err](const B &y, const State_t &s, ParseError const& err_) {
+                    return cok(y, s, mergeError(err, err_));
+                };
 
             // if (k x) doesn't consume input, but errors,
             // we return the error in the 'consumed-error' continuation
             // peerr err' = cerr (mergeError err err')
             const typename ParsecT_base_t::template err_type<BB> peerr =
-				[cerr, err](ParseError const& err_) {
-					return cerr(mergeError(err, err_));
-				};
+                [cerr, err](ParseError const& err_) {
+                    return cerr(mergeError(err, err_));
+                };
             return k(x).template run<BB>(s, cok, cerr, peok, peerr);
         };
         // empty-ok case for m
         const typename ParsecT_A_base_t::template ok_type<BB> meok =
-			[this, &cok, &cerr, &eok, &eerr](A const& x, const State_t &s, ParseError const& err)
+            [this, &cok, &cerr, &eok, &eerr](A const& x, const State_t &s, ParseError const& err)
         {
             /*
                 let
@@ -137,11 +137,11 @@ struct parserBind_unParser
             */
             // in these cases, (k x) can return as empty
             const typename ParsecT_base_t::template ok_type<BB> peok =
-				[eok, err](const B &y, const State_t &s, ParseError const& err_) {
+                [eok, err](const B &y, const State_t &s, ParseError const& err_) {
                     return eok(y, s, mergeError(err, err_));
                 };
             const typename ParsecT_base_t::template err_type<BB> peerr =
-				[eerr, err](ParseError const& err_) {
+                [eerr, err](ParseError const& err_) {
                     return eerr(mergeError(err, err_));
                 };
             return k(x).template run<BB>(s, cok, cerr, peok, peerr);
@@ -193,12 +193,12 @@ struct is_same_applicative<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M
 template<typename S, typename U, typename M>
 struct Applicative<parsec::_ParsecT<S, U, M> > : Functor<parsec::_ParsecT<S, U, M> >
 {
-	using super = Functor<parsec::_ParsecT<S, U, M> >;
+    using super = Functor<parsec::_ParsecT<S, U, M> >;
 
-	template<typename T>
-	static parsec::ParsecT<S, U, M, T, parsec::parserReturn_unParser<S, U, M, T> > pure(T const& x) {
-		return parsec::parserReturn<S, U, M>(x);
-	}
+    template<typename T>
+    static parsec::ParsecT<S, U, M, T, parsec::parserReturn_unParser<S, U, M, T> > pure(T const& x) {
+        return parsec::parserReturn<S, U, M>(x);
+    }
 };
 
 // Monad
@@ -211,37 +211,37 @@ struct is_same_monad<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M> > : 
 template<typename S, typename U, typename M>
 struct Monad<parsec::_ParsecT<S, U, M> > : Applicative<parsec::_ParsecT<S, U, M> >
 {
-	using super = Applicative<parsec::_ParsecT<S, U, M> >;
+    using super = Applicative<parsec::_ParsecT<S, U, M> >;
 
-	// mreturn == pure
-	template<typename T>
-	static parsec::ParsecT<S, U, M, T, parsec::parserReturn_unParser<S, U, M, T> > mreturn(T const& x) {
-		return super::pure(x);
-	}
-	
+    // mreturn == pure
+    template<typename T>
+    static parsec::ParsecT<S, U, M, T, parsec::parserReturn_unParser<S, U, M, T> > mreturn(T const& x) {
+        return super::pure(x);
+    }
+    
     template<typename PA, typename B, typename PB, typename Arg>
     static parsec::ParsecT<S, U, M, B, parsec::parserBind_unParser<S, U, M, fdecay<Arg>, PA, B, PB> >
     mbind(parsec::ParsecT<S, U, M, fdecay<Arg>, PA> const& m, function_t<parsec::ParsecT<S, U, M, B, PB>(Arg)> const& k) {
         return parsec::parserBind<S, U, M, fdecay<Arg>, PA, B, PB>(m, k);
     }
 
-	template<typename A, typename PA, typename B>
-	using liftM_unParser_t = parsec::parserBind_unParser<S, U, M, A, PA, B, parsec::parserReturn_unParser<S, U, M, B> >;
+    template<typename A, typename PA, typename B>
+    using liftM_unParser_t = parsec::parserBind_unParser<S, U, M, A, PA, B, parsec::parserReturn_unParser<S, U, M, B> >;
 
-	template<typename A, typename PA, typename B>
-	using liftM_type = parsec::ParsecT<S, U, M, B, liftM_unParser_t<A, PA, B> >;
+    template<typename A, typename PA, typename B>
+    using liftM_type = parsec::ParsecT<S, U, M, B, liftM_unParser_t<A, PA, B> >;
 };
 
 template<typename S, typename U, typename M, typename PA, typename B, typename PB, typename Arg>
 parsec::ParsecT<S, U, M, B, parsec::parserBind_unParser<S, U, M, fdecay<Arg>, PA, B, PB> >
 operator>>=(parsec::ParsecT<S, U, M, fdecay<Arg>, PA> const& m, function_t<parsec::ParsecT<S, U, M, B, PB>(Arg)> const& k){
-	return Monad<parsec::_ParsecT<S, U, M> >::mbind(m, k);
+    return Monad<parsec::_ParsecT<S, U, M> >::mbind(m, k);
 }
 
 template<typename S, typename U, typename M, typename PA, typename B, typename PB, typename Arg>
 parsec::ParsecT<S, U, M, B, parsec::parserBind_unParser<S, U, M, fdecay<Arg>, PA, B, PB> >
 operator<<=(function_t<parsec::ParsecT<S, U, M, B, PB>(Arg)> const& k, parsec::ParsecT<S, U, M, fdecay<Arg>, PA> const& m){
-	return m >>= k;
+    return m >>= k;
 }
 
 template<typename S, typename U, typename M, typename A, typename PA, typename B>
@@ -251,8 +251,8 @@ using parsec_liftM_type = typename Monad<parsec::_ParsecT<S, U, M> >::template l
 #define PARSEC_LIFTM_TYPE(S, U, M, A, PA, B) typename PARSEC_LIFTM_TYPE_(S, U, M, A, PA, B)
 
 DEFINE_FUNCTION_2(6, PARSEC_LIFTM_TYPE(T0, T1, T2, T3, T4, T5), liftMM, function_t<T5(T3 const&)> const&, f,
-	PARSECT(T0, T1, T2, T3, T4) const&, m,
-	return _do(x, m, return (Monad<parsec::_ParsecT<T0, T1, T2> >::mreturn(f(x))););)
+    PARSECT(T0, T1, T2, T3, T4) const&, m,
+    return _do(x, m, return (Monad<parsec::_ParsecT<T0, T1, T2> >::mreturn(f(x))););)
 
 _FUNCPROG_END
 

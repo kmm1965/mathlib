@@ -7,27 +7,27 @@ _SYMDIFF_BEGIN
 template<typename VT>
 struct scalar : expression<scalar<VT> >
 {
-	typedef VT value_type;
+    typedef VT value_type;
 
-	template<unsigned M>
-	struct diff_type
-	{
-		typedef int_constant<0> type;
-	};
+    template<unsigned M>
+    struct diff_type
+    {
+        typedef int_constant<0> type;
+    };
 
     constexpr scalar(const value_type &value) : value(value){}
 
-	template<unsigned M>
+    template<unsigned M>
     constexpr typename diff_type<M>::type diff() const {
-		return typename diff_type<M>::type();
-	}
+        return typename diff_type<M>::type();
+    }
 
-	template<typename T, size_t _Size>
+    template<typename T, size_t _Size>
     constexpr value_type operator()(const std::array<T, _Size> &) const {
-		return value;
-	}
+        return value;
+    }
 
-	const value_type value;
+    const value_type value;
 };
 
 typedef scalar<int> int_scalar;
@@ -42,7 +42,7 @@ struct is_scalar<scalar<VT> > : std::true_type{};
 
 template<typename T>
 constexpr scalar<T> _(const T &val) {
-	return scalar<T>(val);
+    return scalar<T>(val);
 }
 
 _SYMDIFF_END

@@ -16,7 +16,7 @@ struct y_combinator_result
     }
 
 private:
-	const Fun fun;
+    const Fun fun;
 };
 
 template<class Fun>

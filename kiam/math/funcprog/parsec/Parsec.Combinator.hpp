@@ -53,9 +53,9 @@ optionMaybe p       = option Nothing (liftM Just p)
 */
 template<typename S, typename U, typename M, typename A, typename P>
 using optionMaybe_type = ParsecT < S, U, M, Maybe<A>,
-	option_unParser_t<S, U, M, Maybe<A>,
-	typename Monad<_ParsecT<S, U, M> >::template liftM_unParser_t<A, P, Maybe<A> >
-	>
+    option_unParser_t<S, U, M, Maybe<A>,
+    typename Monad<_ParsecT<S, U, M> >::template liftM_unParser_t<A, P, Maybe<A> >
+    >
 >;
 
 template<typename S, typename U, typename M, typename A, typename P>
@@ -84,7 +84,7 @@ template<typename S, typename U, typename M, typename A, typename P>
 ParsecT<S, U, M, EmptyData<A>, optional_unParser_t<S, U, M, A, P> >
 optional(ParsecT<S, U, M, A, P> const& p) {
     return _do(__unused__, p, return (Monad<_ParsecT<S, U, M> >::mreturn(EmptyData<A>()));
-		) | Monad<_ParsecT<S, U, M> >::mreturn(EmptyData<A>());
+        ) | Monad<_ParsecT<S, U, M> >::mreturn(EmptyData<A>());
 }
 
 /*
@@ -244,7 +244,7 @@ struct sepEndBy1_unParser
     {
         return _do(x, p,
             return _do2(__unused__, sep,
-				xs, sepEndBy(p, sep),
+                xs, sepEndBy(p, sep),
                 return (Monad<_ParsecT<S, U, M> >::mreturn(x >> xs));
             ) | (Monad<_ParsecT<S, U, M> >::mreturn(List<A>(x)));
         ).template run<B>(s, cok, cerr, eok, eerr);
@@ -378,7 +378,7 @@ struct chainr1_unParser
     {
         return _do(x, p,
             return _do2(f, op,
-				y, PARSECT(S, U, M, A, chainr1_unParser)(*this),
+                y, PARSECT(S, U, M, A, chainr1_unParser)(*this),
                 return _PARSECT(S, U, M)::mreturn(f(x, y));
             ) | _PARSECT(S, U, M)::mreturn(x);
         ).template run<B>(s, cok, cerr, eok, eerr);
@@ -624,34 +624,34 @@ manyTill p end      = scan
 template<typename S, typename U, typename M, typename A, typename P, typename E, typename PE>
 struct manyTill_unParser
 {
-	using ParsecT_base_t = ParsecT_base<S, U, M, List<A> >;
+    using ParsecT_base_t = ParsecT_base<S, U, M, List<A> >;
 
-	manyTill_unParser(ParsecT<S, U, M, A, P> const& p, ParsecT<S, U, M, E, PE> const& end) : p(p), end(end) {}
+    manyTill_unParser(ParsecT<S, U, M, A, P> const& p, ParsecT<S, U, M, E, PE> const& end) : p(p), end(end) {}
 
-	template<typename B>
-	typename ParsecT_base_t::template return_type<B> run(
-		State<S, U> const& s,
-		typename ParsecT_base_t::template ok_type<B> const& cok,
-		typename ParsecT_base_t::template err_type<B> const& cerr,
-		typename ParsecT_base_t::template ok_type<B> const& eok,
-		typename ParsecT_base_t::template err_type<B> const& eerr) const
-	{
-		ParsecT<S, U, M, List<A>, manyTill_unParser> scan(*this);
-		return (
-			_do(__unused__, end, return (Monad<_ParsecT<S, U, M> >::mreturn(List<A>()));) |
-			_do2(x, p, xs, scan, return (Monad<_ParsecT<S, U, M> >::mreturn(x >> xs));)
-		).template run<B>(s, cok, cerr, eok, eerr);
-	}
+    template<typename B>
+    typename ParsecT_base_t::template return_type<B> run(
+        State<S, U> const& s,
+        typename ParsecT_base_t::template ok_type<B> const& cok,
+        typename ParsecT_base_t::template err_type<B> const& cerr,
+        typename ParsecT_base_t::template ok_type<B> const& eok,
+        typename ParsecT_base_t::template err_type<B> const& eerr) const
+    {
+        ParsecT<S, U, M, List<A>, manyTill_unParser> scan(*this);
+        return (
+            _do(__unused__, end, return (Monad<_ParsecT<S, U, M> >::mreturn(List<A>()));) |
+            _do2(x, p, xs, scan, return (Monad<_ParsecT<S, U, M> >::mreturn(x >> xs));)
+        ).template run<B>(s, cok, cerr, eok, eerr);
+    }
 
 private:
-	const ParsecT<S, U, M, A, P> p;
-	const ParsecT<S, U, M, E, PE> end;
+    const ParsecT<S, U, M, A, P> p;
+    const ParsecT<S, U, M, E, PE> end;
 };
 
 template<typename S, typename U, typename M, typename A, typename P, typename E, typename PE>
 ParsecT<S, U, M, List<A>, manyTill_unParser<S, U, M, A, P, E, PE> >
 manyTill(ParsecT<S, U, M, A, P> const& p, ParsecT<S, U, M, E, PE> const& end){
-	return ParsecT<S, U, M, List<A>, manyTill_unParser<S, U, M, A, P, E, PE> >(manyTill_unParser<S, U, M, A, P, E, PE>(p, end));
+    return ParsecT<S, U, M, List<A>, manyTill_unParser<S, U, M, A, P, E, PE> >(manyTill_unParser<S, U, M, A, P, E, PE>(p, end));
 }
 
 template<typename U, typename M>
@@ -661,8 +661,8 @@ using simpleComment_unParser_t =
         String, manyTill_unParser<String, U, M,
             char, anyChar_unParser_t<U, M>,
             String, try_unParser<String, U, M, String,
-				tokens_unParser<String, U, M, char>
-			>
+                tokens_unParser<String, U, M, char>
+            >
         >
     >;
 

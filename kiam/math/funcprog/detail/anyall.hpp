@@ -15,38 +15,38 @@ and (x:xs)      =  x && and xs
 */
 inline bool _and(List<bool> const& l)
 {
-	/* return foldr(_(std::logical_and<bool>()), true, l); */
-	for (bool b : l)
-		if (!b) return false;
-	return true;
+    /* return foldr(_(std::logical_and<bool>()), true, l); */
+    for (bool b : l)
+        if (!b) return false;
+    return true;
 }
 
 inline bool _and_(List<bool> const& l)
 {
-	/* return foldr(_(std::logical_and<bool>()), true, l); */
-	for (bool b : l)
-		if (!b) return false;
-	return true;
+    /* return foldr(_(std::logical_and<bool>()), true, l); */
+    for (bool b : l)
+        if (!b) return false;
+    return true;
 }
 
 inline bool _or(List<bool> const& l)
 {
-	/* return foldr(_(std::logical_and<bool>()), true, l); */
-	for (bool b : l)
-		if (b) return true;
-	return false;
+    /* return foldr(_(std::logical_and<bool>()), true, l); */
+    for (bool b : l)
+        if (b) return true;
+    return false;
 }
 
 inline bool _or_(List<bool> const& l)
 {
-	/* return foldr(_(std::logical_or<bool>()), false, l); */
-	for (bool b : l)
-		if (b) return true;
-	return false;
+    /* return foldr(_(std::logical_or<bool>()), false, l); */
+    for (bool b : l)
+        if (b) return true;
+    return false;
 }
 
 DEFINE_FUNCTION_2(1, bool, any, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
-	return (_(_or_) & _map(p))(l);)
+    return (_(_or_) & _map(p))(l);)
 
 /*
 -- | Applied to a predicate and a list, 'all' determines if all elements
@@ -61,7 +61,7 @@ all _ []        =  True
 all p (x:xs)    =  p x && all p xs
 */
 DEFINE_FUNCTION_2(1, bool, all, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
-	return (_(_and_) & _map(p))(l);)
+    return (_(_and_) & _map(p))(l);)
 
 /*
 -- | 'elem' is the list membership predicate, usually written in infix form,
@@ -84,7 +84,7 @@ elem x (y:ys)   = x==y || elem x ys
 // elem :: (Eq a) => a -> [a] -> Bool
 // elem x = any(== x)
 DEFINE_FUNCTION_2(1, bool, elem, T0 const&, v, List<T0> const&, l,
-	return any(_eq(v), l);)
+    return any(_eq(v), l);)
 
 /*
 -- | 'notElem' is the negation of 'elem'.
@@ -104,6 +104,6 @@ notElem x (y:ys)=  x /= y && notElem x ys
 // notElem                 :: (Eq a) = > a ->[a]->Bool
 // notElem x = all(/= x)
 DEFINE_FUNCTION_2(1, bool, notElem, T0 const&, v, List<T0> const&, l,
-	return all(_neq(v), l);)
+    return all(_neq(v), l);)
 
 _FUNCPROG_END

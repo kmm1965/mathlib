@@ -53,8 +53,8 @@ template<class MP1, class MP2>
 using is_same_monad_plus_t = is_same_monad_plus<base_class_t<MP1>, base_class_t<MP2> >;
 
 #define IMPLEMENT_MONADPLUS(MP, _MP) \
-	template<> struct is_monad_plus<_MP> : std::true_type {}; \
-	template<> struct is_same_monad_plus<_MP, _MP> : std::true_type {};
+    template<> struct is_monad_plus<_MP> : std::true_type {}; \
+    template<> struct is_same_monad_plus<_MP, _MP> : std::true_type {};
 
 #define DECLARE_MONADPLUS_CLASS(MP) \
     template<typename T> \
@@ -66,15 +66,15 @@ using is_same_monad_plus_t = is_same_monad_plus<base_class_t<MP1>, base_class_t<
         using type = MP<T>; \
     }; \
     template<typename T> \
-	static MP<T> mzero(); \
+    static MP<T> mzero(); \
     template<typename A> \
-	static MP<A> mplus(MP<A> const& op1, MP<A> const& op2);
+    static MP<A> mplus(MP<A> const& op1, MP<A> const& op2);
 
 #define IMPLEMENT_DEFAULT_MONADPLUS(MP, _MP) \
-	template<typename T> \
-	MP<T> MonadPlus<_MP>::mzero(){ return Alternative<_MP>::template empty<T>(); } \
-	template<typename T> \
-	MP<T> MonadPlus<_MP>::mplus(MP<T> const& op1, MP<T> const& op2){ return op1 | op2; }
+    template<typename T> \
+    MP<T> MonadPlus<_MP>::mzero(){ return Alternative<_MP>::template empty<T>(); } \
+    template<typename T> \
+    MP<T> MonadPlus<_MP>::mplus(MP<T> const& op1, MP<T> const& op2){ return op1 | op2; }
 
 template<typename MP1, typename MP2>
 using mplus_type = typename std::enable_if<

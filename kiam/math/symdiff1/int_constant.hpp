@@ -7,19 +7,19 @@ _SYMDIFF1_BEGIN
 template<int N>
 struct int_constant : expression<int_constant<N> >
 {
-	static const int value = N;
+    static const int value = N;
 
-	typedef int_constant<0> diff_type;
+    typedef int_constant<0> diff_type;
 
     constexpr diff_type diff() const
-	{
-		return diff_type();
-	}
+    {
+        return diff_type();
+    }
 
-	template<typename T>
+    template<typename T>
     constexpr int operator()(const T &x) const {
-		return value;
-	}
+        return value;
+    }
 
     constexpr std::string to_string() const
     {

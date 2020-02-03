@@ -31,11 +31,11 @@ using MonadWriter_t = MonadWriter<W, base_class_t<M> >;
 template<typename W, class _M, typename MW>
 struct _MonadWriter
 {
-	template<typename T>
-	using type = typename _M::template type<T>;
+    template<typename T>
+    using type = typename _M::template type<T>;
 
-	static_assert(is_monoid_t<W>::value, "Should be a Monoid");
-	static_assert(is_monad<_M>::value, "Should be a Monad");
+    static_assert(is_monoid_t<W>::value, "Should be a Monoid");
+    static_assert(is_monad<_M>::value, "Should be a Monad");
 
 /*
     -- | @'writer' (a,w)@ embeds a simple writer action.
@@ -44,24 +44,24 @@ struct _MonadWriter
       tell w
       return a
 */
-	template<typename A>
-	static type<A> writer(pair_t<A, W> const& p) {
-		return MW::tell(snd(p)) >> Monad<_M>::mreturn(fst(p));
-	}
+    template<typename A>
+    static type<A> writer(pair_t<A, W> const& p) {
+        return MW::tell(snd(p)) >> Monad<_M>::mreturn(fst(p));
+    }
 /*
     -- | @'tell' w@ is an action that produces the output @w@.
     tell   :: w -> m ()
     tell w = writer ((),w)
 */
-	static type<None> tell(W const& w) {
-		return MW::writer(pair_t<None, W>(None(), w));
-	}
+    static type<None> tell(W const& w) {
+        return MW::writer(pair_t<None, W>(None(), w));
+    }
 /*
     -- | @'listen' m@ is an action that executes the action @m@ and adds
     -- its output to the value of the computation.
     listen :: m a -> m (a, w)
 
-	-- | @'pass' m@ is an action that executes the action @m@, which
+    -- | @'pass' m@ is an action that executes the action @m@, which
     -- returns a value and a function, and returns the value, applying
     -- the function to the output.
     pass   :: m (a, w -> w) -> m a
@@ -75,20 +75,20 @@ struct _MonadWriter
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 listens :: MonadWriter w m => (w -> b) -> m a -> m (a, b)
 listens f m = do
-	~(a, w) <- listen m
-	return (a, f w)
+    ~(a, w) <- listen m
+    return (a, f w)
 */
 template<typename W, class M, typename B>
 using listens_type = typename std::enable_if<
-	is_monoid_t<W>::value && is_monad_t<M>::value,
-	typename M::template type<pair_t<value_type_t<M>, B> >
+    is_monoid_t<W>::value && is_monad_t<M>::value,
+    typename M::template type<pair_t<value_type_t<M>, B> >
 >::type;
 
 #define LISTENS_TYPE_(W, M, B) BOOST_IDENTITY_TYPE((listens_type<W, M, B>))
 #define LISTENS_TYPE(W, M, B) typename LISTENS_TYPE_(W, M, B)
 
 DEFINE_FUNCTION_2(3, LISTENS_TYPE(T0, T1, T2), listens, function_t<T2(T0 const&)> const&, f, T1 const&, m,
-	return _do(p, MONADWRITER_T_(T0, T1)::listen(m), return Monad_t<T1>::mreturn(pair_t<value_type_t<T1>, T2>(fst(p), f(snd(p)))););)
+    return _do(p, MONADWRITER_T_(T0, T1)::listen(m), return Monad_t<T1>::mreturn(pair_t<value_type_t<T1>, T2>(fst(p), f(snd(p)))););)
 
 /*
 -- | @'censor' f m@ is an action that executes the action @m@ and
@@ -98,8 +98,8 @@ DEFINE_FUNCTION_2(3, LISTENS_TYPE(T0, T1, T2), listens, function_t<T2(T0 const&)
 -- * @'censor' f m = 'pass' ('liftM' (\\x -> (x,f)) m)@
 censor :: MonadWriter w m => (w -> w) -> m a -> m a
 censor f m = pass $ do
-	a <- m
-	return (a, f)
+    a <- m
+    return (a, f)
 */
 template<typename W, class M>
 using censor_type = typename std::enable_if<is_monoid_t<W>::value && is_monad_t<M>::value, M>::type;
@@ -108,8 +108,8 @@ using censor_type = typename std::enable_if<is_monoid_t<W>::value && is_monad_t<
 #define CENSOR_TYPE(W, M) typename CENSOR_TYPE_(W, M)
 
 DEFINE_FUNCTION_2(2, CENSOR_TYPE(T0, T1), censor, function_t<T0(T0 const&)> const&, f, T1 const&, m,
-	return MONADWRITER_T_(T0, T1)::pass(
-		_do(a, m, return Monad_t<T1>::mreturn(PAIR_T(value_type_t<T1>, function_t<T0(T0 const&)>)(a, f));)
-	);)
+    return MONADWRITER_T_(T0, T1)::pass(
+        _do(a, m, return Monad_t<T1>::mreturn(PAIR_T(value_type_t<T1>, function_t<T0(T0 const&)>)(a, f));)
+    );)
 
 _FUNCPROG_END

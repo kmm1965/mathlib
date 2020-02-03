@@ -60,9 +60,9 @@ template<typename S, typename U, typename _M>
 struct _ParsecT
 {
     static_assert(is_monad<_M>::value, "M should be a monad");
-	using base_class = _ParsecT;
-	
-	template<typename A>
+    using base_class = _ParsecT;
+    
+    template<typename A>
     using type = ParsecT<S, U, _M, A, parserReturn_unParser<S, U, _M, A> >;
 
     template<typename B>
@@ -75,8 +75,8 @@ struct _ParsecT
 template<typename S, typename U>
 struct __ParsecT
 {
-	template<typename _M>
-	using mt_type = _ParsecT<S, U, _M>;
+    template<typename _M>
+    using mt_type = _ParsecT<S, U, _M>;
 };
 
 template<typename S, typename U, typename _M, typename A>
@@ -85,11 +85,11 @@ struct ParsecT_base : _ParsecT<S, U, _M>
     using super = _ParsecT<S, U, _M>;
     using value_type = A;
 
-	template<typename B>
-	using ok_type = function_t<typename super::template return_type<B>(A const&, State<S, U> const&, ParseError const&)>;
+    template<typename B>
+    using ok_type = function_t<typename super::template return_type<B>(A const&, State<S, U> const&, ParseError const&)>;
 
-	template<typename B>
-	using err_type = function_t<typename super::template return_type<B>(ParseError const&)>;
+    template<typename B>
+    using err_type = function_t<typename super::template return_type<B>(ParseError const&)>;
 };
 
 #define PARSECT_BASE_(S, U, _M, A) BOOST_IDENTITY_TYPE((_PARSEC::ParsecT_base<S, U, _M, A>))
@@ -98,53 +98,53 @@ struct ParsecT_base : _ParsecT<S, U, _M>
 template<typename S, typename U, typename _M, typename A, class P>
 struct ParsecT : ParsecT_base<S, U, _M, A>
 {
-	using super = ParsecT_base<S, U, _M, A>;
+    using super = ParsecT_base<S, U, _M, A>;
 
     ParsecT(P const& unParser) : unParser(unParser) {}
 
-	template<typename B>
-	typename super::template return_type<B> run(State<S, U> const& s,
-		typename super::template ok_type<B> const& cok,
-		typename super::template err_type<B> const& cerr,
-		typename super::template ok_type<B> const& eok,
-		typename super::template err_type<B> const& eerr) const
-	{
-		return unParser.template run<B>(s, cok, cerr, eok, eerr);
-	}
+    template<typename B>
+    typename super::template return_type<B> run(State<S, U> const& s,
+        typename super::template ok_type<B> const& cok,
+        typename super::template err_type<B> const& cerr,
+        typename super::template ok_type<B> const& eok,
+        typename super::template err_type<B> const& eerr) const
+    {
+        return unParser.template run<B>(s, cok, cerr, eok, eerr);
+    }
 
-	/*
-	-- | Low-level unpacking of the ParsecT type. To run your parser, please look to
-	-- runPT, runP, runParserT, runParser and other such functions.
-	runParsecT :: Monad m => ParsecT s u m a -> State s u -> m (Consumed (m (Reply s u a)))
-	runParsecT p s = unParser p s cok cerr eok eerr
-		where cok a s' err = return . Consumed . return $ Ok a s' err
-			  cerr err = return . Consumed . return $ Error err
-			  eok a s' err = return . Empty . return $ Ok a s' err
-			  eerr err = return . Empty . return $ Error err
-	*/
+    /*
+    -- | Low-level unpacking of the ParsecT type. To run your parser, please look to
+    -- runPT, runP, runParserT, runParser and other such functions.
+    runParsecT :: Monad m => ParsecT s u m a -> State s u -> m (Consumed (m (Reply s u a)))
+    runParsecT p s = unParser p s cok cerr eok eerr
+        where cok a s' err = return . Consumed . return $ Ok a s' err
+              cerr err = return . Consumed . return $ Error err
+              eok a s' err = return . Empty . return $ Ok a s' err
+              eerr err = return . Empty . return $ Error err
+    */
 
-	typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >
-	run(State<S, U> const& s) const
-	{
-		using Reply_t = Reply<S, U, A>;
-		using mrep_type = typename _M::template type<Reply_t>;
-		using B = Consumed<mrep_type>;
-		const typename ParsecT<S, U, _M, A, P>::template ok_type<B>
-			cok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
-				return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
-			},
-			eok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
-				return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
-			};
-		const typename ParsecT<S, U, _M, A, P>::template err_type<B>
-			cerr = [](ParseError const& err) {
-				return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
-			},
-			eerr = [](ParseError const& err) {
-				return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
-			};
-		return unParser.template run<B>(s, cok, cerr, eok, eerr);
-	}
+    typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >
+    run(State<S, U> const& s) const
+    {
+        using Reply_t = Reply<S, U, A>;
+        using mrep_type = typename _M::template type<Reply_t>;
+        using B = Consumed<mrep_type>;
+        const typename ParsecT<S, U, _M, A, P>::template ok_type<B>
+            cok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
+                return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
+            },
+            eok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
+                return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
+            };
+        const typename ParsecT<S, U, _M, A, P>::template err_type<B>
+            cerr = [](ParseError const& err) {
+                return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
+            },
+            eerr = [](ParseError const& err) {
+                return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
+            };
+        return unParser.template run<B>(s, cok, cerr, eok, eerr);
+    }
 
 private:
     const P unParser;
@@ -153,7 +153,7 @@ private:
 template<typename S, typename U, typename _M, typename A, typename P>
 typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >
 runParsecT(ParsecT<S, U, _M, A, P> const& p, State<S, U> const& s) {
-	return p.run(s);
+    return p.run(s);
 }
 
 template<typename S, typename U, typename A, typename P>
@@ -192,7 +192,7 @@ unexpected msg
 template<typename S, typename U, typename _M, typename A>
 struct unexpected_unParser
 {
-	using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
     unexpected_unParser(std::string const& msg) : msg(msg) {}
 

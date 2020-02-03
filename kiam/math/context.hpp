@@ -17,18 +17,18 @@ _KIAM_MATH_END
 
 #ifdef DONT_USE_CXX_11
 #define DECLARE_MATH_CONTEXT(name) \
-	template<class CONTEXT> \
-	struct name##_context : _KIAM_MATH::context<name##_tag, CONTEXT>{}; \
-	template<class CB, class _Proxy = CB> \
-	struct name##_context_builder : _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>{}; \
-	template<class CBP> \
-	struct name##_context_builder_proxy : _KIAM_MATH::context_builder_proxy<name##_tag, CBP>{}
+    template<class CONTEXT> \
+    struct name##_context : _KIAM_MATH::context<name##_tag, CONTEXT>{}; \
+    template<class CB, class _Proxy = CB> \
+    struct name##_context_builder : _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>{}; \
+    template<class CBP> \
+    struct name##_context_builder_proxy : _KIAM_MATH::context_builder_proxy<name##_tag, CBP>{}
 #else
 #define DECLARE_MATH_CONTEXT(name) \
-	template<class CONTEXT> \
-	using name##_context = _KIAM_MATH::context<name##_tag, CONTEXT>; \
-	template<class CB, class _Proxy = CB> \
-	using name##_context_builder = _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>; \
-	template<class CBP> \
-	using name##_context_builder_proxy = _KIAM_MATH::context_builder_proxy<name##_tag, CBP>
+    template<class CONTEXT> \
+    using name##_context = _KIAM_MATH::context<name##_tag, CONTEXT>; \
+    template<class CB, class _Proxy = CB> \
+    using name##_context_builder = _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>; \
+    template<class CBP> \
+    using name##_context_builder_proxy = _KIAM_MATH::context_builder_proxy<name##_tag, CBP>
 #endif

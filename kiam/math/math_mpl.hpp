@@ -101,7 +101,7 @@ using logical_or = boost::compute::logical_or<T>;
 template<typename T>
 using logical_not = boost::compute::logical_not<T>;
 
-#else	// __CUDACC__
+#else   // __CUDACC__
 
 template<typename T>
 using plus = std::plus<T>;
@@ -126,8 +126,8 @@ struct maximum
     using result_type = T;
     
     const T& operator()(const T& x, const T& y) const {
-		return x < y ? y : x;
-	}
+        return x < y ? y : x;
+    }
 };
 
 template<typename T>
@@ -138,8 +138,8 @@ struct minimum
     using result_type = T;
 
     const T& operator()(const T& x, const T& y) const {
-		return x < y ? x : y;
-	}
+        return x < y ? x : y;
+    }
 };
 
 template<typename T>
@@ -169,7 +169,7 @@ using logical_or = std::logical_or<T>;
 template<typename T>
 using logical_not = std::logical_not<T>;
 
-#endif	// __CUDACC__
+#endif  // __CUDACC__
 
 template<typename T>
 struct maxabs
@@ -180,10 +180,10 @@ struct maxabs
 
     __DEVICE __HOST
     T operator()(const T &_Left, const T &_Right) const
-	{
-		const T l = (_Left < 0 ? -_Left : _Left), r = (_Right < 0 ? -_Right : _Right);
-		return l < r ? r : l;
-	}
+    {
+        const T l = (_Left < 0 ? -_Left : _Left), r = (_Right < 0 ? -_Right : _Right);
+        return l < r ? r : l;
+    }
 };
 
 template<typename T>
@@ -195,8 +195,8 @@ struct sumsqr
 
     __DEVICE __HOST
     CONSTEXPR T operator()(const T &_Left, const T &_Right) const {
-		return _Left + _Right * _Right;
-	}
+        return _Left + _Right * _Right;
+    }
 };
 
 _KIAM_MATH_END

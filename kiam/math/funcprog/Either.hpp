@@ -9,7 +9,7 @@ _FUNCPROG_BEGIN
 template<typename A>
 struct _Either
 {
-	using base_class = _Either;
+    using base_class = _Either;
 
     template<typename B>
     using type = Either<A, B>;
@@ -18,9 +18,9 @@ struct _Either
 template<>
 struct _Either<void>
 {
-	using base_class = _Either;
+    using base_class = _Either;
 
-	template<typename B>
+    template<typename B>
     using type = Either<void, B>;
 };
 
@@ -31,29 +31,29 @@ struct EitherBase
 
 protected:
     EitherBase(value_type const& value) : value(value) {}
-	EitherBase(f0<value_type> const& fvalue) : value(fvalue) {}
+    EitherBase(f0<value_type> const& fvalue) : value(fvalue) {}
 
 public:
-	value_type operator*() const {
-		return value();
-	}
+    value_type operator*() const {
+        return value();
+    }
 
 private:
-	const fdata<value_type> value;
+    const fdata<value_type> value;
 };
 
 template<typename A>
 struct _Left : EitherBase<A>
 {
     _Left(A const& value) : EitherBase<A>(value) {}
-	_Left(f0<A> const& fvalue) : EitherBase<A>(fvalue) {}
+    _Left(f0<A> const& fvalue) : EitherBase<A>(fvalue) {}
 };
 
 template<typename A>
 struct _Right : EitherBase<A>
 {
     _Right(A const& value) : EitherBase<A>(value) {}
-	_Right(f0<A> const& fvalue) : EitherBase<A>(fvalue) {}
+    _Right(f0<A> const& fvalue) : EitherBase<A>(fvalue) {}
 };
 
 template<typename A, typename B>
@@ -68,13 +68,13 @@ struct Either : variant_t<_Left<A>, _Right<B> >, _Either<A>
     Either(Either<void, B> const& e) : super(e.right()) {}
 
     const _Left<A>& left() const
-	{
+    {
         assert(super::index() == Left_);
         return super::template get<_Left<A> >();
     }
 
     const _Right<B>& right() const
-	{
+    {
         assert(super::index() == Right_);
         return super::template get<_Right<B> >();
     }
@@ -86,9 +86,9 @@ struct Functor<_Either<A> >
 {
     template<typename FUNC> struct fmap_result_type;
 
-	template<typename Ret, typename Arg, typename... Args>
-	static Either<A, remove_f0_t<function_t<Ret(Args...)> > >
-	fmap(function_t<Ret(Arg, Args...)> const& f, Either<A, fdecay<Arg> > const& x);
+    template<typename Ret, typename Arg, typename... Args>
+    static Either<A, remove_f0_t<function_t<Ret(Args...)> > >
+    fmap(function_t<Ret(Arg, Args...)> const& f, Either<A, fdecay<Arg> > const& x);
 };
 
 // Applicative
@@ -97,15 +97,15 @@ struct Applicative<_Either<A> > : Functor<_Either<A> >
 {
     using super = Functor<_Either<A> >;
 
-	template<typename T>
-	static Either<A, fdecay<T> > pure(T const& x);
+    template<typename T>
+    static Either<A, fdecay<T> > pure(T const& x);
 
     // <*> :: Applicative f => f (a -> b) -> f a -> f b
     // Left  e <*> _ = Left e
     // Right f <*> r = fmap f r
     template<typename Ret, typename Arg, typename... Args>
     static Either<A, remove_f0_t<function_t<Ret(Args...)> > >
-	apply(Either<A, function_t<Ret(Arg, Args...)> > const& f, Either<A, fdecay<Arg> > const& v);
+    apply(Either<A, function_t<Ret(Arg, Args...)> > const& f, Either<A, fdecay<Arg> > const& v);
 };
 
 // Monad
@@ -114,15 +114,15 @@ struct Monad<_Either<A> > : Applicative<_Either<A> >
 {
     using super = Applicative<_Either<A> >;
 
-	// mreturn == pure
-	template<typename T>
-	static Either<A, fdecay<T> > mreturn(T const& x) {
-		return super::pure(x);
-	}
-	
-	template<typename C, typename Arg, typename... Args>
-	static remove_f0_t<function_t<Either<A, C>(Args...)> >
-	mbind(Either<A, fdecay<Arg> > const& m, function_t<Either<A, C>(Arg, Args...)> const& f);
+    // mreturn == pure
+    template<typename T>
+    static Either<A, fdecay<T> > mreturn(T const& x) {
+        return super::pure(x);
+    }
+    
+    template<typename C, typename Arg, typename... Args>
+    static remove_f0_t<function_t<Either<A, C>(Args...)> >
+    mbind(Either<A, fdecay<Arg> > const& m, function_t<Either<A, C>(Arg, Args...)> const& f);
 };
 
 //template<typename A, typename Arg, typename MF>
@@ -134,16 +134,16 @@ struct Monad<_Either<A> > : Applicative<_Either<A> >
 template<typename A>
 struct MonadError<_Either<A> > : MonadError_base<_Either<A> >
 {
-	template<typename B>
-	using error_type = A;
+    template<typename B>
+    using error_type = A;
 
-	// throwError :: e -> m a
-	template<typename B>
-	static Either<A, B> throwError(A const&);
+    // throwError :: e -> m a
+    template<typename B>
+    static Either<A, B> throwError(A const&);
 
-	// catchError :: m a -> (e -> m a) -> m a
-	template<typename B>
-	static Either<A, B> catchError(Either<A, B> const& x, function_t<Either<A, B>(A const&)> const& f);
+    // catchError :: m a -> (e -> m a) -> m a
+    template<typename B>
+    static Either<A, B> catchError(Either<A, B> const& x, function_t<Either<A, B>(A const&)> const& f);
 };
 
 template<typename A>
@@ -188,11 +188,11 @@ private:
 template<>
 struct Functor<_Either<void> >
 {
-	template<typename FUNC> struct fmap_result_type;
+    template<typename FUNC> struct fmap_result_type;
 
-	template<typename Ret, typename Arg, typename... Args>
-	static Either<void, remove_f0_t<function_t<Ret(Args...)> > >
-	fmap(function_t<Ret(Arg, Args...)> const& f, Either<void, fdecay<Arg> > const& x);
+    template<typename Ret, typename Arg, typename... Args>
+    static Either<void, remove_f0_t<function_t<Ret(Args...)> > >
+    fmap(function_t<Ret(Arg, Args...)> const& f, Either<void, fdecay<Arg> > const& x);
 };
 
 // Applicative
@@ -201,12 +201,12 @@ struct Applicative<_Either<void> > : Functor<_Either<void> >
 {
     using super = Functor<_Either<void> >;
 
-	template<typename T>
-	static Either<void, fdecay<T> > pure(T const& x);
+    template<typename T>
+    static Either<void, fdecay<T> > pure(T const& x);
 
     template<typename Ret, typename Arg, typename... Args>
     static Either<void, remove_f0_t<function_t<Ret(Args...)> > >
-	apply(Either<void, function_t<Ret(Arg, Args...)> > const& f, Either<void, fdecay<Arg> > const& v);
+    apply(Either<void, function_t<Ret(Arg, Args...)> > const& f, Either<void, fdecay<Arg> > const& v);
 };
 
 // Monad
@@ -215,15 +215,15 @@ struct Monad<_Either<void> > : Applicative<_Either<void> >
 {
     using super = Applicative<_Either<void> >;
 
-	// mreturn == pure
-	template<typename T>
-	static Either<void, fdecay<T> > mreturn(T const& x) {
-		return super::pure(x);
-	}
+    // mreturn == pure
+    template<typename T>
+    static Either<void, fdecay<T> > mreturn(T const& x) {
+        return super::pure(x);
+    }
 
-	template<typename C, typename Arg, typename... Args>
-	static remove_f0_t<function_t<Either<void, C>(Args...)> >
-	mbind(Either<void, fdecay<Arg> > const& m, function_t<Either<void, C>(Arg, Args...)> const& f);
+    template<typename C, typename Arg, typename... Args>
+    static remove_f0_t<function_t<Either<void, C>(Args...)> >
+    mbind(Either<void, fdecay<Arg> > const& m, function_t<Either<void, C>(Arg, Args...)> const& f);
 };
 
 template<typename A>

@@ -4,6 +4,8 @@
 #include <thrust/system_error.h>
 #include <thrust/system/cuda/error.h>
 
+#include <boost/throw_exception.hpp>
+
 namespace hpc {
 
 int getCudaDeviceCount();

@@ -6,7 +6,7 @@
 _FUNCPROG_BEGIN
 
 inline std::string _s(const char *s){
-	return s;
+    return s;
 }
 template<typename T>
 struct is_function : std::false_type {};
@@ -24,20 +24,20 @@ struct is_function0<function_t<T()> > : std::true_type{};
 
 template<typename Ret, typename Arg, typename... Args>
 function_t<Ret(Arg, Args...)> invoke_f0(function_t<Ret(Arg, Args...)> const& f) {
-	return f;
+    return f;
 }
 
 template<typename Ret>
 Ret invoke_f0(f0<Ret> const& f) {
-	return f();
+    return f();
 }
 
 template<typename RetG, typename RetF, typename ArgF, typename... ArgsF, typename ArgG, typename... ArgsG>
 typename std::enable_if<
-	is_same_as<ArgG, function_t<RetF(ArgsF...)> >::value,
-	function_t<RetG(ArgF, ArgsG...)>
+    is_same_as<ArgG, function_t<RetF(ArgsF...)> >::value,
+    function_t<RetG(ArgF, ArgsG...)>
 >::type operator&(function_t<RetG(ArgG, ArgsG...)> const& g, function_t<RetF(ArgF, ArgsF...)> const& f){
-	return [g, f](ArgF argF, ArgsG... argsG) { return g(invoke_f0(f << argF), argsG...); };
+    return [g, f](ArgF argF, ArgsG... argsG) { return g(invoke_f0(f << argF), argsG...); };
 }
 
 // Function application

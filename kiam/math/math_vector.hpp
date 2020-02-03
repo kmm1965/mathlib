@@ -32,39 +32,47 @@ struct vector_proxy;
 template<typename T>
 struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
 {
-	typedef math_vector type;
-	typedef T value_type;
-	typedef MATH_VECTOR_BASE_CLASS<value_type> super;
-	typedef value_type *pointer;
-	typedef const value_type *const_pointer;
-	typedef vector_proxy<value_type> vector_proxy_type;
+    typedef math_vector type;
+    typedef T value_type;
+    typedef MATH_VECTOR_BASE_CLASS<value_type> super;
+    typedef value_type *pointer;
+    typedef const value_type *const_pointer;
+    typedef vector_proxy<value_type> vector_proxy_type;
 
-	math_vector() : super(){}
-	math_vector(size_t size) : super(size){}
-	math_vector(size_t size, const value_type &initValue) : super(size, initValue){}
+    math_vector() : super(){}
+    math_vector(size_t size) : super(size){}
+    math_vector(size_t size, const value_type &initValue) : super(size, initValue){}
 #ifndef DONT_USE_CXX_11
-	math_vector(const math_vector &other) : super(other){};
-	math_vector(math_vector &&other) : super(std::forward<super>(other)){}
+    explicit math_vector(const math_vector& other) = delete;
+    explicit math_vector(math_vector &&other) : super(std::forward<super>(other)){}
 #endif
-	math_vector(const host_vector<value_type>& hv)
-#ifdef __CUDACC__
-	{ operator=(hv); }
-#else
-		: super(hv){}
-#endif
+    explicit math_vector(const host_vector<value_type>& hv) = delete;
+//#ifdef __CUDACC__
+//  { operator=(hv); }
+//#else
+//      : super(hv){}
+//#endif
 
-	void operator=(const math_vector &other){ super::operator=(other); }
-	void operator=(math_vector &&other){ super::operator=(std::forward<super>(other)); }
-
-	void operator=(const host_vector<value_type> &hv)
-	{
+    void operator=(const math_vector &other)
+    {
 #ifdef __CUDACC__
-		super::resize(hv.size());
-		thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), hv.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyHostToDevice), "cudaMemcpy");
+        super::resize(other.size());
+        thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), other.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyDeviceToDevice), "cudaMemcpy");
 #else
-		super::operator=(hv);
+        super::operator=(other);
 #endif
-	}
+    }
+    void operator=(math_vector &&other){ super::operator=(std::forward<super>(other)); }
+
+    void operator=(const host_vector<value_type> &hv)
+    {
+#ifdef __CUDACC__
+        super::resize(hv.size());
+        thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), hv.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyHostToDevice), "cudaMemcpy");
+#else
+        super::operator=(hv);
+#endif
+    }
 
 #if defined(__CUDACC__)
     #define DATA_POINTER() thrust::raw_pointer_cast(&super::front())
@@ -73,8 +81,8 @@ struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
 #else
     #define DATA_POINTER() &super::front()
 #endif
-	pointer data_pointer(){ return DATA_POINTER(); }
-	const_pointer data_pointer() const { return DATA_POINTER(); }
+    pointer data_pointer(){ return DATA_POINTER(); }
+    const_pointer data_pointer() const { return DATA_POINTER(); }
 #undef DATA_POINTER
     vector_proxy_type get_proxy(){ return *this; }
     vector_proxy_type get_proxy() const { return *this; }

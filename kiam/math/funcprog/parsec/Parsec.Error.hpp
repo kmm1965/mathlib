@@ -45,7 +45,7 @@ errorMessages (ParseError _pos msgs)
     = sort msgs
 */
 inline List<Message> errorMessages(ParseError const& err) {
-	return sort(err.msgs);
+    return sort(err.msgs);
 }
 
 /*
@@ -55,7 +55,7 @@ errorIsUnknown (ParseError _pos msgs)
 
 */
 inline bool errorIsUnknown(ParseError const& err) {
-	return null(err.msgs);
+    return null(err.msgs);
 }
 
 /*
@@ -67,7 +67,7 @@ newErrorUnknown pos
 
 */
 inline ParseError newErrorUnknown(SourcePos const& pos) {
-	return ParseError(pos);
+    return ParseError(pos);
 }
 
 /*

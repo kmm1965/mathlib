@@ -15,40 +15,40 @@ template<class F>
 struct is_foldable : std::false_type {};
 
 #define DECLARE_FOLDABLE_CLASS(F) \
-	/* foldMap :: Monoid m => (a -> m) -> t a -> m */ \
-	template<typename M, typename Arg> \
-	static typename std::enable_if<is_monoid_t<M>::value, M>::type foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x); \
-	\
-	/* foldl :: (b -> a -> b) -> b -> t a -> b */ \
-	template<typename Ret, typename A, typename B> \
-	static typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
-	foldl(function_t<Ret(B, A)> const& f, Ret const& z, F<fdecay<A> > const& x); \
+    /* foldMap :: Monoid m => (a -> m) -> t a -> m */ \
+    template<typename M, typename Arg> \
+    static typename std::enable_if<is_monoid_t<M>::value, M>::type foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x); \
     \
-	/* foldl1 :: (a -> a -> a) -> t a -> a */ \
-	template<typename A, typename Arg1, typename Arg2> \
-	static typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
-	foldl1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
-	\
-	/* foldr :: (a -> b -> b) -> b -> t a -> b */ \
-	template<typename Ret, typename A, typename B> \
-	static typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
-	foldr(function_t<Ret(A, B)> const& f, Ret const& z, F<fdecay<A> > const& x); \
+    /* foldl :: (b -> a -> b) -> b -> t a -> b */ \
+    template<typename Ret, typename A, typename B> \
+    static typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
+    foldl(function_t<Ret(B, A)> const& f, Ret const& z, F<fdecay<A> > const& x); \
     \
-	/* foldr1 :: (a -> a -> a) -> t a -> a */ \
-	template<typename A, typename Arg1, typename Arg2> \
-	static typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
-	foldr1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
+    /* foldl1 :: (a -> a -> a) -> t a -> a */ \
+    template<typename A, typename Arg1, typename Arg2> \
+    static typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
+    foldl1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
+    \
+    /* foldr :: (a -> b -> b) -> b -> t a -> b */ \
+    template<typename Ret, typename A, typename B> \
+    static typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
+    foldr(function_t<Ret(A, B)> const& f, Ret const& z, F<fdecay<A> > const& x); \
+    \
+    /* foldr1 :: (a -> a -> a) -> t a -> a */ \
+    template<typename A, typename Arg1, typename Arg2> \
+    static typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
+    foldr1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
 
 // foldMap f = foldr (mappend . f) mempty
 #define DEFAULT_FOLDMAP_IMPL(F, _F) \
-	template<typename M, typename Arg> \
-	typename std::enable_if<is_monoid_t<M>::value, M>::type Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
-		return foldr(_(mappend<M>) & f, Monoid_t<M>::template mempty<value_type_t<M> >(), x); \
-	}
+    template<typename M, typename Arg> \
+    typename std::enable_if<is_monoid_t<M>::value, M>::type Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
+        return foldr(_(mappend<M>) & f, Monoid_t<M>::template mempty<value_type_t<M> >(), x); \
+    }
 
 #define IMPLEMENT_FOLDABLE(F) \
-	template<typename A> \
-	struct is_foldable<F<A> > : std::true_type {};
+    template<typename A> \
+    struct is_foldable<F<A> > : std::true_type {};
 
 /*
 -- | Map each element of the structure to a monoid,
@@ -60,15 +60,15 @@ foldMap f = foldr (mappend . f) mempty
 */
 template<typename F, typename M, typename Arg>
 using foldMap_type = typename std::enable_if<
-	is_foldable<F>::value && is_monoid_t<M>::value && is_same_as<value_type_t<F>, Arg>::value,
-	M
+    is_foldable<F>::value && is_monoid_t<M>::value && is_same_as<value_type_t<F>, Arg>::value,
+    M
 >::type;
 
 #define FOLDMAP_TYPE_(F, M, Arg) BOOST_IDENTITY_TYPE((foldMap_type<F, M, Arg>))
 #define FOLDMAP_TYPE(F, M, Arg) typename FOLDMAP_TYPE_(F, M, Arg)
 
 DEFINE_FUNCTION_2(3, FOLDMAP_TYPE(T0, T1, T2), foldMap, function_t<T1(T2)> const&, f, T0 const&, v,
-	return Foldable_t<T0>::foldMap(f, v);)
+    return Foldable_t<T0>::foldMap(f, v);)
 
 /*
 -- | Combine the elements of a structure using a monoid.
@@ -77,21 +77,21 @@ fold = foldMap id
 */
 template<typename F>
 using fold_type = typename std::enable_if<
-	is_foldable<F>::value && is_monoid_t<value_type_t<F> >::value,
-	value_type_t<F>
+    is_foldable<F>::value && is_monoid_t<value_type_t<F> >::value,
+    value_type_t<F>
 >::type;
 
 // fold :: Monoid m => t m -> m
 // fold = foldMap id
 template<typename T>
 fold_type<T> fold(T const& v) {
-	return foldMap(_(id<value_type_t<T> >), v);
+    return foldMap(_(id<value_type_t<T> >), v);
 }
 
 template<typename FO, typename A, typename B, typename Ret>
 using foldlr_type = typename std::enable_if<
-	is_foldable<FO>::value && is_same_as<value_type_t<FO>, A>::value && is_same_as<Ret, B>::value,
-	Ret
+    is_foldable<FO>::value && is_same_as<value_type_t<FO>, A>::value && is_same_as<Ret, B>::value,
+    Ret
 >::type;
 
 #define FOLDLR_TYPE_(FO, A, B, Ret) BOOST_IDENTITY_TYPE((foldlr_type<FO, A, B, Ret>))

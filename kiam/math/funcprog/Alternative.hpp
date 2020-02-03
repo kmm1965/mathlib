@@ -56,7 +56,7 @@ template<class A1, class A2>
 using is_same_alternative_t = is_same_alternative<base_class_t<A1>, base_class_t<A2> >;
 
 #define IMPLEMENT_ALTERNATIVE(ALT, _ALT) \
-	template<> struct is_alternative<_ALT> : std::true_type {}; \
+    template<> struct is_alternative<_ALT> : std::true_type {}; \
     template<> struct is_same_alternative<_ALT, _ALT> : std::true_type {};
 
 #define DECLARE_ALTERNATIVE_CLASS(ALT) \
@@ -66,18 +66,18 @@ using is_same_alternative_t = is_same_alternative<base_class_t<A1>, base_class_t
     struct alt_op_result_type<ALT<T> >{ \
         using type = ALT<T>; \
     }; \
-	template<typename T> static ALT<T> empty(); \
-	template<typename T> static ALT<T> alt_op(ALT<T> const& op1, ALT<T> const& op2);
+    template<typename T> static ALT<T> empty(); \
+    template<typename T> static ALT<T> alt_op(ALT<T> const& op1, ALT<T> const& op2);
 
 template<class ALT>
 using alt_op_result_type = typename std::enable_if<
-	is_alternative_t<ALT>::value,
-	typename Alternative_t<ALT>::template alt_op_result_type_t<ALT>
+    is_alternative_t<ALT>::value,
+    typename Alternative_t<ALT>::template alt_op_result_type_t<ALT>
 >::type;
 
 template<class ALT>
 alt_op_result_type<ALT> operator|(ALT const& op1, ALT const& op2) {
-	return Alternative_t<ALT>::alt_op(op1, op2);
+    return Alternative_t<ALT>::alt_op(op1, op2);
 }
 
 _FUNCPROG_END

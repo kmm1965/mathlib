@@ -21,7 +21,7 @@ struct fst_type;
 
 template<typename A, typename B>
 struct fst_type<pair_t<A, B> > {
-	using type = A;
+    using type = A;
 };
 
 template<typename T>
@@ -32,7 +32,7 @@ struct snd_type;
 
 template<typename A, typename B>
 struct snd_type<pair_t<A, B> > {
-	using type = B;
+    using type = B;
 };
 
 template<typename T>
@@ -52,14 +52,14 @@ struct is_tuple3<tuple3_t<A, B, C> > : std::true_type {};
 
 template<typename T>
 T id(T const& value) {
-	return value;
+    return value;
 }
 
 DEFINE_FUNCTION_2(2, T1, const_, T1 const&, value, T0 const&, __unused__, return value;)
 DEFINE_FUNCTION_3(3, T0, flip, function_t<T0(T1, T2)> const&, f, fdecay<T2> const&, y, fdecay<T1> const&, x, return f(x, y);)
 
 #define DEFINE_LOG_OPERATION(name, op) \
-	DEFINE_FUNCTION_2(1, bool, name, T0 const&, l, T0 const&, r, return l op r;)
+    DEFINE_FUNCTION_2(1, bool, name, T0 const&, l, T0 const&, r, return l op r;)
 
 DEFINE_LOG_OPERATION(eq, ==)
 DEFINE_LOG_OPERATION(neq, !=)
@@ -85,14 +85,14 @@ _FUNCPROG_END
 
 namespace std {
 
-	template<typename T>
-	ostream& operator<<(ostream& os, _FUNCPROG::fdata<T> const& v) {
-		return os << v();
-	}
+    template<typename T>
+    ostream& operator<<(ostream& os, _FUNCPROG::fdata<T> const& v) {
+        return os << v();
+    }
 
-	template<typename T>
-	wostream& operator<<(wostream& os, _FUNCPROG::fdata<T> const& v) {
-		return os << v();
-	}
+    template<typename T>
+    wostream& operator<<(wostream& os, _FUNCPROG::fdata<T> const& v) {
+        return os << v();
+    }
 
 }

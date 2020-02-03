@@ -112,12 +112,12 @@ p1 <|> p2 = mplus p1 p2
 template<typename S, typename U, typename M>
 struct Alternative<parsec::_ParsecT<S, U, M> >
 {
-	template<typename A>
-	parsec::ParsecT<S, U, M, A, parsec::parserZero_unParser<S, U, M, A> > empty() {
-		return parsec::parserZero<S, U, M, A>();
-	}
-	
-	template<typename T, typename P>
+    template<typename A>
+    parsec::ParsecT<S, U, M, A, parsec::parserZero_unParser<S, U, M, A> > empty() {
+        return parsec::parserZero<S, U, M, A>();
+    }
+    
+    template<typename T, typename P>
     struct alt_op_result_type;
 
     template<typename T, typename P>
@@ -140,7 +140,7 @@ using parsec_alt_op_result_type = typename Alternative<parsec::_ParsecT<S, U, M>
 
 template<typename S, typename U, typename M, typename A, typename P, typename P2>
 parsec_alt_op_result_type<S, U, M, A, P, P2> operator|(parsec::ParsecT<S, U, M, A, P> const& op1, parsec::ParsecT<S, U, M, A, P2> const& op2) {
-	return Alternative<parsec::_ParsecT<S, U, M> >::alt_op(op1, op2);
+    return Alternative<parsec::_ParsecT<S, U, M> >::alt_op(op1, op2);
 }
 
 _FUNCPROG_END

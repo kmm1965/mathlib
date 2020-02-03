@@ -31,37 +31,37 @@ _FUNCPROG_BEGIN
 template<typename FuncType> using function_t = std::function<FuncType>;
 
 #if FUNCPROG_USE_CPP17
-	template<typename T> using optional_t = std::optional<T>;
-	template<typename... Types> using variant_base = std::variant<Types...>;
+    template<typename T> using optional_t = std::optional<T>;
+    template<typename... Types> using variant_base = std::variant<Types...>;
 #else
-	template<typename T> using optional_t = boost::optional<T>;
-	template<typename... Types> using variant_base = boost::variant<Types...>;
+    template<typename T> using optional_t = boost::optional<T>;
+    template<typename... Types> using variant_base = boost::variant<Types...>;
 #endif
 
 template<typename... Types>
 struct variant_t : variant_base<Types...>
 {
-	using super = variant_base<Types...>;
+    using super = variant_base<Types...>;
 
-	variant_t(variant_t const& other) : super(other) {}
-	template<typename T> variant_t(T const& value) : super(value) {}
+    variant_t(variant_t const& other) : super(other) {}
+    template<typename T> variant_t(T const& value) : super(value) {}
 
-	size_t index() const {
+    size_t index() const {
 #if FUNCPROG_USE_CPP17
-		return super::index();
+        return super::index();
 #else
-		return super::which();
+        return super::which();
 #endif
-	}
+    }
 
-	template<typename T>
-	T const& get() const {
+    template<typename T>
+    T const& get() const {
 #if FUNCPROG_USE_CPP17
-		return std::get<T>(*this);
+        return std::get<T>(*this);
 #else
-		return boost::get<T>(*this);
+        return boost::get<T>(*this);
 #endif
-	}
+    }
 
 };
 

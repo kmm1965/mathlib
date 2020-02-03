@@ -9,7 +9,7 @@ _KIAM_MATH_BEGIN
 template<typename T>
 struct get_scalar_type
 {
-	typedef T type;
+    typedef T type;
 };
 
 template<typename T>
@@ -97,7 +97,7 @@ struct supports_component_product : std::false_type {};
 template<>
 struct get_scalar_type<float2>
 {
-	typedef float type;
+    typedef float type;
 };
 
 template<>
@@ -106,7 +106,7 @@ struct supports_multiplies<float2, float2> : std::true_type{};
 template<>
 struct multiplies_result_type<float2, float2>
 {
-	typedef float2 type;
+    typedef float2 type;
 };
 
 template<>
@@ -115,7 +115,7 @@ struct supports_divides<float2, float2> : std::true_type {};
 template<>
 struct divides_result_type<float2, float2>
 {
-	typedef float2 type;
+    typedef float2 type;
 };
 
 template<>
@@ -124,13 +124,13 @@ struct supports_divides<float, float2> : std::true_type {};
 template<>
 struct divides_result_type<float, float2>
 {
-	typedef float2 type;
+    typedef float2 type;
 };
 
 template<>
 struct get_scalar_type<double2>
 {
-	typedef double type;
+    typedef double type;
 };
 
 template<>
@@ -139,7 +139,7 @@ struct supports_divides<double2, double2> : std::true_type {};
 template<>
 struct divides_result_type<double2, double2>
 {
-	typedef double2 type;
+    typedef double2 type;
 };
 
 template<>
@@ -148,10 +148,10 @@ struct supports_divides<double, double2> : std::true_type{};
 template<>
 struct divides_result_type<double, double2>
 {
-	typedef double2 type;
+    typedef double2 type;
 };
 
-#else	// __CUDACC__
+#else   // __CUDACC__
 
 #ifdef MATH_HAS_COMPLEX
 template<typename T>
@@ -184,11 +184,11 @@ struct supports_divides<T, std::complex<T> > : std::true_type {};
 template<typename T>
 struct divides_result_type<T, std::complex<T> >
 {
-	typedef std::complex<T> type;
+    typedef std::complex<T> type;
 };
 #endif // MATH_HAS_COMPLEX
 
-#endif	// __CUDACC__
+#endif  // __CUDACC__
 
 typedef typename std::make_signed<size_t>::type isize_t;
 

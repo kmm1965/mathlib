@@ -11,10 +11,10 @@ _FUNCPROG_BEGIN
 
 struct _Identity
 {
-	using base_class = _Identity;
+    using base_class = _Identity;
 
-	template<typename A>
-	using type = Identity<A>;
+    template<typename A>
+    using type = Identity<A>;
 };
 
 template<typename A>
@@ -22,34 +22,34 @@ struct Identity : _Identity
 {
     using value_type = A;
 
-	Identity(value_type const& value) : value(value) {}
-	Identity(f0<value_type> const& fvalue) : value(fvalue) {}
-	Identity(Identity const& ivalue) : value(ivalue.value) {}
-	Identity(f0<Identity> const& fivalue) : value((*fivalue).value) {}
-	//Identity(f0<Identity> const& fivalue) : value(_([fivalue]() { return (*fivalue).value(); })) {}
+    Identity(value_type const& value) : value(value) {}
+    Identity(f0<value_type> const& fvalue) : value(fvalue) {}
+    Identity(Identity const& ivalue) : value(ivalue.value) {}
+    Identity(f0<Identity> const& fivalue) : value((*fivalue).value) {}
+    //Identity(f0<Identity> const& fivalue) : value(_([fivalue]() { return (*fivalue).value(); })) {}
 
-	value_type run() const {
-		return value();
-	}
+    value_type run() const {
+        return value();
+    }
 
 private:
-	const fdata<value_type> value;
+    const fdata<value_type> value;
 };
 
 template<typename T>
 T runIdentity(Identity<T> const& x) {
-	return x.run();
+    return x.run();
 }
 
 // Constructor
 template<typename T>
 Identity<T> Identity_(T const& value) {
-	return value;
+    return value;
 }
 
 template<typename T>
 Identity<T> Identity_f(f0<T> const& fvalue) {
-	return fvalue;
+    return fvalue;
 }
 
 // Functor
@@ -58,7 +58,7 @@ IMPLEMENT_FUNCTOR(Identity, _Identity)
 template<>
 struct Functor<_Identity>
 {
-	DECLARE_FUNCTOR_CLASS(Identity)
+    DECLARE_FUNCTOR_CLASS(Identity)
 };
 
 // Applicative
@@ -80,7 +80,7 @@ struct Monad<_Identity> : Applicative<_Identity>
 {
     typedef Applicative<_Identity> super;
 
-	DECLARE_MONAD_CLASS(Identity, _Identity)
+    DECLARE_MONAD_CLASS(Identity, _Identity)
 };
 
 // Foldable
@@ -104,37 +104,37 @@ struct Traversable<_Identity>
 template<>
 struct MonadFix<_Identity>
 {
-	// mfix :: (a -> m a) -> m a
-	// mfix f = Identity (fix (runIdentity . f))
-	template<typename Arg>
-	static Identity<fdecay<Arg> > mfix(function_t<Identity<fdecay<Arg> >(Arg)> const& f)
-	{
-		using A = fdecay<Arg>;
-		//return fix<A>(_(runIdentity<A>) & f);
-	}
+    // mfix :: (a -> m a) -> m a
+    // mfix f = Identity (fix (runIdentity . f))
+    template<typename Arg>
+    static Identity<fdecay<Arg> > mfix(function_t<Identity<fdecay<Arg> >(Arg)> const& f)
+    {
+        using A = fdecay<Arg>;
+        //return fix<A>(_(runIdentity<A>) & f);
+    }
 };
 
 // MonadZip
 template<>
 struct MonadZip<_Identity> : _MonadZip<MonadZip<_Identity> >
 {
-	// mzipWith :: (a -> b -> c) -> m a -> m b -> m c
-	// mzipWith = liftM2
-	template<typename A, typename B, typename C, typename ArgA, typename ArgB>
-	static Identity<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, Identity<A> const& ma, Identity<B> const& mb)
-	{
-		static_assert(is_same_as<ArgA, A>::value, "Should be the same");
-		static_assert(is_same_as<ArgB, B>::value, "Should be the same");
-		return liftM2(f, ma, mb);
-	}
+    // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
+    // mzipWith = liftM2
+    template<typename A, typename B, typename C, typename ArgA, typename ArgB>
+    static Identity<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, Identity<A> const& ma, Identity<B> const& mb)
+    {
+        static_assert(is_same_as<ArgA, A>::value, "Should be the same");
+        static_assert(is_same_as<ArgB, B>::value, "Should be the same");
+        return liftM2(f, ma, mb);
+    }
 
-	// munzip (Identity (a, b)) = (Identity a, Identity b)
-	template<typename A, typename B>
-	static pair_t<Identity<A>, Identity<B> > munzip(Identity<pair_t<A, B> > const& mab)
-	{
-		const pair_t<A, B> p = mab.run();
-		return std::make_pair(p.first, p.second);
-	}
+    // munzip (Identity (a, b)) = (Identity a, Identity b)
+    template<typename A, typename B>
+    static pair_t<Identity<A>, Identity<B> > munzip(Identity<pair_t<A, B> > const& mab)
+    {
+        const pair_t<A, B> p = mab.run();
+        return std::make_pair(p.first, p.second);
+    }
 };
 
 template<typename T>

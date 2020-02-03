@@ -17,24 +17,24 @@
 #define __HOST __host__
 #define __CONSTANT __constant__
 
-#else	// __CUDACC__
+#else // __CUDACC__
 
 #define __DEVICE
 #define __HOST
 #define __CONSTANT
 
-#endif	// __CUDACC__
+#endif // __CUDACC__
 
 #define __DEVICE__HOST
 #define __DEVICE_
 #define CONSTEXPR constexpr
 
 #ifndef MAX_ARRAY_DIM_SIZE
-#define MAX_ARRAY_DIM_SIZE	10
+#define MAX_ARRAY_DIM_SIZE 10
 #endif
 
 #ifndef MAX_ASSIGNMENT_SIZE
-#define MAX_ASSIGNMENT_SIZE	10
+#define MAX_ASSIGNMENT_SIZE 10
 #endif
 
 #define BOOST_PP_ENUM_print_data(z, n, data) data

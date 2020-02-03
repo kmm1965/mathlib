@@ -8,7 +8,7 @@ template<class INDEX, class _Proxy = INDEX>
 struct index_base : math_object<INDEX, _Proxy>
 {
 protected:
-	CONSTEXPR index_base(){} // protect from direct usage
+    CONSTEXPR index_base(){} // protect from direct usage
 };
 
 struct default_index : index_base<default_index>

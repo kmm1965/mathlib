@@ -73,7 +73,7 @@
 #define MATH_FOR_EACH(first, last, func) boost::compute::for_each(first, last, func)
 #define MATH_DISTANCE(first, last) boost::compute::distance(first, last)
 
-#else	// __CUDACC__
+#else // __CUDACC__
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -102,6 +102,6 @@
 #define MATH_FOR_EACH(first, last, func) std::for_each(first, last, func)
 #define MATH_DISTANCE(first, last) std::distance(first, last)
 
-#endif	// __CUDACC__
+#endif // __CUDACC__
 
 #define MATH_COPY_N(first, count, dest) MATH_COPY(first, (first) + (count), dest)

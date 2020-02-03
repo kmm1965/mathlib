@@ -28,7 +28,7 @@ using is_same_applicative_t = is_same_applicative<base_class_t<A1>, base_class_t
     template<> struct is_same_applicative<_AP, _AP> : std::true_type {};
 
 #define DECLARE_APPLICATIVE_CLASS(AP) \
-	template<typename T> static AP<fdecay<T> > pure(T const& x); \
+    template<typename T> static AP<fdecay<T> > pure(T const& x); \
     template<typename Ret, typename Arg, typename... Args> \
     static AP<remove_f0_t<function_t<Ret(Args...)> > > \
     apply(AP<function_t<Ret(Arg, Args...)> > const& f, AP<fdecay<Arg> > const& v);
@@ -37,11 +37,11 @@ using is_same_applicative_t = is_same_applicative<base_class_t<A1>, base_class_t
 template<class AP, class AF>
 struct apply_result_type
 {
-	static_assert(is_same_applicative_t<AP, AF>::value, "Should be the same Applicative");
-	static_assert(is_function<value_type_t<AF> >::value, "Should be a function");
-	static_assert(std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value, "Should be the same");
-	
-	using type = typename AP::template type<remove_f0_t<remove_first_arg_t<value_type_t<AF> > > >;
+    static_assert(is_same_applicative_t<AP, AF>::value, "Should be the same Applicative");
+    static_assert(is_function<value_type_t<AF> >::value, "Should be a function");
+    static_assert(std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value, "Should be the same");
+    
+    using type = typename AP::template type<remove_f0_t<remove_first_arg_t<value_type_t<AF> > > >;
 };
 
 template<class AP, class AF>
@@ -50,10 +50,10 @@ using apply_result_type_t = typename apply_result_type<AP, AF>::type;
 // <*> :: Applicative f => f (a -> b) -> f a -> f b
 template<class AP, class AF>
 using apply_type = typename std::enable_if<
-	is_same_applicative_t<AP, AF>::value &&
-	is_function<value_type_t<AF> >::value &&
-	std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value,
-	apply_result_type_t<AP, AF>
+    is_same_applicative_t<AP, AF>::value &&
+    is_function<value_type_t<AF> >::value &&
+    std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value,
+    apply_result_type_t<AP, AF>
 >::type;
 
 #define _APPLY_TYPE(AP, AF) BOOST_IDENTITY_TYPE((apply_type<AP, AF>))
@@ -70,10 +70,10 @@ apply_type<AP, AF> operator*(AF const& f, AP const& v) {
 // liftA2 :: (a -> b -> c) -> f a -> f b -> f c
 template<class AY, class AX, typename FT>
 using liftA2_type = typename std::enable_if<
-	is_same_applicative_t<AX, AY>::value &&
-	std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
-	std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value,
-	apply_result_type_t<AY, fmap_result_type_t<AX, function_t<FT> > >
+    is_same_applicative_t<AX, AY>::value &&
+    std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
+    std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value,
+    apply_result_type_t<AY, fmap_result_type_t<AX, function_t<FT> > >
 >::type;
 
 #define LIFTA2_TYPE_(AY, AX, FT) BOOST_IDENTITY_TYPE((liftA2_type<AY, AX, FT>))
@@ -85,12 +85,12 @@ DEFINE_FUNCTION_3(3, LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, 
 // liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 template<class AZ, class AY, class AX, typename FT>
 using liftA3_type = typename std::enable_if<
-	is_same_applicative_t<AX, AY>::value &&
-	is_same_applicative_t<AX, AZ>::value &&
-	std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
-	std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value &&
-	std::is_same<value_type_t<AZ>, first_argument_type_t<remove_first_arg_t<remove_first_arg_t<function_t<FT> > > > >::value,
-	apply_result_type_t<AZ, apply_result_type_t<AY, fmap_result_type_t<AX, function_t<FT> > > >
+    is_same_applicative_t<AX, AY>::value &&
+    is_same_applicative_t<AX, AZ>::value &&
+    std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
+    std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value &&
+    std::is_same<value_type_t<AZ>, first_argument_type_t<remove_first_arg_t<remove_first_arg_t<function_t<FT> > > > >::value,
+    apply_result_type_t<AZ, apply_result_type_t<AY, fmap_result_type_t<AX, function_t<FT> > > >
 >::type;
 
 #define LIFTA3_TYPE_(AZ, AY, AX, FT) BOOST_IDENTITY_TYPE((liftA3_type<AZ, AY, AX, FT>))
@@ -126,7 +126,7 @@ ap_r(Fa const& a, Fb const& b) {
 template<typename Fa, typename Fb>
 typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fb>::type
 operator*=(Fa const& a, Fb const& b) {
-	return ap_r(a, b);
+    return ap_r(a, b);
 }
 
 // (<*) = liftA2 const
@@ -139,7 +139,7 @@ ap_l(Fa const& a, Fb const& b) {
 template<typename Fa, typename Fb>
 typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fa>::type
 operator^=(Fa const& a, Fb const& b) {
-	return ap_l(a, b);
+    return ap_l(a, b);
 }
 
 _FUNCPROG_END

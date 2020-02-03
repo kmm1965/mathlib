@@ -19,8 +19,8 @@ struct supports_multiplies<boost::units::quantity<Unit1, Y>, boost::units::quant
 template<class Unit1, class Unit2, class Y>
 struct multiplies_result_type<boost::units::quantity<Unit1, Y>, boost::units::quantity<Unit2, Y> >
 {
-	static_assert(std::is_same<typename Unit1::system_type, typename Unit2::system_type>::value, "System types should be the same");
-	typedef boost::units::quantity<typename boost::units::multiply_typeof_helper<Unit1, Unit2>::type, Y> type;
+    static_assert(std::is_same<typename Unit1::system_type, typename Unit2::system_type>::value, "System types should be the same");
+    typedef boost::units::quantity<typename boost::units::multiply_typeof_helper<Unit1, Unit2>::type, Y> type;
 };
 
 template<class Unit1, class Unit2, class Y>
@@ -29,8 +29,8 @@ struct supports_divides<boost::units::quantity<Unit1, Y>, boost::units::quantity
 template<class Unit1, class Unit2, class Y>
 struct divides_result_type<boost::units::quantity<Unit1, Y>, boost::units::quantity<Unit2, Y> >
 {
-	static_assert(std::is_same<typename Unit1::system_type, typename Unit2::system_type>::value, "System types should be the same");
-	typedef boost::units::quantity<typename boost::units::divide_typeof_helper<Unit1, Unit2>::type, Y> type;
+    static_assert(std::is_same<typename Unit1::system_type, typename Unit2::system_type>::value, "System types should be the same");
+    typedef boost::units::quantity<typename boost::units::divide_typeof_helper<Unit1, Unit2>::type, Y> type;
 };
 
 template<class Unit, class Y>
@@ -51,60 +51,60 @@ template<class EO, class Unit, class Y>
 typename std::enable_if<
     boost::units::is_quantity<get_value_type_t<EO> >::value,
     binary_scalar_evaluable_object1<EO,
-	    generic_multiplies<
-		    get_value_type_t<EO>,
+        generic_multiplies<
+            get_value_type_t<EO>,
             boost::units::quantity<Unit, Y>,
             typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
-	    >
+        >
     >
 >::type operator*(const EOBJ(EO) &eobj, const boost::units::quantity<Unit, Y> &value)
 {
-	typedef generic_multiplies<
-		get_value_type_t<EO>,
+    typedef generic_multiplies<
+        get_value_type_t<EO>,
         boost::units::quantity<Unit, Y>,
         typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
-	> bin_op_type;
-	return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
+    > bin_op_type;
+    return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
 }
 
 template<class EO, class Unit, class Y>
 typename std::enable_if<
     boost::units::is_quantity<get_value_type_t<EO> >::value,
     binary_scalar_evaluable_object1<EO,
-	    generic_divides<
-		    get_value_type_t<EO>,
+        generic_divides<
+            get_value_type_t<EO>,
             boost::units::quantity<Unit, Y>,
             typename boost::units::divide_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
-	    >
+        >
     >
 >::type operator/(const EOBJ(EO) &eobj, const boost::units::quantity<Unit, Y> &value)
 {
-	typedef generic_divides<
+    typedef generic_divides<
         get_value_type_t<EO>,
         boost::units::quantity<Unit, Y>,
         typename boost::units::divide_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
-	> bin_op_type;
-	return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
+    > bin_op_type;
+    return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
 }
 
 template<class EO, class Unit, class Y>
 typename std::enable_if<
     boost::units::is_quantity<get_value_type_t<EO> >::value,
     binary_scalar_evaluable_object2<EO,
-	    generic_multiplies<
+        generic_multiplies<
             boost::units::quantity<Unit, Y>,
-		    get_value_type_t<EO>,
+            get_value_type_t<EO>,
             typename boost::units::multiply_typeof_helper<boost::units::quantity<Unit, Y>, get_value_type_t<EO> >::type
-	    >
+        >
     >
 >::type operator*(const boost::units::quantity<Unit, Y>& value, const EOBJ(EO) &eobj)
 {
-	typedef generic_multiplies<
+    typedef generic_multiplies<
         boost::units::quantity<Unit, Y>,
         get_value_type_t<EO>,
         typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
-	> bin_op_type;
-	return binary_scalar_evaluable_object2<EO, bin_op_type>(value, bin_op_type(), eobj);
+    > bin_op_type;
+    return binary_scalar_evaluable_object2<EO, bin_op_type>(value, bin_op_type(), eobj);
 }
 
 template<class Unit, class Y>

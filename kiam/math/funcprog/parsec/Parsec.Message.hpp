@@ -98,7 +98,7 @@ messageString (Expect      s) = s
 messageString (Message     s) = s
 */
 inline _FUNCPROG::String messageString(Message const& m) {
-	return m.msg;
+    return m.msg;
 }
 
 inline std::ostream& operator<<(std::ostream &os, _Message type) {

@@ -83,7 +83,7 @@ runPT(ParsecT<S, U, M, A, P> const& p, U const& u, SourceName const& name, S con
         return res.index() == Consumed_ ? *(res.consumed()) : *(res.empty());
     };
     return _do2(res, p.run(State<S, U>(s, initialPos(name), u)),
-		r, parserReply(res),
+        r, parserReply(res),
         return Monad_t<M>::mreturn(r.index() == Ok_ ?
             Either_t(_Right<A>(r.ok().value)) :
             Either_t(_Left<ParseError>(r.error().error)));

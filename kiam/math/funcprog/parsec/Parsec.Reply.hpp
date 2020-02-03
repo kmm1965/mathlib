@@ -38,10 +38,10 @@ struct Reply;
 template<typename S, typename U>
 struct _Reply
 {
-	using base_class = _Reply;
+    using base_class = _Reply;
 
-	template<typename A>
-	using type = Reply<S, U, A>;
+    template<typename A>
+    using type = Reply<S, U, A>;
 };
 
 #define _REPLY_(S, U) BOOST_IDENTITY_TYPE((_PARSEC::_Reply<S, U>))
@@ -76,7 +76,7 @@ DEFINE_FUNCTION_3(3, REPLY(T0, T1, T2), __Ok, T2 const&, value, const STATE(T0, 
 
 template<typename S, typename U, typename A>
 Reply<S, U, A> __Error(ParseError const& error) {
-	return c_Error(error);
+    return c_Error(error);
 }
 
 _PARSEC_END
@@ -98,13 +98,13 @@ struct Functor<parsec::_Reply<S, U> >
 {
     template<typename Ret, typename Arg>
     static parsec::Reply<S, U, Ret>
-	fmap(function_t<Ret(Arg)> const& f, parsec::Reply<S, U, fdecay<Arg> > const& v)
-	{
-		if (v.index() == parsec::Ok_) {
-			parsec::c_Ok<S, U, fdecay<Arg> > const& ok = v.ok();
-			return parsec::c_Ok<S, U, Ret>(f(ok.value), ok.state, ok.error);
-		} else return v.error();
-	}
+    fmap(function_t<Ret(Arg)> const& f, parsec::Reply<S, U, fdecay<Arg> > const& v)
+    {
+        if (v.index() == parsec::Ok_) {
+            parsec::c_Ok<S, U, fdecay<Arg> > const& ok = v.ok();
+            return parsec::c_Ok<S, U, Ret>(f(ok.value), ok.state, ok.error);
+        } else return v.error();
+    }
 };
 
 _FUNCPROG_END
