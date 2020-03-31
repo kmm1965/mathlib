@@ -132,8 +132,8 @@ struct MonadZip<_Identity> : _MonadZip<MonadZip<_Identity> >
     template<typename A, typename B>
     static pair_t<Identity<A>, Identity<B> > munzip(Identity<pair_t<A, B> > const& mab)
     {
-        const pair_t<A, B> p = mab.run();
-        return std::make_pair(p.first, p.second);
+        const auto [a, b] = mab.run();
+        return std::make_pair(Identity_(a), Identity_(b));
     }
 };
 
