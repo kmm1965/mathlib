@@ -200,13 +200,9 @@ showMany pre msgs3 = case clean (map messageString msgs3) of
     (unExpect,msgs2)    = span ((UnExpect    "") ==) msgs1
     (expect,messages)   = span ((Expect      "") ==) msgs2
 */
-    const pair_t<List<Message>, List<Message> > p1 = span(_eq<Message>(Message(SysUnExpect, "")), msgs);
-    List<Message> const& sysUnExpect = p1.first, &msgs1 = p1.second;
-    const pair_t<List<Message>, List<Message> > p2 = span(_eq<Message>(Message(UnExpect, "")), msgs1);
-    List<Message> const& unExpect = p2.first, &msgs2 = p2.second;
-    const pair_t<List<Message>, List<Message> > p3 = span(_eq<Message>(Message(Expect, "")), msgs2);
-    List<Message> const& expect = p3.first, &messages = p3.second;
-
+    const auto [sysUnExpect, msgs1] = span(_eq<Message>(Message(SysUnExpect, "")), msgs);
+    const auto [unExpect, msgs2] = span(_eq<Message>(Message(UnExpect, "")), msgs1);
+    const auto [expect, messages] = span(_eq<Message>(Message(Expect, "")), msgs2);
 /*
       showExpect      = showMany msgExpecting expect
       showUnExpect    = showMany msgUnExpected unExpect

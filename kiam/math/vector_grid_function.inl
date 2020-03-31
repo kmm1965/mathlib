@@ -76,7 +76,7 @@ void vector_grid_function<TAG, T>::operator+=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::plus<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -89,7 +89,7 @@ void vector_grid_function<TAG, T>::operator-=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::minus<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -102,7 +102,7 @@ void vector_grid_function<TAG, T>::operator*=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::multiplies<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -115,7 +115,7 @@ void vector_grid_function<TAG, T>::operator/=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::divides<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
 #undef FUNC
 }
 

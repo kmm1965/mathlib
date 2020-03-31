@@ -13,7 +13,7 @@ struct object_pool
     factory_type get(const char *name)
     {
         typename registry_type::iterator it = registry.find(name);
-        return it != registry.end() ? it->second : nullptr;
+        return it != std::end(registry) ? it->second : nullptr;
     }
 
     void register_factory(const char *name, factory_type factory){

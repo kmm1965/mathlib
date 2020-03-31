@@ -81,7 +81,7 @@ DEFINE_FUNCTION_2(2, List<PAIR_T(T0, T1)>, zip, List<T0> const&, l1, List<T1> co
     List<PAIR_T(T0, T1)> result;
     typename List<T0>::const_iterator it1;
     typename List<T1>::const_iterator it2;
-    for (it1 = l1.cbegin(), it2 = l2.cbegin(); it1 != l1.cend() && it2 != l2.cend(); ++it1, ++it2)
+    for (it1 = std::cbegin(l1), it2 = std::cbegin(l2); it1 != std::cend(l1) && it2 != std::cend(l2); ++it1, ++it2)
         result.push_back(std::make_pair(*it1, *it2));
     return result;)
 
@@ -91,7 +91,7 @@ DEFINE_FUNCTION_3(3, List<TUPLE3(T0, T1, T2)>, zip3, List<T0> const&, l1, List<T
     typename List<T0>::const_iterator it1;
     typename List<T1>::const_iterator it2;
     typename List<T2>::const_iterator it3;
-    for (it1 = l1.cbegin(), it2 = l2.cbegin(), it3 = l3.cbegin(); it1 != l1.cend() && it2 != l2.cend() && it3 != l3.cend(); ++it1, ++it2, ++it3)
+    for (it1 = std::cbegin(l1), it2 = std::cbegin(l2), it3 = std::cbegin(l3); it1 != std::cend(l1) && it2 != std::cend(l2) && it3 != std::cend(l3); ++it1, ++it2, ++it3)
         result.push_back(std::make_tuple(*it1, *it2, *it3));
     return result;)
 
@@ -100,7 +100,7 @@ DEFINE_FUNCTION_3(3, List<T0>, zipWith, function_t<T0(T1, T2)> const&, f, List<f
     List<T0> result;
     typename List<fdecay<T1> >::const_iterator it1;
     typename List<fdecay<T2> >::const_iterator it2;
-    for (it1 = l1.cbegin(), it2 = l2.cbegin(); it1 != l1.cend() && it2 != l2.cend(); ++it1, ++it2)
+    for (it1 = std::cbegin(l1), it2 = std::cbegin(l2); it1 != std::cend(l1) && it2 != std::cend(l2); ++it1, ++it2)
         result.push_back(f(*it1, *it2));
     return result;)
 
@@ -111,7 +111,7 @@ DEFINE_FUNCTION_4(4, List<T0>, zipWith3, function_t<T0(T1, T2, T3)> const&, f, L
     typename List<T1>::const_iterator it1;
     typename List<T2>::const_iterator it2;
     typename List<T3>::const_iterator it3;
-    for (it1 = l1.cbegin(), it2 = l2.cbegin(), it3 = l3.cbegin(); it1 != l1.cend() && it2 != l2.cend() && it3 != l3.cend(); ++it1, ++it2, ++it3)
+    for (it1 = std::cbegin(l1), it2 = std::cbegin(l2), it3 = std::cbegin(l3); it1 != std::cend(l1) && it2 != std::cend(l2) && it3 != std::cend(l3); ++it1, ++it2, ++it3)
         result.push_back(f(*it1, *it2, *it3));
     return result;)
 
@@ -120,12 +120,10 @@ template<typename T0, typename T1>
 pair_t<List<T0>, List<T1> > unzip(List<pair_t<T0, T1> > const& l)
 {
     pair_t<List<T0>, List<T1> > result;
-    std::for_each(l.cbegin(), l.cend(),
-        [&result](pair_t<T0, T1> const& p)
-        {
-            result.first.push_back(p.first);
-            result.second.push_back(p.second);
-        });
+    for(auto const& [f, s] : l){
+        result.first.push_back(f);
+        result.second.push_back(s);
+    }
     return result;
 }
 
@@ -141,13 +139,11 @@ template<typename T0, typename T1, typename T2>
 tuple3_t<List<T0>, List<T1>, List<T2> > unzip3(List<tuple3_t<T0, T1, T2> > const& l)
 {
     tuple3_t<List<T0>, List<T1>, List<T2> > result;
-    std::for_each(l.cbegin(), l.cend(),
-        [&result](tuple3_t<T0, T1, T2> const& t)
-        {
-            std::get<0>(result).push_back(std::get<0>(t));
-            std::get<1>(result).push_back(std::get<1>(t));
-            std::get<2>(result).push_back(std::get<2>(t));
-        });
+    for (auto const& [f, s, t] : l) {
+        std::get<0>(result).push_back(f);
+        std::get<1>(result).push_back(s);
+        std::get<2>(result).push_back(t);
+    }
     return result;
 }
 

@@ -54,7 +54,7 @@ Monad<_List>::mbind(List<fdecay<Arg> > const& l, function_t<List<Ret>(Arg, Args.
         List<Ret> result;
         for (fdecay<Arg> const& v : l) {
             const List<Ret> l2 = f(v, args...);
-            result.insert(result.end(), l2.cbegin(), l2.cend());
+            result.insert(std::end(result), std::cbegin(l2), std::cend(l2));
         }
         return result;
     }));
@@ -97,7 +97,7 @@ List<A> Monoid<_List>::mconcat(List<List<A> > const& ls)
 {
     List<A> result;
     for (List<A> const& l : ls)
-        result.insert(result.end(), l.cbegin(), l.cend());
+        result.insert(std::end(result), std::cbegin(l), std::cend(l));
     return result;
 }
 
@@ -174,7 +174,7 @@ template<typename T>
 List<T> tail(List<T> const& l)
 {
     checkEmptyList(l, "tail");
-    return List<T>(++l.cbegin(), l.cend());
+    return List<T>(++std::cbegin(l), std::cend(l));
 }
 
 template<typename T>
@@ -188,9 +188,7 @@ template<typename T>
 List<T> init(List<T> const& l)
 {
     checkEmptyList(l, "init");
-    const typename List<T>::const_iterator
-        ibegin = l.cbegin(),
-        iend = l.cend();
+    const typename List<T>::const_iterator ibegin = std::cbegin(l), iend = std::cend(l);
     typename List<T>::const_iterator it = ibegin, it1;
     while (++(it1 = it) != iend) it = it1;
     return List<T>(ibegin, it);
@@ -208,7 +206,7 @@ int length(List<T> const& l) {
 
 DEFINE_FUNCTION_2(1, List<fdecay<T0> >, filter, function_t<bool(T0)> const&, pred, List<fdecay<T0> > const&, l,
     List<fdecay<T0> > result;
-    std::copy_if(l.cbegin(), l.cend(), std::back_inserter(result), pred);
+    std::copy_if(std::cbegin(l), std::cend(l), std::back_inserter(result), pred);
     return result;)
 
 DEFINE_FUNCTION_2(1, List<T0>, cons, T0 const&, value, List<T0> const&, l,
@@ -246,7 +244,7 @@ template<typename A>
 List<A> operator+(List<A> const&l1, List<A> const&l2)
 {
     List<A> result(l1);
-    result.insert(result.end(), l2.cbegin(), l2.cend());
+    result.insert(std::end(result), std::cbegin(l2), std::cend(l2));
     return result;
 }
 

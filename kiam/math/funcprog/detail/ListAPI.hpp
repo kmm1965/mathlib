@@ -77,18 +77,18 @@ DEFINE_FUNCTION_2(2, List<fdecay<T0> >, dropWhile, function_t<bool(T1)> const&, 
 
 // take
 DEFINE_FUNCTION_2(1, List<T0>, take, int, n, List<T0> const&, l,
-    typename List<T0>::const_iterator it = l.cbegin();
-    const typename List<T0>::const_iterator iend = l.cend();
+    typename List<T0>::const_iterator it = std::cbegin(l);
+    const typename List<T0>::const_iterator iend = std::cend(l);
     while (n > 0 && it != iend){
         --n;
         ++it;
     }
-    return List<T0>(l.cbegin(), it);)
+    return List<T0>(std::cbegin(l), it);)
 
 // drop
 DEFINE_FUNCTION_2(1, List<T0>, drop, int, n, List<T0> const&, l,
-    typename List<T0>::const_iterator it = l.cbegin();
-    const typename List<T0>::const_iterator iend = l.cend();
+    typename List<T0>::const_iterator it = std::cbegin(l);
+    const typename List<T0>::const_iterator iend = std::cend(l);
     while (n > 0 && it != iend){
         --n;
         ++it;
@@ -97,13 +97,14 @@ DEFINE_FUNCTION_2(1, List<T0>, drop, int, n, List<T0> const&, l,
 
 // splitAt
 DEFINE_FUNCTION_2(1, PAIR_T(List<T0>, List<T0 >), splitAt, int, n, List<T0> const&, l,
-    typename List<T0>::const_iterator it = l.cbegin();
-    const typename List<T0>::const_iterator iend = l.cend();
+    const typename List<T0>::const_iterator ibegin = std::cbegin(l);
+    const typename List<T0>::const_iterator iend = std::cend(l);
+    typename List<T0>::const_iterator it = ibegin;
     while (n > 0 && it != iend){
         --n;
         ++it;
     }
-    return std::make_pair(List<T0>(l.cbegin(), it), List<T0>(it, iend));)
+    return std::make_pair(List<T0>(ibegin, it), List<T0>(it, iend));)
 
 /*
 -- | 'span', applied to a predicate @p@ and a list @xs@, returns a tuple where
@@ -192,24 +193,17 @@ lookup  key ((x,y):xys)
 */
 
 template<typename B, typename A>
-Maybe<B> lookup(A const& a, List<pair_t<A, B> > const& l)
+Maybe<B> lookup(A const& key, List<pair_t<A, B> > const& l)
 {
     if (null(l)) return Nothing<B>();
-    const pair_t<A, B> &h = head(l);
-    return h.first == a ? Just(h.second) : lookup(a, tail(l));
+    auto const& [x, y] = head(l);
+    return key == x ? Just(y) : lookup(key, tail(l));
 }
 
 template<typename B, typename A>
-function_t<Maybe<B>(List<pair_t<A, B> > const&)> lookup(A const& a){
-    return [a](List<pair_t<A, B> > const& l){
-        return lookup(a, l);
-    };
-}
-
-template<typename B, typename A>
-function_t<Maybe<B>(A const&, List<pair_t<A, B> > const&)> lookup(){
-    return [](A const& a, List<pair_t<A, B> > const& l){
-        return lookup(a, l);
+function_t<Maybe<B>(List<pair_t<A, B> > const&)> _lookup(A const& key){
+    return [key](List<pair_t<A, B> > const& l){
+        return lookup(key, l);
     };
 }
 
@@ -224,9 +218,9 @@ DEFINE_FUNCTION_2(2, List<T1>, concatMap, function_t<List<T1>(T0 const&)> const&
 template<typename T>
 List<T> sort(List<T> const& l)
 {
-    std::vector<T> v(l.cbegin(), l.cend());
-    std::sort(v.begin(), v.end());
-    return List<T>(v.cbegin(), v.cend());
+    std::vector<T> v(std::cbegin(l), std::cend(l));
+    std::sort(std::begin(v), std::end(v));
+    return List<T>(std::cbegin(v), std::cend(v));
 }
 
 // nub :: (Eq a) => [a] -> [a]
@@ -303,7 +297,7 @@ DEFINE_FUNCTION_3(3, List<T0>, intersectBy, function_t<bool(T1, T2)> const&, pre
     if(null(xs) || null(ys))
         return List<T0>();
     List<T0> result;
-    std::copy_if(xs.cbegin(), xs.cend(), std::back_inserter(result),
+    std::copy_if(std::cbegin(xs), std::cend(xs), std::back_inserter(result),
         [&pred, &ys](T0 const& x) { return any(pred << x, ys); });
     return result;)
 

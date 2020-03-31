@@ -66,17 +66,16 @@ struct tokenPrimEx_unParser
         return _do(r, Stream_t::uncons(s.input),
             if (!r)
                 return eerr(unexpectError("", s.pos));
-        pair_type const& p = r.value();
-        T const& c = p.first;
-        List<T> const& cs = p.second;
-        const Maybe<A> ma = test(c);
-        if (!ma)
-            return eerr(unexpectError(showToken(c), s.pos));
-        A const& x = ma.value();
-        const SourcePos newpos = nextpos(s.pos, c, cs);
-        const State_t newstate(cs, newpos, nextState ? nextState.value()(s.pos, c, cs, s.user) : s.user);
-        return cok(x, newstate, newErrorUnknown(newpos));
-        );
+            pair_type const& p = r.value();
+            T const& c = p.first;
+            List<T> const& cs = p.second;
+            const Maybe<A> ma = test(c);
+            if (!ma)
+                return eerr(unexpectError(showToken(c), s.pos));
+            A const& x = ma.value();
+            const SourcePos newpos = nextpos(s.pos, c, cs);
+            const State_t newstate(cs, newpos, nextState ? nextState.value()(s.pos, c, cs, s.user) : s.user);
+            return cok(x, newstate, newErrorUnknown(newpos)););
     }
 
 private:
@@ -176,7 +175,7 @@ token(
         [tokpos](SourcePos const&, T const& tok, typename S::stream_type const& ts)
     {
         const Maybe<typename S::pair_type> r = uncons(ts).run();
-        return tokpos(r ? r.first : tok);
+        return tokpos(r ? r.value().first : tok);
     };
     return tokenPrim<U, M, A, T>(showToken, nextpos, test);
 }
@@ -273,15 +272,8 @@ struct tokens_unParser
             const List<T> ts = tail(l);
             const Maybe<pair_t<T, List<T> > > sr = uncons(rs);
             if (!sr) return cerr(errEof());
-            T const& x = sr.value().first;
-            List<T> const& xs = sr.value().second;
+            auto const& [x, xs] = sr.value();
             return t == x ? walk(ts, xs) : cerr(errExpect(x));
-            //return _do(sr, uncons(rs),
-            //    if (!sr) return cerr(errEof());
-            //    T const& x = sr.value().first;
-            //    List<T> const& xs = sr.value().second;
-            //    return t == x ? walk(ts, xs) : cerr(errExpect(x));
-            //);
         };
         /*
               do
@@ -296,15 +288,8 @@ struct tokens_unParser
         const List<T> toks = tail(tts);
         const Maybe<pair_t<T, List<T> > > sr = uncons(s.input);
         if (!sr) return eerr(errEof());
-        T const& x = sr.value().first;
-        List<T> const& xs = sr.value().second;
+        auto const& [x, xs] = sr.value();
         return tok == x ? walk(toks, xs) : eerr(errExpect(x));
-        //return _do(sr, uncons(s.input),
-        //    if(!sr) return eerr(errEof());
-        //    T const& x = sr.value().first;
-        //    List<T> const& xs = sr.value().second;
-        //    return tok == x ? walk(toks, xs) : eerr(errExpect(x));
-        //);
     }
 
 private:

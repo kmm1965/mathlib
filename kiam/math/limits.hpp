@@ -18,14 +18,14 @@ struct numeric_traits_base;
 template<>
 struct numeric_traits_base<double>
 {
-    typedef unsigned long long value_type;
+    typedef uint64_t value_type;
     static const unsigned mantissa_length = 52;
 };
 
 template<>
 struct numeric_traits_base<float>
 {
-    typedef unsigned value_type;
+    typedef uint32_t value_type;
     static const unsigned mantissa_length = 23;
 };
 

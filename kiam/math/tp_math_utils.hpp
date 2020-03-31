@@ -140,7 +140,7 @@ V reduce_n(const T *data, size_t n, /*size_t stride,*/ V init, BO1 bin_op1, BO2 
             futures[i] = pt.get_future();
             pool.submit(boost::move(pt));
         }
-        boost::wait_for_all(futures.begin(), futures.end());
+        boost::wait_for_all(std::begin(futures), std::end(futures));
     }
     while(size > 1){
         futures.resize((size + 1) / 2);
@@ -149,8 +149,8 @@ V reduce_n(const T *data, size_t n, /*size_t stride,*/ V init, BO1 bin_op1, BO2 
             futures[i] = pt.get_future();
             pool.submit(boost::move(pt));
         }
-        boost::wait_for_all(futures.begin(), futures.end());
-        size = futures.size();
+        boost::wait_for_all(std::begin(futures), std::end(futures));
+        size = std::size(futures);
     }
     return result.front();
 }

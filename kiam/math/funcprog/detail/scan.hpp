@@ -28,9 +28,8 @@ DEFINE_FUNCTION_3(3, List<T0>, scanl, function_t<T0(T1, T2)> const&, f, T0 const
     List<T0> result;
     result.push_back(q);
     T0 q1 = q;
-    std::for_each(l.cbegin(), l.cend(), [&f, &result, &q1](T2 const& x){
+    for(T2 const& x : l)
         result.push_back(q1 = f(q1, x));
-    });
     return result;)
 
 DEFINE_FUNCTION_2(3, List<T0>, scanl1, function_t<T0(T1, T2)> const&, f, List<T0> const&, l,
