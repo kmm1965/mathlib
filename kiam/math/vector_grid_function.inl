@@ -177,13 +177,13 @@ struct vector_grid_function_proxy : vector_proxy<T>
         return super::operator[](i);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     CONSTEXPR const_reference operator()(size_t i, const context<tag_type, CONTEXT> &context) const {
         return super::operator[](i);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     reference operator()(size_t i, const context<tag_type, CONTEXT> &context){
         return super::operator[](i);
@@ -208,18 +208,21 @@ struct vector_grid_assignment : assignment<typename EO::tag_type, vector_grid_as
 
     __DEVICE
     void operator[](size_t i){
-        func_proxy[i] = eobj_proxy[i];
+        //func_proxy[i] = eobj_proxy[i];
+        eobj_proxy.assign(func_proxy[i], i);
     }
 
     __DEVICE
     void operator()(size_t i){
-        func_proxy(i) = eobj_proxy(i);
+        //func_proxy(i) = eobj_proxy(i);
+        eobj_proxy.assign(func_proxy(i), i);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     void operator()(size_t i, const context<tag_type, CONTEXT> &context){
-        func_proxy[i] = eobj_proxy(i, context);
+        //func_proxy[i] = eobj_proxy(i, context);
+        eobj_proxy.assign(func_proxy[i], i, context);
     }
 
     typename func_type::proxy_type func_proxy;
@@ -265,7 +268,7 @@ struct vector_grid_assignment_value : assignment<TAG, vector_grid_assignment_val
         func_proxy(i) = value;
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     void operator()(size_t i, const context<tag_type, CONTEXT> &context){
         func_proxy[i] = value;

@@ -33,12 +33,15 @@ template<class E>
 struct is_int_constant : std::false_type{};
 
 template<int N>
-struct is_int_constant<int_constant<N> > : std::true_type{};
+struct is_int_constant<int_constant<N> > :
+    std::true_type{};
 
 template<class E>
-struct int_constant_value : std::integral_constant<int, 0>{};
+struct int_constant_value :
+    std::integral_constant<int, 0>{};
 
 template<int N>
-struct int_constant_value<int_constant<N> > : std::integral_constant<int, N>{};
+struct int_constant_value<int_constant<N> > :
+    std::integral_constant<int, N>{};
 
 _SYMDIFF1_END

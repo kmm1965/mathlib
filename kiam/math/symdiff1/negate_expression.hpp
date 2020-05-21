@@ -23,7 +23,7 @@ using negate_expression_t = typename negate_expression_type<E>::type;
 template<class E>
 struct negate_expression : expression<negate_expression<E> >
 {
-    typedef typename negate_expression_type<typename E::diff_type>::type diff_type;
+    typedef negate_expression_t<typename E::diff_type> diff_type;
 
     constexpr negate_expression(const expression<E> &e) : e(e()){}
 

@@ -6,9 +6,9 @@ RM = rm -rf
 BOOST_LIBS = -L ${BOOST_LIBRARY_PATH} \
 	-lboost_timer -lboost_chrono
 
-HPC_LIB = -L ~/.local/lib -lhpc
+HPC_LIB = -L ../../lib -lhpc
  
-OPTS = -std=c++11 -I ~/.local/include -I ${BOOST_INCLUDE_PATH}
+OPTS = -std=c++11 -I ../.. -I ${BOOST_INCLUDE_PATH}
 
 SRC = gridop2.cu
 

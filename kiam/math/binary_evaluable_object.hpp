@@ -26,7 +26,7 @@ struct binary_evaluable_object : evaluable_object<typename EO1::tag_type, binary
         return bin_op(eobj1_proxy(i), eobj2_proxy(i));
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     CONSTEXPR value_type operator()(size_t i, const context<typename EO1::tag_type, CONTEXT> &context) const {
         return bin_op(eobj1_proxy(i, context), eobj2_proxy(i, context));

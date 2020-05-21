@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_object.hpp"
+#include "context.hpp"
 
 _KIAM_MATH_BEGIN
 
@@ -20,6 +20,18 @@ struct evaluable_object : math_object<EO, _Proxy>
 #endif
 {
     typedef TAG tag_type;
+
+    template<typename T>
+    __DEVICE
+    void assign(T &val, size_t i) const {
+        val = (*this)()[i];
+    }
+
+    template<typename T, typename CONTEXT>
+    __DEVICE
+    void assign(T &val, size_t i, const context<tag_type, CONTEXT>& context) const {
+        val = (*this)()(i, context);
+    }
 
 protected: // protect from direct construction
     CONSTEXPR evaluable_object() {}

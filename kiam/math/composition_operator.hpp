@@ -8,7 +8,7 @@ template<class MOP, class EOP>
 struct composition_operator_eobj_proxy
 {
     typedef typename MOP::template get_value_type<get_value_type_t<EOP>>::type value_type;
-    typedef typename MOP::tag_type tag_type;
+    typedef typename MOP::template get_tag_type<typename EOP::tag_type>::type tag_type;
 
     __DEVICE
     CONSTEXPR composition_operator_eobj_proxy(const MOP &op_proxy, const EOP &eobj_proxy) : op_proxy(op_proxy), eobj_proxy(eobj_proxy){}

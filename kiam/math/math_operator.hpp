@@ -35,7 +35,7 @@ struct operator_evaluator : evaluable_object<typename MO::template get_tag_type<
         return op_proxy(i, eobj_proxy);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     value_type operator()(size_t i, context<tag_type, CONTEXT> const& context) const {
         return op_proxy(i, eobj_proxy, context);
@@ -172,3 +172,28 @@ _KIAM_MATH_END
     template<class MO, class _Proxy = MO> \
     using name##_operator = _KIAM_MATH::math_operator<MO, _Proxy>
 #endif
+
+_KIAM_MATH_BEGIN
+
+template<typename F>
+struct inplace_math_operator : math_operator<inplace_math_operator<F> >
+{
+    inplace_math_operator(F f) : f(f) {}
+
+    template<typename EOP>
+    double operator()(int i, int j, EOP const& eobj_proxy) const {
+        return f(i, j, eobj_proxy);
+    }
+
+    IMPLEMENT_MATH_EVAL_OPERATOR(inplace_math_operator)
+
+private:
+    F f;
+};
+
+template<typename F>
+inplace_math_operator<F> get_inplace_math_operator(F f){
+    return inplace_math_operator<F>(f);
+}
+
+_KIAM_MATH_END

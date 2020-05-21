@@ -25,7 +25,7 @@ struct binary_scalar_evaluable_object1 : evaluable_object<typename EO::tag_type,
         return bin_op(eobj_proxy(i), value);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     CONSTEXPR value_type operator()(size_t i, const context<typename EO::tag_type, CONTEXT> &context) const {
         return bin_op(eobj_proxy(i, context), value);

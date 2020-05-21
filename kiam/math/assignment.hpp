@@ -24,7 +24,7 @@ struct empty_assignment : assignment<TAG, empty_assignment<TAG> >
     __DEVICE
     void operator()(size_t i){}
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     void operator()(size_t i, const context<TAG, CONTEXT> &context){}
 };

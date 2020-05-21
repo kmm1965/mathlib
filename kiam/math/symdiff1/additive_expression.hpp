@@ -11,14 +11,15 @@ struct additive_expression;
 template<class E1, char op, class E2>
 struct additive_expression_type
 {
-    typedef std::conditional_t<std::is_same<E2, int_constant<0> >::value, E1,
-        std::conditional_t<std::is_same<E1, int_constant<0> >::value,
-            std::conditional_t<op == '+', E2, negate_expression_t<E2> >,
-            std::conditional_t<is_int_constant<E1>::value && is_int_constant<E2>::value,
-                std::conditional_t<op == '+',
-                    int_constant<int_constant_value<E1>::value + int_constant_value<E2>::value>,
-                    int_constant<int_constant_value<E1>::value - int_constant_value<E2>::value>
-                >,
+    typedef std::conditional_t<
+        is_int_constant<E1>::value && is_int_constant<E2>::value,
+        std::conditional_t<op == '+',
+            int_constant<int_constant_value<E1>::value + int_constant_value<E2>::value>,
+            int_constant<int_constant_value<E1>::value - int_constant_value<E2>::value>
+        >,
+        std::conditional_t<std::is_same<E2, int_constant<0> >::value, E1,
+            std::conditional_t<std::is_same<E1, int_constant<0> >::value,
+                std::conditional_t<op == '+', E2, negate_expression_t<E2> >,
                 std::conditional_t<
                     is_scalar<E1>::value && (std::is_same<E1, E2>::value || is_int_constant<E2>::value), E1,
                     std::conditional_t<

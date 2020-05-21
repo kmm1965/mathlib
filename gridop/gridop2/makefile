@@ -3,7 +3,7 @@ TARGET = gridop2
 CC = g++
 RM = rm -rf 
 
-OPTS = -std=c++14 -I ~/.local/include
+OPTS = -std=c++14 -I ../..
 BOOST_LIBS = -lboost_timer
 
 SRC = $(TARGET).cpp

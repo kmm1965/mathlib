@@ -4,7 +4,7 @@
 
 _KIAM_MATH_BEGIN
 
-template<typename TAG, class CONTEXT>
+template<typename TAG, typename CONTEXT>
 struct context : math_object_base<CONTEXT>{};
 
 template<typename TAG, class CB, class _Proxy = CB>
@@ -17,7 +17,7 @@ _KIAM_MATH_END
 
 #ifdef DONT_USE_CXX_11
 #define DECLARE_MATH_CONTEXT(name) \
-    template<class CONTEXT> \
+    template<typename CONTEXT> \
     struct name##_context : _KIAM_MATH::context<name##_tag, CONTEXT>{}; \
     template<class CB, class _Proxy = CB> \
     struct name##_context_builder : _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>{}; \
@@ -25,7 +25,7 @@ _KIAM_MATH_END
     struct name##_context_builder_proxy : _KIAM_MATH::context_builder_proxy<name##_tag, CBP>{}
 #else
 #define DECLARE_MATH_CONTEXT(name) \
-    template<class CONTEXT> \
+    template<typename CONTEXT> \
     using name##_context = _KIAM_MATH::context<name##_tag, CONTEXT>; \
     template<class CB, class _Proxy = CB> \
     using name##_context_builder = _KIAM_MATH::context_builder<name##_tag, CB, _Proxy>; \

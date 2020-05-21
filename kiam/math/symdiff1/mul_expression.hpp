@@ -79,13 +79,15 @@ operator*(const int_constant<N1>&, const int_constant<N2>&){
 
 template<class E>
 constexpr const int_constant<0>
-operator*(const expression<E>&, const int_constant<0>&){
+operator*(const expression<E>&,
+    const int_constant<0>&){
     return int_constant<0>();
 }
 
 template<class E>
 constexpr const int_constant<0>
-operator*(const int_constant<0>&, const expression<E>&){
+operator*(const int_constant<0>&,
+    const expression<E>&){
     return int_constant<0>();
 }
 

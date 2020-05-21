@@ -3,7 +3,7 @@ TARGET = gridop1_dim
 CC = g++
 RM = rm -rf 
 
-OPTS = -std=c++14 -I ~/.local/include
+OPTS = -std=c++14 -I ../..
 
 SRC = $(TARGET).cpp
 

@@ -69,28 +69,16 @@ private:
     const typename OP2::proxy_type op2_proxy;
 };
 
-template<class OP1, class OP2>
-binary_operator<OP1, math_plus_value, OP2>
-operator+(const MATH_OP(OP1) &op1, const MATH_OP(OP2) &op2){
-    return binary_operator<OP1, math_plus_value, OP2>(op1, op2);
-}
+#define BINARY_GRID_OP(oper, bin_op) \
+    template<class OP1, class OP2> \
+    binary_operator<OP1, bin_op, OP2> \
+    operator oper(const MATH_OP(OP1)& op1, const MATH_OP(OP2)& op2){ \
+        return binary_operator<OP1, bin_op, OP2>(op1, op2); \
+    }
 
-template<class OP1, class OP2>
-binary_operator<OP1, math_minus_value, OP2>
-operator-(const MATH_OP(OP1) &op1, const MATH_OP(OP2) &op2){
-    return binary_operator<OP1, math_minus_value, OP2>(op1, op2);
-}
-
-template<class OP1, class OP2>
-binary_operator<OP1, math_multiplies_value, OP2>
-operator*(const MATH_OP(OP1) &op1, const MATH_OP(OP2) &op2){
-    return binary_operator<OP1, math_multiplies_value, OP2>(op1, op2);
-}
-
-template<class OP1, class OP2>
-binary_operator<OP1, math_divides_value, OP2>
-operator/(const MATH_OP(OP1) &op1, const MATH_OP(OP2) &op2){
-    return binary_operator<OP1, math_divides_value, OP2>(op1, op2);
-}
+BINARY_GRID_OP(+, math_plus_value)
+BINARY_GRID_OP(-, math_minus_value)
+BINARY_GRID_OP(*, math_multiplies_value)
+BINARY_GRID_OP(/, math_divides_value)
 
 _KIAM_MATH_END

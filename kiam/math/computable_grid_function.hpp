@@ -44,7 +44,7 @@ struct math_computable_grid_function_proxy
         return f_proxy(i);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     value_type operator()(size_t i, const context<tag_type, CONTEXT> &context) const {
         return f_proxy[i];

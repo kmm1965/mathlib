@@ -9,7 +9,7 @@ struct math_shift : math_operator<TAG, math_shift<TAG> >
 {
     math_shift(int s) : s(s){}
 
-    template<class EOP, class CONTEXT>
+    template<class EOP, typename CONTEXT>
     __DEVICE
     get_value_type_t<EOP>
     operator()(size_t i, const EOP &eobj_proxy, const context<TAG, CONTEXT> &context) const {

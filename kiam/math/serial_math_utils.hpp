@@ -91,6 +91,11 @@ _Ty math_inner_product_n(_InIt1 _First1, size_t n, _InIt2 _First2, _Ty _Val){
     return std::inner_product(_First1, _First1 + n, _First2, _Val);
 }
 
+template<class _InIt, class _Fn1> inline
+void math_for_each(_InIt _First, _InIt _Last, _Fn1 _Func) {
+    std::for_each(_First, _Last, _Func);
+}
+
 using math_string = std::string;
 
 _KIAM_MATH_END

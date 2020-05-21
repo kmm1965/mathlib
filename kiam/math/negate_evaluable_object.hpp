@@ -24,7 +24,7 @@ struct negate_evaluable_object : evaluable_object<typename EO::tag_type, negate_
         return -eobj_proxy(i);
     }
 
-    template<class CONTEXT>
+    template<typename CONTEXT>
     __DEVICE
     CONSTEXPR value_type operator()(size_t i, const context<tag_type, CONTEXT>& context) const {
         return -eobj_proxy(i, context);
