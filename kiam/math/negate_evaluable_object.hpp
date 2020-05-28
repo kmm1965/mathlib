@@ -35,7 +35,7 @@ private:
 };
 
 template<class EO>
-negate_evaluable_object<EO> operator-(const EOBJ(EO)& eobj){
+negate_evaluable_object<EO> operator-(EOBJ(EO) const& eobj){
     return negate_evaluable_object<EO>(eobj);
 }
 

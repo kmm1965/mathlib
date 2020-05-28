@@ -25,7 +25,7 @@ struct inplace_ugrid_operator : ugrid_operator1<G, inplace_ugrid_operator<G, F> 
 {
     using super = ugrid_operator1<G, inplace_ugrid_operator>;
 
-    inplace_ugrid_operator(grid_type const& grid, F f) : super(grid), f(f){}
+    inplace_ugrid_operator(typename super::grid_type const& grid, F f) : super(grid), f(f){}
 
     template<typename EOP>
     __DEVICE __HOST

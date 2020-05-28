@@ -23,9 +23,9 @@ struct stride_iterator : std::iterator<
     typedef typename super::value_type value_type;
     typedef typename super::difference_type difference_type;
     typedef typename super::pointer pointer;
-    typedef typename super::const_pointer const_pointer;
+    typedef value_type* const_pointer;
     typedef typename super::reference reference;
-    typedef typename super::const_reference const_reference;
+    typedef value_type& const_reference;
 
     __DEVICE __HOST
     CONSTEXPR stride_iterator(inner_iterator_type inner_iterator, int stride) : m_inner_iterator(inner_iterator), m_stride(stride){}

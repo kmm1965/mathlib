@@ -111,14 +111,14 @@ struct array_value
     __DEVICE __HOST
     CONSTEXPR array_value& operator*=(const value_type &rhs)
     {
-        math_transform_n(m_values, array_size, m_values, [&rhs](const value_type& x) { return x * rhs; });
+        math_transform_n(m_values, array_size, m_values, [&rhs](value_type const& x) { return x * rhs; });
         return *this;
     }
 
     __DEVICE __HOST
     CONSTEXPR array_value& operator/=(const value_type &rhs)
     {
-        math_transform_n(m_values, array_size, m_values, [&rhs](const value_type& x) { return x / rhs; });
+        math_transform_n(m_values, array_size, m_values, [&rhs](value_type const& x) { return x / rhs; });
         return *this;
     }
 

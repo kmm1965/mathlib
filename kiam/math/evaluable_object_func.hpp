@@ -18,7 +18,7 @@ struct fmap_evaluable_object : evaluable_object<typename EO::tag_type, fmap_eval
     using function_type = funcprog::function_t<Ret(Arg, Args...)>;
     using eobj_type = EOBJ(EO);
 
-    fmap_evaluable_object(function_type const& f, eobj_type const& eobj) : f(f), eobj_proxy(eobj.get_proxy()) {}
+    fmap_evaluable_object(function_type const& f, eobj_type const& eobj) : f(f), eobj_proxy(eobj.get_proxy()){}
 
     __DEVICE
     CONSTEXPR value_type operator[](size_t i) const {
@@ -32,7 +32,7 @@ private:
 
 template<class EO, typename Ret, typename Arg, typename... Args>
 fmap_evaluable_object<EO, Ret, Arg, Args...>
-operator/(funcprog::function_t<Ret(Arg, Args...)> const& f, EOBJ(EO) const& eobj) {
+operator/(funcprog::function_t<Ret(Arg, Args...)> const& f, EOBJ(EO) const& eobj){
     return fmap_evaluable_object<EO, Ret, Arg, Args...>(f, eobj);
 }
 
@@ -42,7 +42,7 @@ struct pure_evaluable_object : evaluable_object<TAG, pure_evaluable_object<TAG, 
 {
     using value_type = T;
 
-    pure_evaluable_object(value_type const& value) : value(value) {}
+    pure_evaluable_object(value_type const& value) : value(value){}
 
     __DEVICE
     CONSTEXPR value_type operator[](size_t) const {
@@ -67,7 +67,7 @@ struct apply_evaluable_object : evaluable_object<typename EO::tag_type, apply_ev
     using eobj_f_type = evaluable_object<typename EO_F::tag_type, EO_F, typename EO_F::proxy_type>;
     using eobj_type = EOBJ(EO);
 
-    apply_evaluable_object(eobj_f_type const& eobj_f, eobj_type const& eobj) : eobj_f_proxy(eobj_f.get_proxy()), eobj_proxy(eobj.get_proxy()) {}
+    apply_evaluable_object(eobj_f_type const& eobj_f, eobj_type const& eobj) : eobj_f_proxy(eobj_f.get_proxy()), eobj_proxy(eobj.get_proxy()){}
 
     __DEVICE
     CONSTEXPR value_type operator[](size_t i) const
@@ -111,7 +111,7 @@ struct mbind_evaluable_object : evaluable_object<typename EO::tag_type, mbind_ev
     using value_type = funcprog::value_type_t<EORet>;
     using function_type = funcprog::function_t<EORet(Arg)>;
 
-    mbind_evaluable_object(EOBJ(EO) const& eobj, function_type const& f) : eobj_proxy(eobj.get_proxy()), f(f) {}
+    mbind_evaluable_object(EOBJ(EO) const& eobj, function_type const& f) : eobj_proxy(eobj.get_proxy()), f(f){}
 
     __DEVICE
     CONSTEXPR value_type operator[](size_t i) const {
@@ -174,7 +174,7 @@ namespace funcprog {
         using super = Functor<_KIAM_MATH::_evaluable_object<TAG> >;
 
         template<typename T>
-        static _KIAM_MATH::pure_evaluable_object<TAG, T> pure(T const& value) {
+        static _KIAM_MATH::pure_evaluable_object<TAG, T> pure(T const& value){
             return _KIAM_MATH::pure_evaluable_object<TAG, T>(value);
         }
 
@@ -204,7 +204,7 @@ namespace funcprog {
         //using liftM_type = _KIAM_MATH::mbind_evaluable_object<EO, _KIAM_MATH::pure_evaluable_object<TAG, T>, T>
 
         template<typename T>
-        static _KIAM_MATH::pure_evaluable_object<TAG, T> mreturn(T const& value) {
+        static _KIAM_MATH::pure_evaluable_object<TAG, T> mreturn(T const& value){
             return super::pure(value);
         }
 
@@ -222,8 +222,8 @@ namespace funcprog {
         using lift_type = function_t<_KIAM_MATH::pure_evaluable_object<TAG, remove_f0_t<function_t<Ret(Args...)> > >(Arg)>;
 
         template<typename Ret, typename Arg, typename... Args>
-        static lift_type<Ret, Arg, Args...> lift(function_t<Ret(Arg, Args...)> const& f) {
-            return [f](Arg arg) {
+        static lift_type<Ret, Arg, Args...> lift(function_t<Ret(Arg, Args...)> const& f){
+            return [f](Arg arg){
                 return _KIAM_MATH::pure_evaluable_object<TAG, remove_f0_t<function_t<Ret(Args...)> > >(invoke_f0(f << arg));
             };
         }
@@ -233,7 +233,7 @@ namespace funcprog {
     _KIAM_MATH::mbind_evaluable_object<EO, _KIAM_MATH::pure_evaluable_object<typename EO::tag_type, Ret>, fdecay<Arg> const&>
         liftM(function_t<Ret(Arg)> const& f, EOBJ(EO) const& eobj)
     {
-        return eobj >>= _([f](value_type_t<EO> const& x) {
+        return eobj >>= _([f](value_type_t<EO> const& x){
             return Monad<_KIAM_MATH::_evaluable_object<typename EO::tag_type> >::mreturn(f(x));
         });
     }

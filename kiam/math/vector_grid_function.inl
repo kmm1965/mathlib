@@ -76,7 +76,7 @@ void vector_grid_function<TAG, T>::operator+=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::plus<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -89,7 +89,7 @@ void vector_grid_function<TAG, T>::operator-=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::minus<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -102,7 +102,7 @@ void vector_grid_function<TAG, T>::operator*=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::multiplies<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -115,7 +115,7 @@ void vector_grid_function<TAG, T>::operator/=(const vector_grid_function &other)
 #else
 #define FUNC _KIAM_MATH::divides<value_type>()
 #endif
-    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, std::cbegin(other), vector_type::begin(), FUNC);
+    MATH_TRANSFORM2(vector_type::cbegin(), vector_type::cbegin() + m_local_size, other.cbegin(), vector_type::begin(), FUNC);
 #undef FUNC
 }
 
@@ -242,8 +242,7 @@ template<typename TAG, typename T>
 template<class EO>
 void vector_grid_function<TAG, T>::operator=(const EOBJ(EO) &eobj)
 {
-    typedef typename EO::tag_type EO_tag_type;
-    static_assert(std::is_same<EO_tag_type, TAG>::value, "Tag types should be the same");
+    static_assert(std::is_same<typename EO::tag_type, TAG>::value, "Tag types should be the same");
     math_assign<TAG>(*this <<= eobj).exec(size_t(), m_local_size);
 }
 

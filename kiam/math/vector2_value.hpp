@@ -56,10 +56,10 @@ struct vector2_value
     reference value_y(){ return m_value_y; }
 
     __DEVICE __HOST
-    void value_x(const value_type& value){ m_value_x = value; }
+    void value_x(value_type const& value){ m_value_x = value; }
 
     __DEVICE __HOST
-    void value_y(const value_type& value){ m_value_y = value; }
+    void value_y(value_type const& value){ m_value_y = value; }
 
     __DEVICE __HOST
     CONSTEXPR unsigned size() const {

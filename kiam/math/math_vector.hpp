@@ -84,8 +84,8 @@ struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
     pointer data_pointer(){ return DATA_POINTER(); }
     const_pointer data_pointer() const { return DATA_POINTER(); }
 #undef DATA_POINTER
-    vector_proxy_type get_proxy(){ return *this; }
-    vector_proxy_type get_proxy() const { return *this; }
+    vector_proxy_type get_vector_proxy(){ return *this; }
+    vector_proxy_type get_vector_proxy() const { return *this; }
 };
 
 _KIAM_MATH_END
