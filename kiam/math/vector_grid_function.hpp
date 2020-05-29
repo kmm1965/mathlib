@@ -1,10 +1,18 @@
 #pragma once
 
+#include <valarray>
+
 #include "grid_function.hpp"
 #include "math_vector.hpp"
 #include "host_vector.hpp"
 
 _KIAM_MATH_BEGIN
+
+template<typename TAG, typename T>
+struct simple_slice;
+
+template<typename TAG, typename T>
+struct grid_func_gslice;
 
 template<typename TAG, typename T>
 struct vector_grid_function_proxy;
@@ -77,6 +85,9 @@ struct vector_grid_function : grid_function<TAG, vector_grid_function<TAG, T>, v
 
     template<class EO>
     void operator/=(const EOBJ(EO) &eobj);
+
+    simple_slice<tag_type, value_type> operator[](std::slice const& sl);
+    grid_func_gslice<tag_type, value_type> operator[](std::gslice const& gsl);
 
     const size_t m_local_size;
 };

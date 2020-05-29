@@ -5,7 +5,7 @@
 _KIAM_MATH_BEGIN
 
 template<typename TAG, typename T>
-struct simple_slice : math_object<simple_slice<TAG, T> >
+struct grid_func_gslice : math_object<grid_func_gslice<TAG, T> >
 {
     typedef TAG tag_type;
     typedef T value_type;
@@ -16,25 +16,36 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
 
     struct index_type
     {
-        index_type(std::slice const& sl) : m_start(sl.start()), m_size(sl.size()) , m_stride(sl.stride()){}
+        index_type(std::gslice const& gsl) : gsl(gsl){
+            assert(gsl.size().size() > 0);
+            assert(gsl.size().size() == gsl.stride().size());
+        }
 
         __DEVICE
         size_t size() const {
-            return m_size;
+            std::valarray<size_t> sizes = gsl.size();
+            return math_accumulate(std::begin(sizes), std::end(sizes), size_t(1), multiplies<size_t>());
         }
 
         __DEVICE
         size_t operator()(size_t i) const {
-            return m_start + i * m_stride;
+            size_t result = gsl.start();
+            const std::valarray<size_t> sizes = gsl.size(), strides = gsl.stride();
+            size_t const dims = sizes.size();
+            for (unsigned idx = 0; idx < dims && i > 0; ++idx){
+                size_t const isize = sizes[idx];
+                result += i % isize * strides[idx];
+                i /= isize;
+            }
+            return result;
         }
 
-        const size_t m_start, m_size, m_stride;
+        std::gslice const gsl;
     };
 
-    simple_slice(gf_type &gf, std::slice const& sl) : gf_proxy(gf), index(sl)
+    grid_func_gslice(gf_type& gf, std::gslice const& gsl) : gf_proxy(gf), index(gsl)
     {
         assert(index(0) < gf.size());
-        assert(sl.stride() > 0 && sl.stride() < gf.size());
         assert(index(index.size() - 1) < gf.size());
     }
 
@@ -55,9 +66,9 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
         return gf_proxy[index(i)];
     }
 
-    struct simple_slice_assign_value_closure
+    struct grid_func_gslice_assign_value_closure
     {
-        simple_slice_assign_value_closure(gf_proxy_type& gf_proxy, value_type const& value, index_type const& index) :
+        grid_func_gslice_assign_value_closure(gf_proxy_type& gf_proxy, value_type const& value, index_type const& index) :
             gf_proxy(gf_proxy), value(value), index(index){}
 
         __DEVICE
@@ -72,14 +83,14 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
     };
 
     void operator=(value_type const& value){
-        simple_slice_assign_value_closure closure(gf_proxy, value, index);
+        grid_func_gslice_assign_value_closure closure(gf_proxy, value, index);
         default_executor<tag_type>()(closure, size());
     }
-    
+
     template<typename EO>
-    struct simple_slice_assign_eobj_closure
+    struct grid_func_gslice_assign_eobj_closure
     {
-        simple_slice_assign_eobj_closure(gf_proxy_type& gf_proxy, EOBJ(EO) const& eobj, index_type const& index) :
+        grid_func_gslice_assign_eobj_closure(gf_proxy_type& gf_proxy, EOBJ(EO) const& eobj, index_type const& index) :
             gf_proxy(gf_proxy), eobj_proxy(eobj.get_proxy()), index(index){}
 
         __DEVICE
@@ -97,18 +108,18 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
     template<typename EO>
     typename std::enable_if<std::is_same<typename EO::tag_type, TAG>::value>::type
     operator=(EOBJ(EO) const& eobj){
-        simple_slice_assign_eobj_closure<EO> closure(gf_proxy, eobj, index);
+        grid_func_gslice_assign_eobj_closure<EO> closure(gf_proxy, eobj, index);
         default_executor<tag_type>()(closure, size());
     }
 
-private:
+//private:
     gf_proxy_type gf_proxy;
     index_type const index;
 };
 
 template<typename TAG, typename T>
-simple_slice<TAG, T> vector_grid_function<TAG, T>::operator[](std::slice const& sl){
-    return simple_slice<TAG, T>(*this, sl);
+grid_func_gslice<TAG, T> vector_grid_function<TAG, T>::operator[](std::gslice const& gsl){
+    return grid_func_gslice<TAG, T>(*this, gsl);
 }
 
 _KIAM_MATH_END
