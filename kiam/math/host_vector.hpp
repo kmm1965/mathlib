@@ -29,7 +29,7 @@ struct host_vector : public std::vector<T>
         : super(other){}
 #endif
 
-    proxy_type get_proxy() const {
+    proxy_type get_vector_proxy() const {
         return proxy_type(super::size(), data_pointer());
     }
 

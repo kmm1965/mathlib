@@ -67,11 +67,11 @@ instance Eq Message where
     m1 == m2 = fromEnum m1 == fromEnum m2
 
 */
-inline bool operator==(const Message &l, const Message &r) {
+inline bool operator==(Message const& l, Message const& r){
     return l.type == r.type;
 }
 
-inline bool operator!=(const Message &l, const Message &r) {
+inline bool operator!=(Message const& l, Message const& r){
     return !(l == r);
 }
 
@@ -84,7 +84,7 @@ inline bool operator!=(const Message &l, const Message &r) {
 instance Ord Message where
     compare msg1 msg2 = compare (fromEnum msg1) (fromEnum msg2)
 */
-inline bool operator<(const Message &l, const Message &r) {
+inline bool operator<(Message const& l, Message const& r){
     return l.type < r.type;
 }
 
@@ -97,23 +97,25 @@ messageString (UnExpect    s) = s
 messageString (Expect      s) = s
 messageString (Message     s) = s
 */
-inline _FUNCPROG::String messageString(Message const& m) {
+inline _FUNCPROG::String messageString(Message const& m){
     return m.msg;
 }
 
-inline std::ostream& operator<<(std::ostream &os, _Message type) {
-    switch (type) {
-    case SysUnExpect: return os << "SysUnExpect";
-    case UnExpect: return os << "UnExpect";
-    case Expect: return os << "Expect";
-    case Message_: return os << "Message";
-    default: assert(false); return os;
+_PARSEC_END
+
+namespace std {
+    inline ostream& operator<<(ostream& os, _PARSEC::_Message type){
+        switch (type){
+        case _PARSEC::SysUnExpect: return os << "SysUnExpect";
+        case _PARSEC::UnExpect: return os << "UnExpect";
+        case _PARSEC::Expect: return os << "Expect";
+        case _PARSEC::Message_: return os << "Message";
+        default: assert(false); return os;
+        }
+    }
+
+    inline ostream& operator<<(ostream& os, _PARSEC::Message const& msg){
+        return os << msg.type << ' ' << msg.msg;
     }
 }
 
-
-inline std::ostream& operator<<(std::ostream &os, const Message &msg) {
-    return os << msg.type << ' ' << msg.msg;
-}
-
-_PARSEC_END

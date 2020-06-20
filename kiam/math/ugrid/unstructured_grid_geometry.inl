@@ -87,9 +87,9 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
             cell_node_index.cbegin() + cell_node_index_end, vector_t(),
             [&nodes](const vector_t &vec, unsigned inode){ return vec + nodes[inode]; }) / value_type(cell_node_count);
         // Центр масс ячейки
-        cell.center = cell_center<value_type, dim>(nodes.get_proxy(), cell_node_index.get_proxy(), cell_node_index_start, cell_node_count);
+        cell.center = cell_center<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_count);
         // Объём ячейки
-        cell.volume = cell_volume<value_type, dim>(nodes.get_proxy(), cell_node_index.get_proxy(), cell_node_index_start, cell_node_count);
+        cell.volume = cell_volume<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_count);
         assert(cell.volume > 0);
     }
     if(rank == 0)
@@ -105,7 +105,7 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
             interface_node_index_end = interface_node_shift[iface + 1],
             interface_node_count = interface_node_index_end - interface_node_index_start;
         assert(interface_node_count == dim || dim == 3 && interface_node_count == dim + 1);
-        interface.normal = calc_normal<value_type, dim>(nodes.get_proxy(), interface_node_index.get_proxy(), interface_node_index_start);
+        interface.normal = calc_normal<value_type, dim>(nodes.get_vector_proxy(), interface_node_index.get_vector_proxy(), interface_node_index_start);
         // Сдалем эту нормаль внешней для первой ячейки.
         // Если у интерфейса есть вторая ячейка (интерфейс не граничный),
         // то для этой второй ячейки нормаль будет внутренней.
@@ -133,7 +133,7 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
             interface.normal = -interface.normal;
         interface.normal /= interface.normal.length(); // Делаем нормаль единичной.
 #if UGRID_INTERFACE_AREA
-        interface.area = calc_interface_area<value_type, dim>(nodes.get_proxy(), interface_node_index.get_proxy(), interface_node_index_start, interface_node_count);
+        interface.area = calc_interface_area<value_type, dim>(nodes.get_vector_proxy(), interface_node_index.get_vector_proxy(), interface_node_index_start, interface_node_count);
 #endif
 #if UGRID_INTERFACE_CENTER
 //      // Вычислим центр масс грани.
@@ -182,7 +182,7 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
                     interface_node_index_start = interface_node_shift[iface],
                     interface_node_count = interface_node_shift[iface + 1] - interface_node_index_start;
                 assert(interface_node_count == dim);
-                const value_type area = calc_interface_area<dim>(nodes.get_proxy(), interface_node_index.get_proxy(), interface_node_index_start, interface_node_count);
+                const value_type area = calc_interface_area<dim>(nodes.get_vector_proxy(), interface_node_index.get_vector_proxy(), interface_node_index_start, interface_node_count);
                 if (max_interface_area < area)
                     max_interface_area = area;
 #endif
@@ -191,7 +191,7 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
             cell.h = cell.volume * dim / max_interface_area;
         } else {
             const unsigned cell_node_index_start = cell_node_shift[icell];
-            cell.h = calc_cell_height<value_type, dim>(nodes.get_proxy(), cell_node_index.get_proxy(), cell_node_index_start, cell_node_shift[icell + 1] - cell_node_index_start);
+            cell.h = calc_cell_height<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_shift[icell + 1] - cell_node_index_start);
         }
         assert(cell.h > 0);
         if(hMin > cell.h)

@@ -103,10 +103,12 @@ inline bool operator<(SourcePos const& l, SourcePos const& r) {
         (l.name == r.name && l.line == r.line && l.column < r.column);
 }
 
-inline std::ostream& operator<<(std::ostream &os, SourcePos const& pos) {
-    if (!pos.name.empty())
-        os << '"' << pos.name << "\" ";
-    return os << "(line " << pos.line << ", column " << pos.column << ')';
-}
-
 _PARSEC_END
+
+namespace std {
+    inline ostream& operator<<(ostream& os, _PARSEC::SourcePos const& pos) {
+        if (!pos.name.empty())
+            os << '"' << pos.name << "\" ";
+        return os << "(line " << pos.line << ", column " << pos.column << ')';
+    }
+}

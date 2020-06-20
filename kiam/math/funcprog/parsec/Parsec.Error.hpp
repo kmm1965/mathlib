@@ -75,7 +75,7 @@ newErrorMessage :: Message -> SourcePos -> ParseError
 newErrorMessage msg pos
     = ParseError pos [msg]
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, newErrorMessage, const Message&, msg, SourcePos const&, pos,
+DEFINE_FUNCTION_2_NOTEMPL(ParseError, newErrorMessage, Message const&, msg, SourcePos const&, pos,
     return ParseError(pos, List<Message>({ msg }));)
 
 /*
@@ -83,7 +83,7 @@ addErrorMessage :: Message -> ParseError -> ParseError
 addErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg:msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, addErrorMessage, const Message&, msg, ParseError const&, err,
+DEFINE_FUNCTION_2_NOTEMPL(ParseError, addErrorMessage, Message const&, msg, ParseError const&, err,
     return ParseError(err.pos, msg >> err.msgs);)
 
 /*
@@ -99,7 +99,7 @@ setErrorMessage :: Message -> ParseError -> ParseError
 setErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg : filter (msg /=) msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, setErrorMessage, const Message&, msg, ParseError const&, err,
+DEFINE_FUNCTION_2_NOTEMPL(ParseError, setErrorMessage, Message const&, msg, ParseError const&, err,
     return ParseError(err.pos, msg >> filter(_neq(msg), err.msgs));)
 
 /*
@@ -241,8 +241,11 @@ ParseError unexpectError(_FUNCPROG::String const& msg, SourcePos const& pos) {
     return newErrorMessage(Message(SysUnExpect, msg), pos);
 }
 
-inline std::ostream& operator<<(std::ostream &os, ParseError const& err) {
-    return os << err.pos << ':' << showErrorMessages("or", "unknown parse error", "expecting", "unexpected", "end of input", errorMessages(err));
+_PARSEC_END
+
+namespace std {
+    inline ostream& operator<<(ostream& os, _PARSEC::ParseError const& err) {
+        return os << err.pos << ':' << _PARSEC::showErrorMessages("or", "unknown parse error", "expecting", "unexpected", "end of input", _PARSEC::errorMessages(err));
+    }
 }
 
-_PARSEC_END

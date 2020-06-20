@@ -20,6 +20,8 @@ private:
     typename grid_type::proxy_type const m_grid;
 };
 
+#ifndef __CUDACC__
+
 template<class G, typename F>
 struct inplace_ugrid_operator : ugrid_operator1<G, inplace_ugrid_operator<G, F> >
 {
@@ -43,5 +45,7 @@ template<class G, typename F>
 inplace_ugrid_operator<G, F> get_inplace_ugrid_operator(G const& grid, F f){
     return inplace_ugrid_operator<G, F>(grid, f);
 }
+
+#endif // __CUDACC__
 
 _UGRID_MATH_END
