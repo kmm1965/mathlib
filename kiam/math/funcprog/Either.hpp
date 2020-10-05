@@ -227,22 +227,13 @@ struct Monad<_Either<void> > : Applicative<_Either<void> >
 };
 
 template<typename A>
-struct is_functor<_Either<A> > : std::true_type {};
+struct _is_functor<_Either<A> > : std::true_type {};
 
 template<typename A>
-struct is_same_functor<_Either<A>, _Either<A> > : std::true_type {};
+struct _is_applicative<_Either<A> > : std::true_type {};
 
 template<typename A>
-struct is_applicative<_Either<A> > : std::true_type {};
-
-template<typename A>
-struct is_same_applicative<_Either<A>, _Either<A> > : std::true_type {};
-
-template<typename A>
-struct is_monad<_Either<A> > : std::true_type {};
-
-template<typename A>
-struct is_same_monad<_Either<A>, _Either<A> > : std::true_type {};
+struct _is_monad<_Either<A> > : std::true_type {};
 
 template<typename T>
 struct is_either : std::false_type {};

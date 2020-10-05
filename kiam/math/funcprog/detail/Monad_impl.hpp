@@ -47,20 +47,20 @@ DEFINE_FUNCTION_2(2, AP_TYPE(T0, T1), ap, T1 const&, mf, T0 const&, mv,
     return _do2(f, mf, v, mv, return Monad_t<T0>::mreturn(invoke_f0(f << v)););)
 
 template<typename MF, typename MG>
-typename std::enable_if<is_same_monad_t<MF, MG>::value, MG>::type
+typename std::enable_if<is_same_monad<MF, MG>::value, MG>::type
 operator>>(MF const& f, MG const& g) {
     return _do(__unused__, f, return g;);
 }
 
 template<typename RetF, typename RetG>
-typename std::enable_if<is_same_monad_t<RetF, RetG>::value, f0<RetG> >::type
+typename std::enable_if<is_same_monad<RetF, RetG>::value, f0<RetG> >::type
 operator>>(f0<RetF> const& f, f0<RetG> const& g) {
     return [f, g](){ return _do(__unused__, f(), return g();); };
 }
 
 // >=>
 template<typename RetG, typename ArgG, typename RetF, typename... ArgsF>
-typename std::enable_if<is_same_monad_t<RetF, RetG>::value && is_same_as<ArgG, typename RetF::value_type>::value, function_t<RetG(ArgsF...)> >::type
+typename std::enable_if<is_same_monad<RetF, RetG>::value && is_same_as<ArgG, typename RetF::value_type>::value, function_t<RetG(ArgsF...)> >::type
 operator^(function_t<RetF(ArgsF...)> const& f, function_t<RetG(ArgG)> const& g) {
     return [g, f](ArgsF... args) { return f(args...) >>= g; };
 }

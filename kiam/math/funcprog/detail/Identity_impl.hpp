@@ -64,7 +64,7 @@ Foldable<_Identity>::foldr1(function_t<A(Arg1, Arg2)> const&, Identity<A> const&
 
 // Traversable
 template<typename AP, typename Arg>
-typename std::enable_if<is_applicative_t<AP>::value, typeof_t<AP, Identity<value_type_t<AP> > > >::type
+typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, Identity<value_type_t<AP> > > >::type
 Traversable<_Identity>::traverse(function_t<AP(Arg)> const& f, Identity<fdecay<Arg> > const& x){
     return _(Identity_<value_type_t<AP> >) / f(x.run());
 }

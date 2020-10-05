@@ -255,10 +255,7 @@ struct is_reader<ReaderT<R, _M, A> > : std::true_type {};
 
 // Functor
 template<typename R, typename _M>
-struct is_functor<_ReaderT<R, _M> > : is_functor<_M> {};
-
-template<typename R, typename _M>
-struct is_same_functor<_ReaderT<R, _M>, _ReaderT<R, _M> > : is_functor<_M> {};
+struct _is_functor<_ReaderT<R, _M> > : _is_functor<_M> {};
 
 template<typename R, typename _M>
 struct Functor<_ReaderT<R, _M> >
@@ -286,10 +283,7 @@ ReaderT<R, _M, A> operator/=(A const& x, ReaderT<R, _M, B> const& v) {
 
 // Applicative
 template<typename R, typename _M>
-struct is_applicative<_ReaderT<R, _M> > : is_applicative<_M> {};
-
-template<typename R, typename _M>
-struct is_same_applicative<_ReaderT<R, _M>, _ReaderT<R, _M> > : is_applicative<_M> {};
+struct _is_applicative<_ReaderT<R, _M> > : _is_applicative<_M> {};
 
 template<typename R, typename _M>
 struct Applicative<_ReaderT<R, _M> > : Functor<_ReaderT<R, _M> >
@@ -335,10 +329,7 @@ ReaderT<R, _M, Fa> operator^=(ReaderT<R, _M, Fa> const& a, ReaderT<R, _M, Fb> co
 
 // Monad
 template<typename R, typename _M>
-struct is_monad<_ReaderT<R, _M> > : is_monad<_M> {};
-
-template<typename R, typename _M>
-struct is_same_monad<_ReaderT<R, _M>, _ReaderT<R, _M> > : is_monad<_M> {};
+struct _is_monad<_ReaderT<R, _M> > : _is_monad<_M> {};
 
 template<typename R, typename _M>
 struct Monad<_ReaderT<R, _M> > : Applicative<_ReaderT<R, _M> >

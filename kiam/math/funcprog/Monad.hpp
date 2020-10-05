@@ -11,24 +11,30 @@ public:
     explicit monad_error(const char* _Message) : runtime_error(_Message) {}
 };
 
+template<class _M>
+struct _is_monad : std::false_type {};
+
+template<class M>
+using is_monad = _is_monad<base_class_t<M> >;
+
+template<class M>
+using monad_type = typename std::enable_if<is_monad<M>::value, M>::type;
+
+template<class _M1, class _M2>
+struct _is_same_monad : std::false_type {};
+
+template<class _M>
+struct _is_same_monad<_M, _M> : _is_monad<_M> {};
+
+template<class M1, class M2>
+using is_same_monad = _is_same_monad<base_class_t<M1>, base_class_t<M2> >;
+
 // Requires mreturn and >>=
 template<typename M>
 struct Monad;
 
 template<typename T>
 using Monad_t = Monad<base_class_t<T> >;
-
-template<class M>
-struct is_monad : std::false_type {};
-
-template<class M>
-using is_monad_t = is_monad<base_class_t<M> >;
-
-template<class M1, class M2>
-struct is_same_monad : std::false_type {};
-
-template<class M1, class M2>
-using is_same_monad_t = is_same_monad<base_class_t<M1>, base_class_t<M2> >;
 
 #define DECLARE_MONAD_CLASS(M, _M) \
     template<typename T> \
@@ -40,8 +46,7 @@ using is_same_monad_t = is_same_monad<base_class_t<M1>, base_class_t<M2> >;
     using liftM_type = _M::template type<T>;
 
 #define IMPLEMENT_MONAD(_M) \
-    template<> struct is_monad<_M> : std::true_type {}; \
-    template<> struct is_same_monad<_M, _M> : std::true_type {}
+    template<> struct _is_monad<_M> : std::true_type {}
 
 #define IMPLEMENT_MRETURN(M, _M) \
     template<typename T> \
@@ -78,7 +83,7 @@ using mbind_result_type_t = typename mbind_result_type<M, MFUNC>::type;
 template<class M, class MF, typename Arg, typename... Args>
 struct mbind_result_type<M, function_t<MF(Arg, Args...)> >
 {
-    static_assert(is_same_monad_t<M, MF>::value, "Should be the same Monad");
+    static_assert(is_same_monad<M, MF>::value, "Should be the same Monad");
     static_assert(is_same_as<value_type_t<M>, Arg>::value, "Should be the same");
 
     using type = remove_f0_t<function_t<typeof_t<M, value_type_t<MF> >(Args...)> >;
@@ -96,7 +101,7 @@ struct mbind_result_type<f0<M>, function_t<MF(Arg, Args...)> >
 template<typename M, typename MFUNC>
 using mbind_type = typename std::enable_if<
     is_function<MFUNC>::value &&
-    is_same_monad_t<M, typename MFUNC::result_type>::value &&
+    is_same_monad<M, typename MFUNC::result_type>::value &&
     std::is_same<value_type_t<M>, first_argument_type_t<MFUNC> >::value,
     mbind_result_type_t<M, MFUNC>
 >::type;
@@ -157,7 +162,7 @@ liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5;
 
 template<typename M, typename Ret, typename Arg, typename... Args>
 using liftM_type = typename std::enable_if<
-    is_monad_t<M>::value && is_same_as<Arg, value_type_t<M> >::value,
+    is_monad<M>::value && is_same_as<Arg, value_type_t<M> >::value,
     typename Monad_t<M>::template liftM_type<remove_f0_t<function_t<Ret(Args...)> > >
 >::type;
 
@@ -181,7 +186,7 @@ DECLARE_FUNCTION_2_ARGS(3, LIFTM_TYPE(T0, T1, T2), liftM, function_t<T1(T2, Args
 // liftM2 f m1 m2 = do { x1 <- m1; x2 <- m2; return (f x1 x2) }
 template<typename M1, typename M2, typename Ret, typename Arg1, typename Arg2>
 using liftM2_type = typename std::enable_if<
-    is_same_monad_t<M1, M2>::value &&
+    is_same_monad<M1, M2>::value &&
     is_same_as<Arg1, value_type_t<M1> >::value &&
     is_same_as<Arg2, value_type_t<M2> >::value,
     typename Monad_t<M1>::template liftM_type<Ret>
@@ -195,7 +200,7 @@ DECLARE_FUNCTION_3(5, LIFTM2_TYPE(T0, T1, T2, T3, T4), liftM2, function_t<T2(T3,
 // liftM3 f m1 m2 m3 = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
 template<typename M1, typename M2, typename M3, typename Ret, typename Arg1, typename Arg2, typename Arg3>
 using liftM3_type = typename std::enable_if<
-    is_same_monad_t<M1, M2>::value && is_same_monad_t<M1, M3>::value &&
+    is_same_monad<M1, M2>::value && is_same_monad<M1, M3>::value &&
     is_same_as<Arg1, value_type_t<M1> >::value &&
     is_same_as<Arg2, value_type_t<M2> >::value && is_same_as<Arg3, value_type_t<M3> >::value,
     typename Monad_t<M1>::template liftM_type<Ret>
@@ -209,7 +214,7 @@ DECLARE_FUNCTION_4(7, LIFTM3_TYPE(T0, T1, T2, T3, T4, T5, T6), liftM3, function_
 // liftM4 f m1 m2 m3 m4 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
 template<typename M1, typename M2, typename M3, typename M4, typename Ret, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
 using liftM4_type = typename std::enable_if<
-    is_same_monad_t<M1, M2>::value && is_same_monad_t<M1, M3>::value && is_same_monad_t<M1, M4>::value &&
+    is_same_monad<M1, M2>::value && is_same_monad<M1, M3>::value && is_same_monad<M1, M4>::value &&
     is_same_as<Arg1, value_type_t<M1> >::value &&
     is_same_as<Arg2, value_type_t<M2> >::value &&
     is_same_as<Arg3, value_type_t<M3> >::value &&
@@ -226,8 +231,8 @@ DECLARE_FUNCTION_5(9, LIFTM4_TYPE(T0, T1, T2, T3, T4, T5, T6, T7, T8), liftM4,
 // liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
 template<typename M1, typename M2, typename M3, typename M4, typename M5, typename Ret, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
 using liftM5_type = typename std::enable_if<
-    is_same_monad_t<M1, M2>::value && is_same_monad_t<M1, M3>::value &&
-    is_same_monad_t<M1, M4>::value && is_same_monad_t<M1, M5>::value &&
+    is_same_monad<M1, M2>::value && is_same_monad<M1, M3>::value &&
+    is_same_monad<M1, M4>::value && is_same_monad<M1, M5>::value &&
     is_same_as<Arg1, value_type_t<M1> >::value &&
     is_same_as<Arg2, value_type_t<M2> >::value &&
     is_same_as<Arg3, value_type_t<M3> >::value &&
@@ -255,7 +260,7 @@ ap m1 m2          = do { x1 <- m1; x2 <- m2; return (x1 x2) }
 */
 template<typename MV, typename MF>
 using ap_type = typename std::enable_if<
-    is_same_monad_t<MF, MV>::value && is_function<value_type_t<MF> >::value &&
+    is_same_monad<MF, MV>::value && is_function<value_type_t<MF> >::value &&
     is_same_as<first_argument_type_t<value_type_t<MF> >, value_type_t<MV> >::value,
     typeof_t<MF, remove_f0_t<remove_first_arg_t<value_type_t<MF> > > >
 >::type;
@@ -274,7 +279,7 @@ ap_type<MV, MF> operator&(MF const& mf, MV const& mv) {
 // f >=> g = \x -> (f x >>= g)
 template<typename MG, typename ArgG, typename... ArgsG, typename MF, typename ArgF, typename... ArgsF>
 typename std::enable_if<
-    is_same_monad_t<MF, MG>::value && is_same_as<value_type_t<MF>, ArgG>::value,
+    is_same_monad<MF, MG>::value && is_same_as<value_type_t<MF>, ArgG>::value,
     function_t<remove_f0_t<function_t<MG(ArgsG...)> >(ArgF, ArgsF...)>
 >::type mcompose(function_t<MF(ArgF, ArgsF...)> const& f, function_t<MG(ArgG, ArgsG...)> const& g) {
     return _([f, g](ArgF x, ArgsF... args) {
@@ -284,7 +289,7 @@ typename std::enable_if<
 
 template<typename MG, typename ArgG, typename... ArgsG, typename MF, typename ArgF, typename... ArgsF>
 typename std::enable_if<
-    is_same_monad_t<MF, MG>::value && is_same_as<value_type_t<MF>, ArgG>::value,
+    is_same_monad<MF, MG>::value && is_same_as<value_type_t<MF>, ArgG>::value,
     function_t<function_t<remove_f0_t<function_t<MG(ArgsG...)> >(ArgF, ArgsF...)>
         (function_t<MG(ArgG, ArgsG...)> const&)>
 >::type _mcompose(function_t<MF(ArgF, ArgsF...)> const& f) {

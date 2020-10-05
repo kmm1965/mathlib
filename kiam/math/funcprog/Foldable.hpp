@@ -17,7 +17,7 @@ struct is_foldable : std::false_type {};
 #define DECLARE_FOLDABLE_CLASS(F) \
     /* foldMap :: Monoid m => (a -> m) -> t a -> m */ \
     template<typename M, typename Arg> \
-    static typename std::enable_if<is_monoid<M>::value, M>::type foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x); \
+    static monoid_type<M> foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x); \
     \
     /* foldl :: (b -> a -> b) -> b -> t a -> b */ \
     template<typename Ret, typename A, typename B> \
@@ -42,7 +42,7 @@ struct is_foldable : std::false_type {};
 // foldMap f = foldr (mappend . f) mempty
 #define DEFAULT_FOLDMAP_IMPL(F, _F) \
     template<typename M, typename Arg> \
-    typename std::enable_if<is_monoid<M>::value, M>::type Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
+    monoid_type<M> Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
         return foldr(_(mappend<M>) & f, Monoid_t<M>::template mempty<value_type_t<M> >(), x); \
     }
 

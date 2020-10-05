@@ -143,10 +143,7 @@ struct is_MaybeT<MaybeT<_M, A> > : std::true_type {};
 
 // Functor
 template<class _M>
-struct is_functor<_MaybeT<_M> > : is_functor<_M> {};
-
-template<typename _M>
-struct is_same_functor<_MaybeT<_M>, _MaybeT<_M> > : is_functor<_M> {};
+struct _is_functor<_MaybeT<_M> > : _is_functor<_M> {};
 
 template<class _M>
 struct Functor<_MaybeT<_M> >
@@ -166,10 +163,7 @@ struct Functor<_MaybeT<_M> >
 
 // Applicative
 template<class _M>
-struct is_applicative<_MaybeT<_M> > : is_monad<_M> {};
-
-template<class _M>
-struct is_same_applicative<_MaybeT<_M>, _MaybeT<_M> > : is_applicative<_M> {};
+struct _is_applicative<_MaybeT<_M> > : is_monad<_M> {};
 
 template<class _M>
 struct Applicative<_MaybeT<_M> > : Functor<_MaybeT<_M> >
@@ -227,10 +221,7 @@ instance (Monad m) => Monad (MaybeT m) where
 */
 // Monad
 template<class _M>
-struct is_monad<_MaybeT<_M> > : is_monad<_M> {};
-
-template<class _M>
-struct is_same_monad<_MaybeT<_M>, _MaybeT<_M> > : is_monad<_M> {};
+struct _is_monad<_MaybeT<_M> > : _is_monad<_M> {};
 
 template<class _M>
 struct Monad<_MaybeT<_M> > : Applicative<_MaybeT<_M> >
@@ -378,8 +369,7 @@ struct Foldable<_MaybeT<_M> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f (MaybeT a) = foldMap (foldMap f) a
     template<typename M, typename Arg>
-    static typename std::enable_if<is_monoid<M>::value, M>::type
-    foldMap(function_t<M(Arg)> const& f, MaybeT<_M, fdecay<Arg> > const& x){
+    static monoid_type<M> foldMap(function_t<M(Arg)> const& f, MaybeT<_M, fdecay<Arg> > const& x){
         return Foldable<_M>::foldMap(_foldMap<Maybe<fdecay<Arg> > >(f), x.run());
     }
 };
@@ -393,7 +383,7 @@ struct Traversable<_MaybeT<_M> >
 {
     // traverse f (MaybeT a) = MaybeT <$> traverse (traverse f) a
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative_t<AP>::value, typeof_t<AP, MaybeT<_M, fdecay<Arg> > > >::type
+    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, MaybeT<_M, fdecay<Arg> > > >::type
     traverse(function_t<AP(Arg)> const& f, MaybeT<_M, fdecay<Arg> > const& x){
         return _(MaybeT_<_M, fdecay<Arg> >) / Traversable<_M>::traverse(_traverse<Maybe<fdecay<Arg> > >(f), x.run());
     }

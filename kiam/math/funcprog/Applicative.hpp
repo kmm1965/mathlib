@@ -4,6 +4,24 @@
 
 _FUNCPROG_BEGIN
 
+template<class _A>
+struct _is_applicative : std::false_type {};
+
+template<class A>
+using is_applicative = _is_applicative<base_class_t<A> >;
+
+template<class A>
+using applicative_type = typename std::enable_if<is_applicative<A>::value, A>::type;
+
+template<class _A1, class _A2>
+struct _is_same_applicative : std::false_type {};
+
+template<class _A>
+struct _is_same_applicative<_A, _A> : _is_applicative<_A> {};
+
+template<class A1, class A2>
+using is_same_applicative = _is_same_applicative<base_class_t<A1>, base_class_t<A2> >;
+
 // Requires pure, / (analogue to <$>) and * (analogue to <*>)
 template<typename AP>
 struct Applicative;
@@ -11,21 +29,8 @@ struct Applicative;
 template<typename T>
 using Applicative_t = Applicative<base_class_t<T> >;
 
-template<class A>
-struct is_applicative : std::false_type {};
-
-template<class A>
-using is_applicative_t = is_applicative<base_class_t<A> >;
-
-template<class A1, class A2>
-struct is_same_applicative : std::false_type {};
-
-template<class A1, class A2>
-using is_same_applicative_t = is_same_applicative<base_class_t<A1>, base_class_t<A2> >;
-
 #define IMPLEMENT_APPLICATIVE(_AP) \
-    template<> struct is_applicative<_AP> : std::true_type {}; \
-    template<> struct is_same_applicative<_AP, _AP> : std::true_type {}
+    template<> struct _is_applicative<_AP> : std::true_type {}
 
 #define DECLARE_APPLICATIVE_CLASS(AP) \
     template<typename T> static AP<fdecay<T> > pure(T const& x); \
@@ -37,7 +42,7 @@ using is_same_applicative_t = is_same_applicative<base_class_t<A1>, base_class_t
 template<class AP, class AF>
 struct apply_result_type
 {
-    static_assert(is_same_applicative_t<AP, AF>::value, "Should be the same Applicative");
+    static_assert(is_same_applicative<AP, AF>::value, "Should be the same Applicative");
     static_assert(is_function<value_type_t<AF> >::value, "Should be a function");
     static_assert(std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value, "Should be the same");
     
@@ -50,7 +55,7 @@ using apply_result_type_t = typename apply_result_type<AP, AF>::type;
 // <*> :: Applicative f => f (a -> b) -> f a -> f b
 template<class AP, class AF>
 using apply_type = typename std::enable_if<
-    is_same_applicative_t<AP, AF>::value &&
+    is_same_applicative<AP, AF>::value &&
     is_function<value_type_t<AF> >::value &&
     std::is_same<value_type_t<AP>, first_argument_type_t<value_type_t<AF> > >::value,
     apply_result_type_t<AP, AF>
@@ -70,7 +75,7 @@ apply_type<AP, AF> operator*(AF const& f, AP const& v) {
 // liftA2 :: (a -> b -> c) -> f a -> f b -> f c
 template<class AY, class AX, typename FT>
 using liftA2_type = typename std::enable_if<
-    is_same_applicative_t<AX, AY>::value &&
+    is_same_applicative<AX, AY>::value &&
     std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
     std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value,
     apply_result_type_t<AY, fmap_result_type_t<AX, function_t<FT> > >
@@ -85,8 +90,8 @@ DEFINE_FUNCTION_3(3, LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, 
 // liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 template<class AZ, class AY, class AX, typename FT>
 using liftA3_type = typename std::enable_if<
-    is_same_applicative_t<AX, AY>::value &&
-    is_same_applicative_t<AX, AZ>::value &&
+    is_same_applicative<AX, AY>::value &&
+    is_same_applicative<AX, AZ>::value &&
     std::is_same<value_type_t<AX>, first_argument_type_t<function_t<FT> > >::value &&
     std::is_same<value_type_t<AY>, first_argument_type_t<remove_first_arg_t<function_t<FT> > > >::value &&
     std::is_same<value_type_t<AZ>, first_argument_type_t<remove_first_arg_t<remove_first_arg_t<function_t<FT> > > > >::value,
@@ -118,26 +123,26 @@ a1 *> a2 = (id <$ a1) <*> a2
 */
 // (*>) a1 *> a2 = (id <$ a1) <*> a2
 template<typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fb>::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, Fb>::type
 ap_r(Fa const& a, Fb const& b) {
     return (_(id<typename Fb::value_type>) /= a) * b;
 }
 
 template<typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fb>::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, Fb>::type
 operator*=(Fa const& a, Fb const& b) {
     return ap_r(a, b);
 }
 
 // (<*) = liftA2 const
 template<typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fa>::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, Fa>::type
 ap_l(Fa const& a, Fb const& b) {
     return liftA2(_(const_<typename Fb::value_type, typename Fa::value_type>), a, b);
 }
 
 template<typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, Fa>::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, Fa>::type
 operator^=(Fa const& a, Fb const& b) {
     return ap_l(a, b);
 }

@@ -13,6 +13,24 @@ using typeof_t = typename A::template type<T>;
 template<typename F>
 using base_class_t = typename F::base_class;
 
+template<class _F>
+struct _is_functor : std::false_type {};
+
+template<class F>
+using is_functor = _is_functor<base_class_t<F> >;
+
+template<class F>
+using functor_type = typename std::enable_if<is_functor<F>::value, F>::type;
+
+template<class _F1, class _F2>
+struct _is_same_functor : std::false_type {};
+
+template<class _F>
+struct _is_same_functor<_F, _F> : _is_functor<_F> {};
+
+template<class F1, class F2>
+using is_same_functor = _is_same_functor<base_class_t<F1>, base_class_t<F2> >;
+
 // Requires operator/ (analogue to <$>)
 template<typename F>
 struct Functor;
@@ -20,21 +38,8 @@ struct Functor;
 template<typename T>
 using Functor_t = Functor<base_class_t<T> >;
 
-template<class F>
-struct is_functor : std::false_type {};
-
-template<class F>
-using is_functor_t = is_functor<base_class_t<F> >;
-
-template<class F1, class F2>
-struct is_same_functor : std::false_type {};
-
-template<class F1, class F2>
-using is_same_functor_t = is_same_functor<base_class_t<F1>, base_class_t<F2> >;
-
 #define IMPLEMENT_FUNCTOR(_F) \
-    template<> struct is_functor<_F> : std::true_type {}; \
-    template<> struct is_same_functor<_F, _F> : std::true_type {}
+    template<> struct _is_functor<_F> : std::true_type {}
 
 #define DECLARE_FUNCTOR_CLASS(F) \
     /* <$> fmap :: Functor f => (a -> b) -> f a -> f b */ \
@@ -50,14 +55,14 @@ using fmap_result_type_t = typename fmap_result_type<F, FT>::type;
 
 template<typename F, typename Ret, typename Arg, typename... Args>
 struct fmap_result_type<F, function_t<Ret(Arg, Args...)> > {
-    static_assert(is_functor_t<F>::value, "Should be a Functor");
+    static_assert(is_functor<F>::value, "Should be a Functor");
     static_assert(is_same_as<value_type_t<F>, Arg>::value, "Should be the same");
     using type = typename F::template type<remove_f0_t<function_t<Ret(Args...)> > >;
 };
 
 template<typename F, typename FT>
 using fmap_type = typename std::enable_if<
-    is_functor_t<F>::value && std::is_same<value_type_t<F>, first_argument_type_t<function_t<FT> > >::value,
+    is_functor<F>::value && std::is_same<value_type_t<F>, first_argument_type_t<function_t<FT> > >::value,
     fmap_result_type_t<F, function_t<FT> >
 >::type;
 
@@ -85,13 +90,13 @@ DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 cons
 (<$) = fmap . const
 */
 template<typename F, typename T>
-typename std::enable_if<is_functor_t<F>::value, typeof_t<F, T> >::type
+typename std::enable_if<is_functor<F>::value, typeof_t<F, T> >::type
 left_fmap(T const& v, F const& f) {
     return _const_<value_type_t<F> >(v) / f;
 }
 
 template<typename F, typename T>
-typename std::enable_if<is_functor_t<F>::value, function_t<typeof_t<F, T>(F const&)> >::type
+typename std::enable_if<is_functor<F>::value, function_t<typeof_t<F, T>(F const&)> >::type
 _left_fmap(T const& v) {
     return [v](F const& f) {
         return left_fmap(v, f);
@@ -99,7 +104,7 @@ _left_fmap(T const& v) {
 }
 
 template<typename F, typename T>
-typename std::enable_if<is_functor_t<F>::value, typeof_t<F, T> >::type
+typename std::enable_if<is_functor<F>::value, typeof_t<F, T> >::type
 operator/=(T const& v, F const& f) {
     return left_fmap(v, f);
 }

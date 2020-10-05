@@ -35,10 +35,7 @@ _FUNCPROG_BEGIN
 
 // Functor
 template<typename S, typename U, typename _M>
-struct is_functor<parsec::_ParsecT<S, U, _M> > : is_functor<_M> {};
-
-template<typename S, typename U, typename _M>
-struct is_same_functor<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M> > : std::true_type {};
+struct _is_functor<parsec::_ParsecT<S, U, _M> > : _is_functor<_M> {};
 
 template<typename S, typename U, typename _M>
 struct Functor<parsec::_ParsecT<S, U, _M> >

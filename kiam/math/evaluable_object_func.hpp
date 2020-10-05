@@ -143,10 +143,7 @@ namespace funcprog {
 
     // Functor
     template<typename TAG>
-    struct is_functor<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
-
-    template<typename TAG>
-    struct is_same_functor<_KIAM_MATH::_evaluable_object<TAG>, _KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
+    struct _is_functor<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
 
     template<typename TAG>
     struct Functor<_KIAM_MATH::_evaluable_object<TAG> >
@@ -163,10 +160,7 @@ namespace funcprog {
 
     // Applicative
     template<typename TAG>
-    struct is_applicative<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
-
-    template<typename TAG>
-    struct is_same_applicative<_KIAM_MATH::_evaluable_object<TAG>, _KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
+    struct _is_applicative<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
 
     template<typename TAG>
     struct Applicative<_KIAM_MATH::_evaluable_object<TAG> > : Functor<_KIAM_MATH::_evaluable_object<TAG> >
@@ -190,10 +184,7 @@ namespace funcprog {
 
     // Monad
     template<typename TAG>
-    struct is_monad<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
-
-    template<typename TAG>
-    struct is_same_monad<_KIAM_MATH::_evaluable_object<TAG>, _KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
+    struct _is_monad<_KIAM_MATH::_evaluable_object<TAG> > : std::true_type {};
 
     template<typename TAG>
     struct Monad<_KIAM_MATH::_evaluable_object<TAG> > : Applicative<_KIAM_MATH::_evaluable_object<TAG> >

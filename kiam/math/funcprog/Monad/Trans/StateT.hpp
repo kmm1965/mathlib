@@ -414,10 +414,7 @@ typename std::enable_if<
 
 // Functor
 template<typename S, typename _M>
-struct is_functor<_StateT<S, _M> > : is_functor<_M> {};
-
-template<typename S, typename _M>
-struct is_same_functor<_StateT<S, _M>, _StateT<S, _M> > : is_functor<_M> {};
+struct _is_functor<_StateT<S, _M> > : is_functor<_M> {};
 
 template<typename S, typename _M>
 struct Functor<_StateT<S, _M> >
@@ -439,10 +436,7 @@ struct Functor<_StateT<S, _M> >
 
 // Applicative
 template<typename S, typename _M>
-struct is_applicative<_StateT<S, _M> > : is_applicative<_M> {};
-
-template<typename S, typename _M>
-struct is_same_applicative<_StateT<S, _M>, _StateT<S, _M> > : is_applicative<_M> {};
+struct _is_applicative<_StateT<S, _M> > : _is_applicative<_M> {};
 
 template<typename S, typename _M>
 struct Applicative<_StateT<S, _M> > : Functor<_StateT<S, _M> >
@@ -483,10 +477,7 @@ operator*=(StateT<S, _M, A> const& a, StateT<S, _M, B> const& b) {
 
 // Monad
 template<typename S, typename _M>
-struct is_monad<_StateT<S, _M> > : is_monad<_M> {};
-
-template<typename S, typename _M>
-struct is_same_monad<_StateT<S, _M>, _StateT<S, _M> > : is_monad<_M> {};
+struct _is_monad<_StateT<S, _M> > : _is_monad<_M> {};
 
 template<typename T>
 struct is_state_monad : std::false_type {};

@@ -5,21 +5,33 @@
 
 _FUNCPROG_BEGIN
 
+template<class _M>
+struct _is_monoid : std::false_type {};
+
+template<class M>
+struct is_monoid : _is_monoid<base_class_t<M> > {};
+
+template<typename M>
+using monoid_type = typename std::enable_if<is_monoid<M>::value, M>::type;
+
+template<class _M1, class _M2>
+struct _is_same_monoid : std::false_type {};
+
+template<class _M>
+struct _is_same_monoid<_M, _M> : _is_monoid<_M> {};
+
+template<class M1, class M2>
+using is_same_monoid = _is_same_monoid<base_class_t<M1>, base_class_t<M2> >;
+
+#define IMPLEMENT_MONOID(_M) \
+    template<> struct _is_monoid<_M> : std::true_type {}
+
 // requires mempty, mappend
 template<typename M>
 struct Monoid;
 
 template<typename T>
 using Monoid_t = Monoid<base_class_t<T> >;
-
-template<class M>
-struct is_monoid : std::false_type {};
-
-template<class M1, class M2>
-struct is_same_monoid : std::false_type {};
-
-template<typename M>
-using monoid_type = typename std::enable_if<is_monoid<M>::value, M>::type;
 
 DEFINE_FUNCTION_2(1, monoid_type<T0>, mappend, T0 const&, x, T0 const&, y,
     return Monoid_t<T0>::mappend(x, y);)
@@ -44,7 +56,7 @@ struct _Monoid
     // Default implementation of mappend
     // mappend = (<>)
     template<typename M>
-    static typename std::enable_if<is_monoid<M>::value, M>::type mappend(M const& x, M const& y){
+    static monoid_type<M> mappend(M const& x, M const& y){
         return x % y;
     }
 
@@ -52,7 +64,7 @@ struct _Monoid
     // mconcat :: [a] -> a
     // mconcat = foldr mappend mempty
     template<typename M>
-    static typename std::enable_if<is_monoid<M>::value, M>::type mconcat(List<M> const& m){
+    static monoid_type<M> mconcat(List<M> const& m){
         return foldr(_(mappend<M>), Monoid_t<M>::template mempty<value_type_t<M> >(), m);
     }
 };

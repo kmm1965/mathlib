@@ -85,13 +85,7 @@ _FUNCPROG_BEGIN
 
 // Functor
 template<typename S, typename U>
-struct is_functor<parsec::_Reply<S, U> > : std::true_type {};
-
-template<typename S, typename U, typename A>
-struct is_functor<parsec::Reply<S, U, A> > : std::true_type {};
-
-template<typename S, typename U, typename A1, typename A2>
-struct is_same_functor<parsec::Reply<S, U, A1>, parsec::Reply<S, U, A2> > : std::true_type {};
+struct _is_functor<parsec::_Reply<S, U> > : std::true_type {};
 
 template<typename S, typename U>
 struct Functor<parsec::_Reply<S, U> >

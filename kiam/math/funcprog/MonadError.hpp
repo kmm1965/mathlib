@@ -58,22 +58,19 @@ liftEither = either throwError return
 };
 
 template<typename M>
-using MonadError_type = typename std::enable_if<is_monad_t<M>::value, M>::type;
-
-template<typename M>
 using MonadError_error_type = typename MonadError_t<M>::template error_type<value_type_t<M> >;
 
 template<typename M>
-MonadError_type<M> liftEither(Either<MonadError_error_type<M>, value_type_t<M> > const& x) {
+monad_type<M> liftEither(Either<MonadError_error_type<M>, value_type_t<M> > const& x) {
     return MonadError_t<M>::template liftEither<MonadError_error_type<M> >(x);
 }
 
 template<typename M, typename A>
-MonadError_type<M> throwError(A const& e){
+monad_type<M> throwError(A const& e){
     return MonadError_t<M>::template throwError<value_type_t<M> >(e);
 }
 
-DEFINE_FUNCTION_2(2, MonadError_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
+DEFINE_FUNCTION_2(2, monad_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
     return MonadError_t<T0>::catchError(x, f);)
 
 _FUNCPROG_END

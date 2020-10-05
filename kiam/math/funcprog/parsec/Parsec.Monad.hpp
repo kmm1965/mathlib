@@ -185,10 +185,7 @@ _FUNCPROG_BEGIN
 
 // Applicative
 template<typename S, typename U, typename _M>
-struct is_applicative<parsec::_ParsecT<S, U, _M> > : is_applicative<_M> {};
-
-template<typename S, typename U, typename _M>
-struct is_same_applicative<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M> > : is_applicative<_M> {};
+struct _is_applicative<parsec::_ParsecT<S, U, _M> > : _is_applicative<_M> {};
 
 template<typename S, typename U, typename M>
 struct Applicative<parsec::_ParsecT<S, U, M> > : Functor<parsec::_ParsecT<S, U, M> >
@@ -203,10 +200,7 @@ struct Applicative<parsec::_ParsecT<S, U, M> > : Functor<parsec::_ParsecT<S, U, 
 
 // Monad
 template<typename S, typename U, typename _M>
-struct is_monad<parsec::_ParsecT<S, U, _M> > : is_monad<_M> {};
-
-template<typename S, typename U, typename _M>
-struct is_same_monad<parsec::_ParsecT<S, U, _M>, parsec::_ParsecT<S, U, _M> > : is_monad<_M> {};
+struct _is_monad<parsec::_ParsecT<S, U, _M> > : _is_monad<_M> {};
 
 template<typename S, typename U, typename M>
 struct Monad<parsec::_ParsecT<S, U, M> > : Applicative<parsec::_ParsecT<S, U, M> >

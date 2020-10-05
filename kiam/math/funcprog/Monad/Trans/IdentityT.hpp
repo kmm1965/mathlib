@@ -111,10 +111,7 @@ struct is_IdentityT<IdentityT<_F, A> > : std::true_type {};
 
 // Functor
 template<class _F>
-struct is_functor<_IdentityT<_F> > : is_functor<_F> {};
-
-template<class _F>
-struct is_same_functor<_IdentityT<_F>, _IdentityT<_F> > : is_functor<_F> {};
+struct _is_functor<_IdentityT<_F> > : _is_functor<_F> {};
 
 template<class _F>
 struct Functor<_IdentityT<_F> >
@@ -133,10 +130,7 @@ struct Functor<_IdentityT<_F> >
 
 // Applicative
 template<class _F>
-struct is_applicative<_IdentityT<_F> > : is_applicative<_F> {};
-
-template<class _F>
-struct is_same_applicative<_IdentityT<_F>, _IdentityT<_F> > : is_applicative<_F> {};
+struct _is_applicative<_IdentityT<_F> > : _is_applicative<_F> {};
 
 template<class _F>
 struct Applicative<_IdentityT<_F> > : Functor<_IdentityT<_F> >
@@ -158,23 +152,20 @@ struct Applicative<_IdentityT<_F> > : Functor<_IdentityT<_F> >
 };
 
 template<class _F, typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, IdentityT<_F, Fb> >::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, IdentityT<_F, Fb> >::type
 operator*=(IdentityT<_F, Fa> const& a, IdentityT<_F, Fb> const& b) {
     return lift2IdentityT<_F>(_(ap_r<Fa, Fb>), a, b);
 }
 
 template<class _F, typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative_t<Fa, Fb>::value, IdentityT<_F, Fa> >::type
+typename std::enable_if<is_same_applicative<Fa, Fb>::value, IdentityT<_F, Fa> >::type
 operator^=(IdentityT<_F, Fa> const& a, IdentityT<_F, Fb> const& b) {
     return lift2IdentityT<_F>(_(ap_l<Fa, Fb>), a, b);
 }
 
 // Monad
 template<class _F>
-struct is_monad<_IdentityT<_F> > : is_monad<_F> {};
-
-template<class _F>
-struct is_same_monad<_IdentityT<_F>, _IdentityT<_F> > : is_monad<_F> {};
+struct _is_monad<_IdentityT<_F> > : _is_monad<_F> {};
 
 template<class _F>
 struct Monad<_IdentityT<_F> > : Applicative<_IdentityT<_F> >
@@ -342,7 +333,7 @@ struct Traversable<_IdentityT<_F> >
     // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
     // traverse f (IdentityT a) = IdentityT <$> traverse f a
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative_t<AP>::value, typeof_t<AP, IdentityT<_F, value_type_t<AP> > > >::type
+    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, IdentityT<_F, value_type_t<AP> > > >::type
     traverse(function_t<AP(Arg)> const& f, IdentityT<_F, fdecay<Arg> > const& x){
         return _(IdentityT_<F_type<value_type_t<AP> > >) / Traversable<_F>::traverse(f, x.run());
     }

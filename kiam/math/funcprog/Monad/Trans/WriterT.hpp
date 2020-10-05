@@ -232,10 +232,7 @@ struct is_writer<WriterT<W, _M, A> > : std::true_type {};
 
 // Functor
 template<typename W, class _M>
-struct is_functor<_WriterT<W, _M> > : is_functor<_M> {};
-
-template<typename W, class _M>
-struct is_same_functor<_WriterT<W, _M>, _WriterT<W, _M> > : is_functor<_M> {};
+struct _is_functor<_WriterT<W, _M> > : _is_functor<_M> {};
 
 template<typename W, class _M>
 struct Functor<_WriterT<W, _M> >
@@ -254,11 +251,7 @@ struct Functor<_WriterT<W, _M> >
 
 // Applicative
 template<typename W, class _M>
-struct is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_applicative<_M>::value>{};
-
-template<typename W, class _M>
-struct is_same_applicative<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid<W>::value && is_applicative<_M>::value>{};
+struct _is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_applicative<_M>::value>{};
 
 template<typename W, class _M>
 struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >
@@ -286,11 +279,7 @@ struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >
 
 // Monad
 template<typename W, class _M>
-struct is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_monad<_M>::value> {};
-
-template<typename W, class _M>
-struct is_same_monad<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid<W>::value && is_monad<_M>::value> {};
+struct _is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_monad<_M>::value> {};
 
 template<typename W, class _M>
 struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >
@@ -425,8 +414,7 @@ struct Foldable<_WriterT<W, _M> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f = foldMap (f . fst) . runWriterT
     template<typename M1, typename Arg>
-    static typename std::enable_if<is_monoid<M1>::value, M1>::type
-    foldMap(function_t<M1(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x){
+    static monoid_type<M1> foldMap(function_t<M1(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x){
         return Foldable<_M>::foldMap(f & _(fst<fdecay<Arg>, W>), x.run());
     }
 };
@@ -448,7 +436,7 @@ struct Traversable<_WriterT<W, _M> >
     // traverse f = fmap WriterT . traverse f' . runWriterT where
     //   f' (a, b) = fmap (\ c -> (c, b)) (f a)
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative_t<AP>::value, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >::type
+    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >::type
     traverse(function_t<AP(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x)
     {
         using A = fdecay<Arg>;

@@ -135,7 +135,7 @@ struct MonadPlus<_List> : Monad<_List>, Alternative<_List>
 };
 
 // Semigroup
-template<typename A> struct is_semigroup<List<A> > : std::true_type {};
+IMPLEMENT_SEMIGROUP(_List);
 
 template<>
 struct Semigroup<_List>
@@ -144,8 +144,7 @@ struct Semigroup<_List>
 };
 
 // Monoid
-template<typename A> struct is_monoid<List<A> > : std::true_type {};
-template<typename A1, typename A2> struct is_same_monoid<List<A1>, List<A2>> : std::true_type {};
+IMPLEMENT_MONOID(_List);
 
 template<>
 struct Monoid<_List> : _Monoid, Semigroup<_List>

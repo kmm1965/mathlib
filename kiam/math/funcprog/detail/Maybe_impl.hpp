@@ -129,7 +129,7 @@ Foldable<_Maybe>::foldr1(function_t<A(Arg1, Arg2)> const&, Maybe<A> const& x)
 //    traverse _ Nothing = pure Nothing
 //    traverse f (Just x) = Just <$> f x
 template<typename AP, typename Arg>
-typename std::enable_if<is_applicative_t<AP>::value, typeof_t<AP, Maybe<value_type_t<AP> > > >::type
+typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, Maybe<value_type_t<AP> > > >::type
 Traversable<_Maybe>::traverse(function_t<AP(Arg)> const& f, Maybe<fdecay<Arg> > const& x){
     return x ? _(Just<value_type_t<AP> >) / f(x.value()) : Applicative_t<AP>::pure(Nothing<value_type_t<AP> >());
 }

@@ -73,7 +73,7 @@ struct _MonadZip
     static pair_t<typeof_t<MAB, fst_type_t<value_type_t<MAB> > >, typeof_t<MAB, snd_type_t<value_type_t<MAB> > > >
     munzip(MAB const& mab)
     {
-        static_assert(is_monad_t<MAB>::value, "Should be a monad");
+        static_assert(is_monad<MAB>::value, "Should be a monad");
         static_assert(is_pair<value_type_t<MAB> >::value, "Should be a pair");
         using FST = fst_type_t<value_type_t<MAB> >;
         using SND = snd_type_t<value_type_t<MAB> >;
@@ -83,7 +83,7 @@ struct _MonadZip
 
 template<typename MA, typename MB>
 using mzip_type =
-    typename std::enable_if<is_same_monad_t<MA, MB>::value,
+    typename std::enable_if<is_same_monad<MA, MB>::value,
         typeof_t<MA, pair_t<value_type_t<MA>, value_type_t<MB> > >
     >::type;
 
@@ -95,7 +95,7 @@ DEFINE_FUNCTION_2(2, MZIP_TYPE(T0, T1), mzip, T0 const&, ma, T1 const&, mb, retu
 
 template<typename MA, typename MB, typename C, typename A, typename B>
 using mzipWith_type = typename std::enable_if<
-    is_same_monad_t<MA, MB>::value &&
+    is_same_monad<MA, MB>::value &&
     is_same_as<A, value_type_t<MA> >::value && is_same_as<B, value_type_t<MB> >::value,
     typeof_t<MA, C>
 >::type;
@@ -108,7 +108,7 @@ DEFINE_FUNCTION_3(5, MZIPWITH_TYPE(T1, T0, T2, T3, T4), mzipWith, function_t<T2(
 
 template<typename MAB>
 using munzip_type =
-    typename std::enable_if<is_monad_t<MAB>::value && is_pair<value_type_t<MAB> >::value,
+    typename std::enable_if<is_monad<MAB>::value && is_pair<value_type_t<MAB> >::value,
         pair_t<typeof_t<MAB, fst_type_t<value_type_t<MAB> > >, typeof_t<MAB, snd_type_t<value_type_t<MAB> > > >
     >::type;
 
