@@ -34,7 +34,7 @@ struct _MonadWriter
     template<typename T>
     using type = typename _M::template type<T>;
 
-    static_assert(is_monoid_t<W>::value, "Should be a Monoid");
+    static_assert(is_monoid<W>::value, "Should be a Monoid");
     static_assert(is_monad<_M>::value, "Should be a Monad");
 
 /*
@@ -80,7 +80,7 @@ listens f m = do
 */
 template<typename W, class M, typename B>
 using listens_type = typename std::enable_if<
-    is_monoid_t<W>::value && is_monad_t<M>::value,
+    is_monoid<W>::value && is_monad_t<M>::value,
     typename M::template type<pair_t<value_type_t<M>, B> >
 >::type;
 
@@ -102,7 +102,7 @@ censor f m = pass $ do
     return (a, f)
 */
 template<typename W, class M>
-using censor_type = typename std::enable_if<is_monoid_t<W>::value && is_monad_t<M>::value, M>::type;
+using censor_type = typename std::enable_if<is_monoid<W>::value && is_monad_t<M>::value, M>::type;
 
 #define CENSOR_TYPE_(W, M) BOOST_IDENTITY_TYPE((censor_type<W, M>))
 #define CENSOR_TYPE(W, M) typename CENSOR_TYPE_(W, M)

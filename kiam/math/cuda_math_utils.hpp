@@ -55,6 +55,21 @@ _OutIt math_copy_n(_InIt _First, size_t n, _OutIt _Dest){
     return math_copy(_First, _First + n, _Dest);
 }
 
+template<class _InIt, class _Ty>
+__device__ __host__
+_Ty math_accumulate(_InIt _First, _InIt _Last, _Ty _Val)
+{
+    for (; _First != _Last; ++_First)
+        _Val += *_First;
+    return _Val;
+}
+
+template<class _InIt, class _Ty>
+__device__ __host__
+_Ty math_accumulate_n(_InIt _First, size_t n, _Ty _Val){
+    return math_accumulate(_First, _First + n, _Val);
+}
+
 template<class _InIt, class _Ty, class _Fn2>
 __device__ __host__
 _Ty math_accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)
@@ -127,11 +142,17 @@ _Ty math_inner_product_n(_InIt1 _First1, size_t n, _InIt2 _First2, _Ty _Val){
     return math_inner_product(_First1, _First1 + n, _First2, _Val);
 }
 
-template<class _InIt, class _Fn1> inline
+template<class _InIt, class _Fn1>
 __device__ __host__
 void math_for_each(_InIt _First, _InIt _Last, _Fn1 _Func){
     for (; _First != _Last; ++_First)
         _Func(*_First);
+}
+
+template<class _InIt, class _Fn1>
+__device__ __host__
+void math_for_each_n(_InIt _First, size_t n, _Fn1 _Func){
+    math_for_each(_First, _First + n, _Func);
 }
 
 template<typename T, typename V, class BO>

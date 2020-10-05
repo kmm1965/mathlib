@@ -361,10 +361,10 @@ struct Functor<_AccumT<W, _M> >
 
 // Applicative
 template<typename W, class _M>
-struct is_applicative<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value> {};
+struct is_applicative<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
 
 template<typename W, class _M>
-struct is_same_applicative<_AccumT<W, _M>, _AccumT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value> {};
+struct is_same_applicative<_AccumT<W, _M>, _AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
 
 template<typename W, typename _M>
 struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
@@ -402,10 +402,10 @@ struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
 
 // Monad
 template<typename W, class _M>
-struct is_monad<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value> {};
+struct is_monad<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
 
 template<typename W, class _M>
-struct is_same_monad<_AccumT<W, _M>, _AccumT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value> {};
+struct is_same_monad<_AccumT<W, _M>, _AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
 
 template<typename T>
 struct is_accum_monad : std::false_type {};
@@ -560,7 +560,7 @@ accumToStateT (AccumT f) =
     StateT $ \ w -> fmap (\ ~(a, w') -> (a, w `mappend` w')) (f w)
 */
 template<typename S, typename _M, typename A>
-typename std::enable_if<is_monoid_t<S>::value, StateT<S, _M, A> >::type
+typename std::enable_if<is_monoid<S>::value, StateT<S, _M, A> >::type
 accumToStateT(AccumT<S, _M, A> const& acc) {
     return _([acc](S const& w) {
         return fmap(_([w](pair_t<A, S> const& p) { return pair_t<A, S>(fst(p), Monoid_t<S>::mappend(w, snd(p))); }), acc.run(w));

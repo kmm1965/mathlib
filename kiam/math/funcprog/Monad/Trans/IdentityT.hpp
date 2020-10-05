@@ -285,7 +285,7 @@ struct Foldable<_IdentityT<_F> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f (IdentityT t) = foldMap f t
     template<typename M, typename Arg>
-    static typename std::enable_if<is_monoid_t<M>::value, M>::type
+    static typename std::enable_if<is_monoid<M>::value, M>::type
     foldMap(function_t<M(Arg)> const& f, IdentityT<_F, fdecay<Arg> > const& x){
         return Foldable<_F>::foldMap(f, x.run());
     }
@@ -331,10 +331,7 @@ struct Foldable<_IdentityT<_F> >
 
 // Traversable
 template<class _F, typename A>
-struct is_traversable<IdentityT<_F, A> > : std::true_type {};
-
-template<class _F, typename A1, typename A2>
-struct is_same_traversable<IdentityT<_F, A1>, IdentityT<_F, A2> > : is_same_traversable<typename _F::template type<A1>, typename _F::template type<A2> > {};
+struct is_traversable<IdentityT<_F, A> > : is_traversable<typename _F::template type<A> > {};
 
 template<class _F>
 struct Traversable<_IdentityT<_F> >

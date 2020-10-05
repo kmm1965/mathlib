@@ -80,14 +80,17 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
                 get_pt_max<dim>(nodeMax, node);
             }
         }
-        cell.dx = nodeMax - nodeMin; // Сохрняем максимальные размеры ячейки
-        get_pt_min<dim>(m_dxMin, cell.dx); // Минимальные размеры по всей сетке
+        cell.dx = nodeMax - nodeMin;        // Сохрняем максимальные размеры ячейки
+        get_pt_min<dim>(m_dxMin, cell.dx);  // Минимальные размеры по всей сетке
         // Геометрический центр ячейки
         cell.gcenter = std::accumulate(cell_node_index.cbegin() + cell_node_index_start,
             cell_node_index.cbegin() + cell_node_index_end, vector_t(),
             [&nodes](const vector_t &vec, unsigned inode){ return vec + nodes[inode]; }) / value_type(cell_node_count);
+        if(cell_node_count == 5) // Для пирамиды особый случай
+            ((cell.gcenter *= 5.) += nodes[cell_node_index[cell_node_index_start]]) /= 6.;
+
         // Центр масс ячейки
-        cell.center = cell_center<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_count);
+        cell.mcenter = cell_mcenter<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_count);
         // Объём ячейки
         cell.volume = cell_volume<value_type, dim>(nodes.get_vector_proxy(), cell_node_index.get_vector_proxy(), cell_node_index_start, cell_node_count);
         assert(cell.volume > 0);
@@ -136,16 +139,17 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
         interface.area = calc_interface_area<value_type, dim>(nodes.get_vector_proxy(), interface_node_index.get_vector_proxy(), interface_node_index_start, interface_node_count);
 #endif
 #if UGRID_INTERFACE_CENTER
-//      // Вычислим центр масс грани.
+        // Геометрический центр грани
+        interface.gcenter = std::accumulate(interface_node_index.cbegin() + interface_node_index_start,
+            interface_node_index.cbegin() + interface_node_index_end, vector_t(),
+            [&nodes](const vector_t& vec, unsigned inode) { return vec + nodes[inode]; }) / value_type(interface_node_count);
+        // Вычислим центр масс грани.
         if(interface_node_count == dim){
             // Это простейший случай. В двумерном случае отрезок, в трёхмерном - треугольник.
-            // В этом случае центр масс грани - это среднее арифметическое её вершин (геометрический центр).
-            interface.center = std::accumulate(interface_node_index.cbegin() + interface_node_index_start,
-                interface_node_index.cbegin() + interface_node_index_end, vector_t(),
-                [&nodes](const vector_t& vec, unsigned inode) { return vec + nodes[inode]; }) / value_type(interface_node_count);
+            interface.mcenter = interface.gcenter;
         } else if(dim == 3){
             assert(interface_node_count == 4);
-            interface.center = quadrilateral_center<value_type, dim>(
+            interface.mcenter = quadrilateral_mcenter<value_type, dim>(
                 nodes[interface_node_index[interface_node_index_start]],
                 nodes[interface_node_index[interface_node_index_start + 1]],
                 nodes[interface_node_index[interface_node_index_start + 2]],
@@ -227,7 +231,8 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
         cell_b.interface = iface;
 #if UGRID_CELL_B_CENTER
         // По умолчанию центр фиктивной ячейки совпадает с центром грани.
-        cell_b.center = interface.center;
+        cell_b.gcenter = interface.gcenter;
+        cell_b.mcenter = interface.mcenter;
 #endif
         interface.cells[1] = unsigned(cells.size() +
 #if UGRID_CELL_B_PATCH
@@ -249,7 +254,7 @@ void unstructured_grid<T, DIM>::calc_geometry(const mpi::communicator &comm)
         interface_value_type& interface = interfaces[iface];
         assert(interface.cells[0] < cells.size());
         if (interface.cells[1] >= cells.size()) {
-            std::cerr << "Error in the grid: for inner interface " << iface << " second inner cell is not defined" << std::endl;
+            std::cerr << "Error in the grid: for the inner interface " << iface << " the second inner cell is not defined" << std::endl;
             has_errors = true;
         }
     }

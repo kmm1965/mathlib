@@ -32,9 +32,9 @@ struct is_same_functor : std::false_type {};
 template<class F1, class F2>
 using is_same_functor_t = is_same_functor<base_class_t<F1>, base_class_t<F2> >;
 
-#define IMPLEMENT_FUNCTOR(F, _F) \
+#define IMPLEMENT_FUNCTOR(_F) \
     template<> struct is_functor<_F> : std::true_type {}; \
-    template<> struct is_same_functor<_F, _F> : std::true_type {};
+    template<> struct is_same_functor<_F, _F> : std::true_type {}
 
 #define DECLARE_FUNCTOR_CLASS(F) \
     /* <$> fmap :: Functor f => (a -> b) -> f a -> f b */ \

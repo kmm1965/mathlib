@@ -38,7 +38,7 @@ struct host_vector : public std::vector<T>
     {
 #ifdef __CUDACC__
         super::resize(other.size());
-        thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), other.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyDeviceToHost), "cudaMemcpy");
+        CUDA_THROW_ON_ERROR(cudaMemcpy(data_pointer(), other.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyDeviceToHost), "cudaMemcpy");
 #else
         super::operator=(other);
 #endif

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_def.h"
+#include "type_traits.hpp"
 
 _KIAM_MATH_BEGIN
 

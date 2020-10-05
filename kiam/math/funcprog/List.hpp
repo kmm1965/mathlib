@@ -76,7 +76,7 @@ struct List<wchar_t> : std::wstring, _List
 using wString = List<wchar_t>;
 
 // Functor
-IMPLEMENT_FUNCTOR(List, _List)
+IMPLEMENT_FUNCTOR(_List);
 
 template<>
 struct Functor<_List>
@@ -85,7 +85,7 @@ struct Functor<_List>
 };
 
 // Applicative
-IMPLEMENT_APPLICATIVE(List, _List)
+IMPLEMENT_APPLICATIVE(_List);
 
 template<>
 struct Applicative<_List> : Functor<_List>
@@ -96,7 +96,7 @@ struct Applicative<_List> : Functor<_List>
 };
 
 // Monad
-IMPLEMENT_MONAD(List, _List)
+IMPLEMENT_MONAD(_List);
 
 template<>
 struct Monad<_List> : Applicative<_List>
@@ -135,7 +135,7 @@ struct MonadPlus<_List> : Monad<_List>, Alternative<_List>
 };
 
 // Semigroup
-IMPLEMENT_SEMIGROUP(List, _List)
+template<typename A> struct is_semigroup<List<A> > : std::true_type {};
 
 template<>
 struct Semigroup<_List>
@@ -144,7 +144,8 @@ struct Semigroup<_List>
 };
 
 // Monoid
-IMPLEMENT_MONOID(List, _List)
+template<typename A> struct is_monoid<List<A> > : std::true_type {};
+template<typename A1, typename A2> struct is_same_monoid<List<A1>, List<A2>> : std::true_type {};
 
 template<>
 struct Monoid<_List> : _Monoid, Semigroup<_List>
@@ -168,7 +169,7 @@ struct Foldable<_List> : Monoid<_List>
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(List)
+IMPLEMENT_TRAVERSABLE(List);
 
 template<>
 struct Traversable<_List>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_def.h"
+#include "kiam_math_alg.h"
 
 #if defined(__CUDACC__)
 #include <thrust/device_vector.h>
@@ -41,9 +41,9 @@ struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
 
     math_vector() : super(){}
     math_vector(size_t size) : super(size){}
-    math_vector(size_t size, const value_type &initValue) : super(size, initValue){}
+    math_vector(size_t size, value_type const& initValue) : super(size, initValue){}
 #ifndef DONT_USE_CXX_11
-    explicit math_vector(const math_vector& other) = delete;
+    explicit math_vector(math_vector const& other) : super(other) {}
     explicit math_vector(math_vector &&other) : super(std::forward<super>(other)){}
 #endif
     explicit math_vector(const host_vector<value_type>& hv) = delete;
@@ -53,11 +53,11 @@ struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
 //      : super(hv){}
 //#endif
 
-    void operator=(const math_vector &other)
+    void operator=(math_vector const& other)
     {
 #ifdef __CUDACC__
         super::resize(other.size());
-        thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), other.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyDeviceToDevice), "cudaMemcpy");
+        CUDA_THROW_ON_ERROR(cudaMemcpy(data_pointer(), other.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyDeviceToDevice), "cudaMemcpy");
 #else
         super::operator=(other);
 #endif
@@ -68,7 +68,7 @@ struct math_vector : public MATH_VECTOR_BASE_CLASS<T>
     {
 #ifdef __CUDACC__
         super::resize(hv.size());
-        thrust::cuda_cub::throw_on_error(cudaMemcpy(data_pointer(), hv.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyHostToDevice), "cudaMemcpy");
+        CUDA_THROW_ON_ERROR(cudaMemcpy(data_pointer(), hv.data_pointer(), super::size() * sizeof(value_type), cudaMemcpyHostToDevice), "cudaMemcpy");
 #else
         super::operator=(hv);
 #endif

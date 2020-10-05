@@ -254,16 +254,16 @@ struct Functor<_WriterT<W, _M> >
 
 // Applicative
 template<typename W, class _M>
-struct is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value && is_applicative<_M>::value>{};
+struct is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_applicative<_M>::value>{};
 
 template<typename W, class _M>
 struct is_same_applicative<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid_t<W>::value && is_applicative<_M>::value>{};
+    std::integral_constant<bool, is_monoid<W>::value && is_applicative<_M>::value>{};
 
 template<typename W, class _M>
 struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >
 {
-    static_assert(is_monoid_t<W>::value, "Should be a Monoid");
+    static_assert(is_monoid<W>::value, "Should be a Monoid");
 
     using super = Functor<_WriterT<W, _M>>;
 
@@ -286,11 +286,11 @@ struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >
 
 // Monad
 template<typename W, class _M>
-struct is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value && is_monad<_M>::value> {};
+struct is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_monad<_M>::value> {};
 
 template<typename W, class _M>
 struct is_same_monad<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid_t<W>::value && is_monad<_M>::value> {};
+    std::integral_constant<bool, is_monoid<W>::value && is_monad<_M>::value> {};
 
 template<typename W, class _M>
 struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >
@@ -327,11 +327,11 @@ instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
     m `mplus` n = WriterT $ runWriterT m `mplus` runWriterT n
 */
 template<typename W, class _M>
-struct is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value && is_monad_plus<_M>::value> {};
+struct is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_monad_plus<_M>::value> {};
 
 template<typename W, class _M>
 struct is_same_monad_plus<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid_t<W>::value && is_monad_plus<_M>::value> {};
+    std::integral_constant<bool, is_monoid<W>::value && is_monad_plus<_M>::value> {};
 
 template<typename W, class _M>
 struct MonadPlus<_WriterT<W, _M> > : Monad<_WriterT<W, _M> >
@@ -372,11 +372,11 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     {-# INLINE (<|>) #-}
 */
 template<typename W, class _M>
-struct is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_t<W>::value && is_alternative<_M>::value> {};
+struct is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_alternative<_M>::value> {};
 
 template<typename W, class _M>
 struct is_same_alternative<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid_t<W>::value && is_alternative<_M>::value> {};
+    std::integral_constant<bool, is_monoid<W>::value && is_alternative<_M>::value> {};
 
 template<typename W, class _M>
 struct Alternative<_WriterT<W, _M> >
@@ -425,7 +425,7 @@ struct Foldable<_WriterT<W, _M> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f = foldMap (f . fst) . runWriterT
     template<typename M1, typename Arg>
-    static typename std::enable_if<is_monoid_t<M1>::value, M1>::type
+    static typename std::enable_if<is_monoid<M1>::value, M1>::type
     foldMap(function_t<M1(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x){
         return Foldable<_M>::foldMap(f & _(fst<fdecay<Arg>, W>), x.run());
     }
@@ -440,9 +440,6 @@ instance (Traversable f) => Traversable (WriterT w f) where
 */
 template<typename W, class _M, typename A>
 struct is_traversable<WriterT<W, _M, A> > : is_traversable<typename _M::template type<A> > {};
-
-template<typename W, class _M, typename A1, typename A2>
-struct is_same_traversable<WriterT<W, _M, A1>, WriterT<W, _M, A2> > : is_same_traversable<typename _M::template type<A1>, typename _M::template type<A2> > {};
 
 template<typename W, class _M>
 struct Traversable<_WriterT<W, _M> >
@@ -466,7 +463,7 @@ struct Traversable<_WriterT<W, _M> >
 template<typename W, class _M>
 struct MonadZip<_WriterT<W, _M> > : _MonadZip<MonadZip<_WriterT<W, _M> > >
 {
-    static_assert(is_monoid_t<W>::value, "Should be a Monoid");
+    static_assert(is_monoid<W>::value, "Should be a Monoid");
 
     // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
     // mzipWith f (WriterT x) (WriterT y) = WriterT $
@@ -485,7 +482,7 @@ struct MonadZip<_WriterT<W, _M> > : _MonadZip<MonadZip<_WriterT<W, _M> > >
 template<typename W, class _M>
 struct MonadTrans<_WriterT<W, _M> >
 {
-    static_assert(is_monoid_t<W>::value, "Should be a Monoid");
+    static_assert(is_monoid<W>::value, "Should be a Monoid");
 
     // lift m = WriterT $ do
     //   a <- m

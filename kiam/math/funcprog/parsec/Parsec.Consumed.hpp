@@ -85,7 +85,7 @@ _PARSEC_END
 _FUNCPROG_BEGIN
 
 // Functor
-IMPLEMENT_FUNCTOR(parsec::Consumed, parsec::_Consumed)
+IMPLEMENT_FUNCTOR(parsec::_Consumed);
 
 template<>
 struct Functor<parsec::_Consumed>

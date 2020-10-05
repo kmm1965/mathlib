@@ -69,8 +69,8 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
     struct cell_value_type
     {
         value_type volume;          // объЄм €чейки
-        vector_t gcenter;       // геометрический центр €чейки
-        vector_t center;            // центр масс €чейки
+        vector_t gcenter;           // геометрический центр €чейки
+        vector_t mcenter;           // центр масс €чейки
         vector_t dx;                // максимальные размеры €чейки
 #if UGRID_CELL_H
         value_type h;               // характерный размер €чейки
@@ -93,7 +93,8 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
         unsigned cell;          // номер €чейки на границе
         unsigned interface;     // номер поверхности на границе
 #if UGRID_CELL_B_CENTER
-        vector_t center;        // центр фиктивной €чейки
+        vector_t gcenter;       // геометрический центр фиктивной €чейки
+        vector_t mcenter;       // центр масс фиктивной €чейки
 #endif
 #if UGRID_CELL_B_BC_CELL
         unsigned bc_cell;       // номер €чейки "за границей"
@@ -113,7 +114,8 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
         value_type area;        // площадь поверхности
 #endif
 #if UGRID_INTERFACE_CENTER
-        vector_t center;        // центр грани
+        vector_t gcenter;       // геометрический центр грани
+        vector_t mcenter;       // центр масс грани
 #endif
     };
 

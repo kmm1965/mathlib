@@ -378,7 +378,7 @@ struct Foldable<_MaybeT<_M> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f (MaybeT a) = foldMap (foldMap f) a
     template<typename M, typename Arg>
-    static typename std::enable_if<is_monoid_t<M>::value, M>::type
+    static typename std::enable_if<is_monoid<M>::value, M>::type
     foldMap(function_t<M(Arg)> const& f, MaybeT<_M, fdecay<Arg> > const& x){
         return Foldable<_M>::foldMap(_foldMap<Maybe<fdecay<Arg> > >(f), x.run());
     }
@@ -386,10 +386,7 @@ struct Foldable<_MaybeT<_M> >
 
 // Traversable
 template<class _M, typename A>
-struct is_traversable<MaybeT<_M, A> > : std::true_type {};
-
-template<class _M, typename A1, typename A2>
-struct is_same_traversable<MaybeT<_M, A1>, MaybeT<_M, A2> > : is_same_traversable<typename _M::template type<Maybe<A1> >, typename _M::template type<Maybe<A2> > > {};
+struct is_traversable<MaybeT<_M, A> > : is_traversable<typename _M::template type<A> >{};
 
 template<class _M>
 struct Traversable<_MaybeT<_M> >

@@ -17,12 +17,12 @@ template<typename TAG>
 struct cuda_math_executor : executor<TAG, cuda_math_executor<TAG> >
 {
     template<class Closure>
-    void operator()(Closure &closure, size_t size){
+    void operator()(Closure &closure, size_t size) const {
         cuda_exec_callback(closure, size);
     }
 
     template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder){
+    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const {
         cuda_exec_callback(closure, size, context_builder);
     }
 };
@@ -41,12 +41,12 @@ template<typename TAG>
 struct opencl_math_executor : executor<TAG, opencl_math_executor<TAG> >
 {
     template<class Closure>
-    void operator()(Closure &closure, size_t size) {
+    void operator()(Closure &closure, size_t size) const {
         opencl_exec_callback(closure, size);
     }
 
     template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) {
+    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const {
         opencl_exec_callback(closure, size, context_builder);
     }
 };
@@ -68,14 +68,14 @@ template<typename TAG>
 struct serial_executor : executor<TAG, serial_executor<TAG> >
 {
     template<class Closure>
-    void operator()(Closure &closure, size_t size){
+    void operator()(Closure &closure, size_t size) const {
         serial_exec_callback(closure, size);
     }
 
     template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder)
+    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const
     {
-        closure_context_callback<TAG, Closure, CB> callback(closure, context_builder);
+        closure_context_callback<TAG, Closure, CB> const callback(closure, context_builder);
         serial_exec_callback(callback, size);
     }
 };

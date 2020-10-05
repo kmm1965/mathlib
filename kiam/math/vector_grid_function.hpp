@@ -30,7 +30,7 @@ struct vector_grid_function : grid_function<TAG, vector_grid_function<TAG, T>, v
     typedef typename vector_type::const_pointer const_pointer;
     typedef grid_function<tag_type, type, vector_grid_function_proxy<tag_type, value_type> > super;
 
-    vector_grid_function(const vector_grid_function&) = delete;
+    vector_grid_function(vector_grid_function const& other) : vector_type(other), m_local_size(other.m_local_size){}
     vector_grid_function(vector_grid_function&&) = delete;
 
     vector_grid_function(size_t size, size_t local_size = 0, const value_type &init = value_type()) :

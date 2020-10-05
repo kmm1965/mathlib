@@ -72,16 +72,18 @@ Maybe<A> Alternative<_Maybe>::alt_op(Maybe<A> const& l, Maybe<A> const&r) {
 
 // Semigroup
 template<typename A>
-Maybe<A> Semigroup<_Maybe>::semigroup_op(Maybe<A> const& x, Maybe<A> const& y) {
+typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type
+Semigroup<_Maybe>::semigroup_op(Maybe<A> const& x, Maybe<A> const& y) {
     return !x ? y : !y ? x : Just(x.value() % y.value());
 }
 
 template<typename A>
-Maybe<A> Semigroup<_Maybe>::stimes(int n, Maybe<A> const& m)
+typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type
+Semigroup<_Maybe>::stimes(int n, Maybe<A> const& m)
 {
     assert(n >= 0);
     if (n < 0) throw maybe_error("stimes: Maybe, negative multiplier");
-    return !m || n == 0 ? Nothing<A>() : Just(_FUNCPROG::stimes(n, m.value()));
+    return !m || n == 0 ? Nothing<A>() : Just(Semigroup_t<A>::stimes(n, m.value()));
 }
 
 // Foldable

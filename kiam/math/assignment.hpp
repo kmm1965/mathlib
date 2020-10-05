@@ -74,7 +74,7 @@ private:
 
 public:
     template<class E>
-    package& exec(size_t i_begin, size_t i_end, executor<TAG, E, typename E::proxy_type> &executor)
+    package& exec(size_t i_begin, size_t i_end, executor<TAG, E, typename E::proxy_type> const& executor)
     {
         this->i_begin = i_begin;
         this->i_end = i_end;
@@ -84,13 +84,13 @@ public:
 
     package& exec(size_t i_begin, size_t i_end)
     {
-        default_executor<TAG> executor;
-        return exec(i_begin, i_end, executor);
+        default_executor<TAG> _executor;
+        return exec(i_begin, i_end, _executor);
     }
 
     template<class CB, class E>
     package& exec(size_t i_begin, size_t i_end, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder,
-        const executor<TAG, E, typename E::proxy_type> &executor)
+        executor<TAG, E, typename E::proxy_type> const& executor)
     {
         this->i_begin = i_begin;
         this->i_end = i_end;

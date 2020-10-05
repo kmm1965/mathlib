@@ -14,9 +14,6 @@ using Traversable_t = Traversable<base_class_t<T> >;
 template<class T>
 struct is_traversable : std::false_type {};
 
-template<class T1, class T2>
-struct is_same_traversable : std::false_type {};
-
 #define DECLARE_TRAVERSABLE_CLASS(T) \
     /* traverse :: Applicative f => (a -> f b) -> t a -> f (t b) */ \
     template<typename AP, typename Arg> \
@@ -29,6 +26,7 @@ struct is_same_traversable : std::false_type {};
     sequenceA(T<A> const& x);
 
 #define DEFAULT_SEQUENCEA_IMPL(T, _T) \
+    /* sequenceA = traverse id */ \
     template<typename A> \
     typename std::enable_if<is_applicative_t<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
     Traversable<_T>::sequenceA(T<A> const& x) { \
@@ -36,10 +34,7 @@ struct is_same_traversable : std::false_type {};
     }
 
 #define IMPLEMENT_TRAVERSABLE(T) \
-    template<typename A> \
-    struct is_traversable<T<A> > : std::true_type {}; \
-    template<typename A1, typename A2> \
-    struct is_same_traversable<T<A1>, T<A2> > : std::true_type {};
+    template<typename A> struct is_traversable<T<A> > : std::true_type {}
 
 // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 template<typename T, typename AP, typename Arg>

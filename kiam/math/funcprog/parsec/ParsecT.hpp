@@ -150,6 +150,11 @@ private:
     const P unParser;
 };
 
+template<typename S, typename U, typename _M, typename A, class P>
+ParsecT<S, U, _M, A, P> getParsecT(P const& unParser) {
+    return ParsecT<S, U, _M, A, P>(unParser);
+}
+
 template<typename S, typename U, typename _M, typename A, typename P>
 typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >
 runParsecT(ParsecT<S, U, _M, A, P> const& p, State<S, U> const& s) {

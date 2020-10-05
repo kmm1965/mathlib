@@ -23,9 +23,9 @@ struct is_same_applicative : std::false_type {};
 template<class A1, class A2>
 using is_same_applicative_t = is_same_applicative<base_class_t<A1>, base_class_t<A2> >;
 
-#define IMPLEMENT_APPLICATIVE(AP, _AP) \
+#define IMPLEMENT_APPLICATIVE(_AP) \
     template<> struct is_applicative<_AP> : std::true_type {}; \
-    template<> struct is_same_applicative<_AP, _AP> : std::true_type {};
+    template<> struct is_same_applicative<_AP, _AP> : std::true_type {}
 
 #define DECLARE_APPLICATIVE_CLASS(AP) \
     template<typename T> static AP<fdecay<T> > pure(T const& x); \

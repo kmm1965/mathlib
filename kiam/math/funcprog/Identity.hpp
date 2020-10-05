@@ -2,6 +2,7 @@
 
 #include "Identity_fwd.hpp"
 #include "Monad.hpp"
+#include "Monoid.hpp"
 #include "Foldable.hpp"
 #include "Traversable.hpp"
 #include "Monad/MonadFix.hpp"
@@ -53,7 +54,7 @@ Identity<T> Identity_f(f0<T> const& fvalue) {
 }
 
 // Functor
-IMPLEMENT_FUNCTOR(Identity, _Identity)
+IMPLEMENT_FUNCTOR(_Identity);
 
 template<>
 struct Functor<_Identity>
@@ -62,7 +63,7 @@ struct Functor<_Identity>
 };
 
 // Applicative
-IMPLEMENT_APPLICATIVE(Identity, _Identity)
+IMPLEMENT_APPLICATIVE(_Identity);
 
 template<>
 struct Applicative<_Identity> : Functor<_Identity>
@@ -73,7 +74,7 @@ struct Applicative<_Identity> : Functor<_Identity>
 };
 
 // Monad
-IMPLEMENT_MONAD(Identity, _Identity)
+IMPLEMENT_MONAD(_Identity);
 
 template<>
 struct Monad<_Identity> : Applicative<_Identity>
@@ -81,6 +82,35 @@ struct Monad<_Identity> : Applicative<_Identity>
     typedef Applicative<_Identity> super;
 
     DECLARE_MONAD_CLASS(Identity, _Identity)
+};
+
+// Semigroup
+IMPLEMENT_SEMIGROUP_COND(Identity);
+
+template<>
+struct Semigroup<_Identity>
+{
+    template<typename A>
+    static typename std::enable_if<is_semigroup<A>::value, Identity<A> >::type semigroup_op(Identity<A> const& x, Identity<A> const& y) {
+        return x.run() % y.run();
+    }
+
+    template<typename A>
+    static typename std::enable_if<is_semigroup<A>::value, Identity<A> >::type stimes(int n, Identity<A> const& m) {
+        return Semigroup_t<A>::stimes(n, m.run());
+    }
+};
+
+// Moniod
+template<typename A> struct is_monoid<Identity<A> > : is_monoid<A> {};
+
+template<>
+struct Monoid<_Identity> : _Identity, Semigroup<_Identity>
+{
+    template<typename A>
+    static typename std::enable_if<is_monoid<A>::value, Identity<A> >::type mempty() {
+        return Monoid_t<A>::mempty();
+    }
 };
 
 // Foldable
@@ -93,7 +123,7 @@ struct Foldable<_Identity>
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(Identity)
+IMPLEMENT_TRAVERSABLE(Identity);
 
 template<>
 struct Traversable<_Identity>

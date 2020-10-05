@@ -13,13 +13,15 @@
 #include <thrust/extrema.h>
 #if THRUST_VERSION >= 100900
 #include <thrust/system/cuda/detail/util.h>
-#define CHECK_CUDA_ERROR(msg) thrust::cuda_cub::throw_on_error(cudaDeviceSynchronize(), msg)
+#define CUDA_THROW_ON_ERROR(error, msg) thrust::cuda_cub::throw_on_error(error, msg)
+#define CHECK_CUDA_ERROR(msg) CUDA_THROW_ON_ERROR(cudaDeviceSynchronize(), msg)
 #else
 #if THRUST_VERSION >= 100800
 #include <thrust/system/cuda/detail/synchronize.h>
 #else
 #include <thrust/detail/backend/cuda/synchronize.h>
 #endif
+#define CUDA_THROW_ON_ERROR(error, msg) thrust::system::cuda::detail::throw_on_error(error, msg)
 #define CHECK_CUDA_ERROR(msg) thrust::system::cuda::detail::synchronize(msg)
 #endif
 

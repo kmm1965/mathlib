@@ -39,9 +39,9 @@ using is_same_monad_t = is_same_monad<base_class_t<M1>, base_class_t<M2> >;
     template<typename T> \
     using liftM_type = _M::template type<T>;
 
-#define IMPLEMENT_MONAD(M, _M) \
+#define IMPLEMENT_MONAD(_M) \
     template<> struct is_monad<_M> : std::true_type {}; \
-    template<> struct is_same_monad<_M, _M> : std::true_type {};
+    template<> struct is_same_monad<_M, _M> : std::true_type {}
 
 #define IMPLEMENT_MRETURN(M, _M) \
     template<typename T> \
