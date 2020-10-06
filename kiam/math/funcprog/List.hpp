@@ -115,7 +115,7 @@ struct Monad<_List> : Applicative<_List>
 };
 
 // Alternative
-IMPLEMENT_ALTERNATIVE(List, _List)
+IMPLEMENT_ALTERNATIVE(_List);
 
 template<>
 struct Alternative<_List>
@@ -124,7 +124,7 @@ struct Alternative<_List>
 };
 
 // MonadPlus
-IMPLEMENT_MONADPLUS(List, _List)
+IMPLEMENT_MONADPLUS(_List);
 
 template<>
 struct MonadPlus<_List> : Monad<_List>, Alternative<_List>
@@ -159,7 +159,7 @@ struct Monoid<_List> : _Monoid, Semigroup<_List>
 };
 
 // Foldable
-IMPLEMENT_FOLDABLE(List)
+IMPLEMENT_FOLDABLE(_List);
 
 template<>
 struct Foldable<_List> : Monoid<_List>
@@ -168,7 +168,7 @@ struct Foldable<_List> : Monoid<_List>
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(List);
+IMPLEMENT_TRAVERSABLE(_List);
 
 template<>
 struct Traversable<_List>

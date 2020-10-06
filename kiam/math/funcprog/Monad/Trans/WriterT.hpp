@@ -55,7 +55,7 @@ struct __WriterT
 template<typename W, class _M>
 struct _WriterT
 {
-    static_assert(is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad<_M>::value, "Should be a monad");
 
     using base_class = _WriterT;
 
@@ -176,7 +176,7 @@ WriterT<W, _M, A> WriterT_(typename _M::template type<pair_t<A, W> > const& valu
 }
 
 template<typename W, class _M, typename A>
-typename std::enable_if<is_monad<_M>::value, typename _M::template type<pair_t<A, W> > >::type
+typename std::enable_if<_is_monad<_M>::value, typename _M::template type<pair_t<A, W> > >::type
 runWriterT(WriterT<W, _M, A> const& m) {
     return m.run();
 }
@@ -316,11 +316,7 @@ instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
     m `mplus` n = WriterT $ runWriterT m `mplus` runWriterT n
 */
 template<typename W, class _M>
-struct is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_monad_plus<_M>::value> {};
-
-template<typename W, class _M>
-struct is_same_monad_plus<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid<W>::value && is_monad_plus<_M>::value> {};
+struct _is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_monad_plus<_M>::value> {};
 
 template<typename W, class _M>
 struct MonadPlus<_WriterT<W, _M> > : Monad<_WriterT<W, _M> >
@@ -361,11 +357,7 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     {-# INLINE (<|>) #-}
 */
 template<typename W, class _M>
-struct is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && is_alternative<_M>::value> {};
-
-template<typename W, class _M>
-struct is_same_alternative<_WriterT<W, _M>, _WriterT<W, _M> > :
-    std::integral_constant<bool, is_monoid<W>::value && is_alternative<_M>::value> {};
+struct _is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_alternative<_M>::value> {};
 
 template<typename W, class _M>
 struct Alternative<_WriterT<W, _M> >
@@ -405,8 +397,8 @@ instance (Foldable f) => Foldable (WriterT w f) where
     length (WriterT t) = length t
 #endif
 */
-template<typename W, class _M, typename A>
-struct is_foldable<WriterT<W, _M, A> > : is_foldable<typename _M::template type<A> > {};
+template<typename W, class _M>
+struct _is_foldable<_WriterT<W, _M> > : _is_foldable<_M> {};
 
 template<typename W, class _M>
 struct Foldable<_WriterT<W, _M> >
@@ -426,8 +418,8 @@ instance (Traversable f) => Traversable (WriterT w f) where
        f' (a, b) = fmap (\ c -> (c, b)) (f a)
     {-# INLINE traverse #-}
 */
-template<typename W, class _M, typename A>
-struct is_traversable<WriterT<W, _M, A> > : is_traversable<typename _M::template type<A> > {};
+template<typename W, class _M>
+struct _is_traversable<_WriterT<W, _M> > : _is_traversable<_M> {};
 
 template<typename W, class _M>
 struct Traversable<_WriterT<W, _M> >
@@ -436,7 +428,7 @@ struct Traversable<_WriterT<W, _M> >
     // traverse f = fmap WriterT . traverse f' . runWriterT where
     //   f' (a, b) = fmap (\ c -> (c, b)) (f a)
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >::type
+    static applicative_type<AP, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >
     traverse(function_t<AP(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x)
     {
         using A = fdecay<Arg>;

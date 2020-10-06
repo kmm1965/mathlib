@@ -22,7 +22,7 @@ using MonadReader_t = MonadReader<R, base_class_t<T> >;
 template<typename R, typename _M, typename MR>
 struct _MonadReader
 {
-    static_assert(is_monad<_M>::value, "Should be a Monad");
+    static_assert(_is_monad<_M>::value, "Should be a Monad");
 
     template<typename T>
     using type = typename _M::template type<T>;

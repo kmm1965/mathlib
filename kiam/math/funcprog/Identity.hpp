@@ -23,11 +23,11 @@ struct Identity : _Identity
 {
     using value_type = A;
 
-    Identity(value_type const& value) : value(value) {}
-    Identity(f0<value_type> const& fvalue) : value(fvalue) {}
-    Identity(Identity const& ivalue) : value(ivalue.value) {}
-    Identity(f0<Identity> const& fivalue) : value((*fivalue).value) {}
-    //Identity(f0<Identity> const& fivalue) : value(_([fivalue]() { return (*fivalue).value(); })) {}
+    Identity(value_type const& value) : value(value){}
+    Identity(f0<value_type> const& fvalue) : value(fvalue){}
+    Identity(Identity const& ivalue) : value(ivalue.value){}
+    Identity(f0<Identity> const& fivalue) : value((*fivalue).value){}
+    //Identity(f0<Identity> const& fivalue) : value(_([fivalue](){ return (*fivalue).value(); })){}
 
     value_type run() const {
         return value();
@@ -38,18 +38,18 @@ private:
 };
 
 template<typename T>
-T runIdentity(Identity<T> const& x) {
+T runIdentity(Identity<T> const& x){
     return x.run();
 }
 
 // Constructor
 template<typename T>
-Identity<T> Identity_(T const& value) {
+Identity<T> Identity_(T const& value){
     return value;
 }
 
 template<typename T>
-Identity<T> Identity_f(f0<T> const& fvalue) {
+Identity<T> Identity_f(f0<T> const& fvalue){
     return fvalue;
 }
 
@@ -91,12 +91,12 @@ template<>
 struct Semigroup<_Identity>
 {
     template<typename A>
-    static typename std::enable_if<is_semigroup<A>::value, Identity<A> >::type semigroup_op(Identity<A> const& x, Identity<A> const& y) {
+    static semigroup_type<A, Identity<A> > semigroup_op(Identity<A> const& x, Identity<A> const& y){
         return x.run() % y.run();
     }
 
     template<typename A>
-    static typename std::enable_if<is_semigroup<A>::value, Identity<A> >::type stimes(int n, Identity<A> const& m) {
+    static semigroup_type<A, Identity<A> > stimes(int n, Identity<A> const& m){
         return Semigroup_t<A>::stimes(n, m.run());
     }
 };
@@ -108,13 +108,13 @@ template<>
 struct Monoid<_Identity> : _Identity, Semigroup<_Identity>
 {
     template<typename A>
-    static typename std::enable_if<is_monoid<A>::value, Identity<A> >::type mempty() {
+    static monoid_type<A, Identity<A> > mempty(){
         return Monoid_t<A>::mempty();
     }
 };
 
 // Foldable
-IMPLEMENT_FOLDABLE(Identity)
+IMPLEMENT_FOLDABLE(_Identity);
 
 template<>
 struct Foldable<_Identity>
@@ -123,7 +123,7 @@ struct Foldable<_Identity>
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(Identity);
+IMPLEMENT_TRAVERSABLE(_Identity);
 
 template<>
 struct Traversable<_Identity>

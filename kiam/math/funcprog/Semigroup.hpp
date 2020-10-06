@@ -10,8 +10,8 @@ struct _is_semigroup : std::false_type {};
 template<class S>
 struct is_semigroup : _is_semigroup<base_class_t<S> > {};
 
-template<typename S>
-using semigroup_type = typename std::enable_if<is_semigroup<S>::value, S>::type;
+template<typename S, typename T = S>
+using semigroup_type = typename std::enable_if<is_semigroup<S>::value, T>::type;
 
 #define IMPLEMENT_SEMIGROUP(_S) \
     template<> struct _is_semigroup<_S> : std::true_type {}

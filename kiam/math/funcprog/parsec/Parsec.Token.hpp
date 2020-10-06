@@ -36,14 +36,14 @@ tokenPrimEx showToken nextpos (Just nextState) test
                            cok x newstate $ newErrorUnknown newpos
               Nothing -> eerr $ unexpectError (showToken c) pos
 */
-template<typename U, typename M, typename A, typename T>
+template<typename U, typename _M, typename A, typename T>
 struct tokenPrimEx_unParser
 {
     using S = List<T>;
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
     using State_t = State<S, U>;
-    using Stream_t = Stream<M, T>;
-    using pair_type = typename Stream<M, T>::pair_type;
+    using Stream_t = Stream<_M, T>;
+    using pair_type = typename Stream<_M, T>::pair_type;
 
     using showToken_type = function_t<std::string(const T&)>;
     using nextpos_type = function_t<SourcePos(SourcePos const&, T const&, S const&)>;
@@ -85,16 +85,16 @@ private:
     const test_type test;
 };
 
-template<typename U, typename M, typename A, typename T>
-ParsecT<List<T>, U, M, A, tokenPrimEx_unParser<U, M, A, T> >
+template<typename U, typename _M, typename A, typename T>
+ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >
 tokenPrimEx(
-    const typename tokenPrimEx_unParser<U, M, A, T>::showToken_type &showToken,
-    const typename tokenPrimEx_unParser<U, M, A, T>::nextpos_type &nextpos,
-    const typename tokenPrimEx_unParser<U, M, A, T>::nextState_type &nextState,
-    const typename tokenPrimEx_unParser<U, M, A, T>::test_type &test)
+    const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
+    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
+    const typename tokenPrimEx_unParser<U, _M, A, T>::nextState_type &nextState,
+    const typename tokenPrimEx_unParser<U, _M, A, T>::test_type &test)
 {
-    return ParsecT<List<T>, U, M, A, tokenPrimEx_unParser<U, M, A, T> >(
-        tokenPrimEx_unParser<U, M, A, T>(showToken, nextpos, nextState, test));
+    return ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >(
+        tokenPrimEx_unParser<U, _M, A, T>(showToken, nextpos, nextState, test));
 }
 
 /*
@@ -124,14 +124,14 @@ tokenPrim :: (Stream s m t)
 tokenPrim showToken nextpos test = tokenPrimEx showToken nextpos Nothing test
 */
 
-template<typename U, typename M, typename A, typename T>
-ParsecT<List<T>, U, M, A, tokenPrimEx_unParser<U, M, A, T> >
+template<typename U, typename _M, typename A, typename T>
+ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >
 tokenPrim(
-    const typename tokenPrimEx_unParser<U, M, A, T>::showToken_type &showToken,
-    const typename tokenPrimEx_unParser<U, M, A, T>::nextpos_type &nextpos,
-    const typename tokenPrimEx_unParser<U, M, A, T>::test_type &test)
+    const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
+    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
+    const typename tokenPrimEx_unParser<U, _M, A, T>::test_type &test)
 {
-    return tokenPrimEx<U, M, A, T>(showToken, nextpos, Nothing<typename tokenPrimEx_unParser<U, M, A, T>::next_state_function_type>(), test);
+    return tokenPrimEx<U, _M, A, T>(showToken, nextpos, Nothing<typename tokenPrimEx_unParser<U, _M, A, T>::next_state_function_type>(), test);
 }
 
 /*
@@ -163,28 +163,28 @@ token showToken tokpos test = tokenPrim showToken nextpos test
                              Nothing -> tokpos tok
                              Just (tok',_) -> tokpos tok'
 */
-template<typename U, typename M, typename A, typename T>
+template<typename U, typename _M, typename A, typename T>
 Parsec<List<T>, U, A, tokenPrimEx_unParser<U, Identity<T>, A, T> >
 token(
-    typename tokenPrimEx_unParser<U, M, A, T>::showToken_type const& showToken,
+    typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type const& showToken,
     function_t<SourcePos(const T&)> const& tokpos,
-    typename tokenPrimEx_unParser<U, M, A, T>::test_type const& test)
+    typename tokenPrimEx_unParser<U, _M, A, T>::test_type const& test)
 {
     using S = Stream<_Identity, T>;
-    const typename tokenPrimEx_unParser<U, M, A, T>::nextpos_type nextpos =
+    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type nextpos =
         [tokpos](SourcePos const&, T const& tok, typename S::stream_type const& ts)
     {
         const Maybe<typename S::pair_type> r = uncons(ts).run();
         return tokpos(r ? r.value().first : tok);
     };
-    return tokenPrim<U, M, A, T>(showToken, nextpos, test);
+    return tokenPrim<U, _M, A, T>(showToken, nextpos, test);
 }
 
-template<typename S, typename U, typename M, typename T>
+template<typename S, typename U, typename _M, typename T>
 struct tokens_unParser
 {
     using A = List<T>;
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
     using showTokens_type = function_t<std::string(List<T> const&)>;
     using nextposs_type = function_t<SourcePos(SourcePos const&, List<T> const&)>;
@@ -306,15 +306,15 @@ tokens :: (Stream s m t, Eq t)
        -> ParsecT s u m [t]
 tokens showTokens nextposs tts@(tok:toks)
 */
-template<typename S, typename U, typename M, typename T>
-ParsecT<S, U, M, List<T>, tokens_unParser<S, U, M, T> >
+template<typename S, typename U, typename _M, typename T>
+ParsecT<S, U, _M, List<T>, tokens_unParser<S, U, _M, T> >
 tokens(
-    const typename tokens_unParser<S, U, M, T>::showTokens_type &showTokens,
-    const typename tokens_unParser<S, U, M, T>::nextposs_type &nextposs,
+    const typename tokens_unParser<S, U, _M, T>::showTokens_type &showTokens,
+    const typename tokens_unParser<S, U, _M, T>::nextposs_type &nextposs,
     List<T> const& tts)
 {
-    return ParsecT<S, U, M, List<T>, tokens_unParser<S, U, M, T> >(
-        tokens_unParser<S, U, M, T>(showTokens, nextposs, tts));
+    return ParsecT<S, U, _M, List<T>, tokens_unParser<S, U, _M, T> >(
+        tokens_unParser<S, U, _M, T>(showTokens, nextposs, tts));
 }
 
 _PARSEC_END

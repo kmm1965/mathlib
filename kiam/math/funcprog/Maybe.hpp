@@ -87,7 +87,7 @@ struct Monad<_Maybe> : Applicative<_Maybe>
 };
 
 // Alternative
-IMPLEMENT_ALTERNATIVE(Maybe, _Maybe)
+IMPLEMENT_ALTERNATIVE(_Maybe);
 
 template<>
 struct Alternative<_Maybe>
@@ -96,7 +96,7 @@ struct Alternative<_Maybe>
 };
 
 // MonadPlus
-IMPLEMENT_MONADPLUS(Maybe, _Maybe)
+IMPLEMENT_MONADPLUS(_Maybe);
 
 template<>
 struct MonadPlus<_Maybe> : Monad<_Maybe>, Alternative<_Maybe>
@@ -113,10 +113,10 @@ template<>
 struct Semigroup<_Maybe>
 {
     template<typename A>
-    static typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type semigroup_op(Maybe<A> const& x, Maybe<A> const& y);
+    static semigroup_type<A, Maybe<A> > semigroup_op(Maybe<A> const& x, Maybe<A> const& y);
 
     template<typename A>
-    static typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type stimes(int n, Maybe<A> const&);
+    static semigroup_type<A, Maybe<A> > stimes(int n, Maybe<A> const&);
 };
 
 // Monoid
@@ -126,13 +126,13 @@ template<>
 struct Monoid<_Maybe> : _Monoid, Semigroup<_Maybe>
 {
     template<typename A>
-    static typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type mempty() {
+    static semigroup_type<A, Maybe<A> > mempty() {
         return Nothing<A>();
     }
 };
 
 // Foldable
-IMPLEMENT_FOLDABLE(Maybe)
+IMPLEMENT_FOLDABLE(_Maybe);
 
 template<>
 struct Foldable<_Maybe> : Monoid<_Maybe>
@@ -141,7 +141,7 @@ struct Foldable<_Maybe> : Monoid<_Maybe>
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(Maybe);
+IMPLEMENT_TRAVERSABLE(_Maybe);
 
 template<>
 struct Traversable<_Maybe>

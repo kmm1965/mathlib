@@ -152,13 +152,13 @@ struct Applicative<_IdentityT<_F> > : Functor<_IdentityT<_F> >
 };
 
 template<class _F, typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative<Fa, Fb>::value, IdentityT<_F, Fb> >::type
+same_applicative_type<Fa, Fb, IdentityT<_F, Fb> >
 operator*=(IdentityT<_F, Fa> const& a, IdentityT<_F, Fb> const& b) {
     return lift2IdentityT<_F>(_(ap_r<Fa, Fb>), a, b);
 }
 
 template<class _F, typename Fa, typename Fb>
-typename std::enable_if<is_same_applicative<Fa, Fb>::value, IdentityT<_F, Fa> >::type
+same_applicative_type<Fa, Fb, IdentityT<_F, Fa> >
 operator^=(IdentityT<_F, Fa> const& a, IdentityT<_F, Fb> const& b) {
     return lift2IdentityT<_F>(_(ap_l<Fa, Fb>), a, b);
 }
@@ -197,10 +197,7 @@ struct Monad<_IdentityT<_F> > : Applicative<_IdentityT<_F> >
 
 // MonadPlus
 template<class _F>
-struct is_monad_plus<_IdentityT<_F> > : is_monad_plus<_F> {};
-
-template<class _F>
-struct is_same_monad_plus<_IdentityT<_F>, _IdentityT<_F> > : is_monad_plus<_F> {};
+struct _is_monad_plus<_IdentityT<_F> > : _is_monad_plus<_F> {};
 
 template<class _F>
 struct MonadPlus<_IdentityT<_F> > : Monad<_IdentityT<_F> >
@@ -233,10 +230,7 @@ struct MonadPlus<_IdentityT<_F> > : Monad<_IdentityT<_F> >
 
 // Alternative
 template<class _F>
-struct is_alternative<_IdentityT<_F> > : is_alternative<_F> {};
-
-template<class _F>
-struct is_same_alternative<_IdentityT<_F>, _IdentityT<_F> > : is_alternative<_F> {};
+struct _is_alternative<_IdentityT<_F> > : _is_alternative<_F> {};
 
 template<class _F>
 struct Alternative<_IdentityT<_F> >
@@ -267,8 +261,8 @@ struct Alternative<_IdentityT<_F> >
 };
 
 // Foldable
-template<class _F, typename A>
-struct is_foldable<IdentityT<_F, A> > : is_foldable<typename _F::template type<A> > {};
+template<class _F>
+struct _is_foldable<_IdentityT<_F> > : _is_foldable<_F> {};
 
 template<class _F>
 struct Foldable<_IdentityT<_F> >
@@ -276,8 +270,7 @@ struct Foldable<_IdentityT<_F> >
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f (IdentityT t) = foldMap f t
     template<typename M, typename Arg>
-    static typename std::enable_if<is_monoid<M>::value, M>::type
-    foldMap(function_t<M(Arg)> const& f, IdentityT<_F, fdecay<Arg> > const& x){
+    static monoid_type<M> foldMap(function_t<M(Arg)> const& f, IdentityT<_F, fdecay<Arg> > const& x){
         return Foldable<_F>::foldMap(f, x.run());
     }
 
@@ -321,8 +314,8 @@ struct Foldable<_IdentityT<_F> >
 };
 
 // Traversable
-template<class _F, typename A>
-struct is_traversable<IdentityT<_F, A> > : is_traversable<typename _F::template type<A> > {};
+template<class _F>
+struct _is_traversable<_IdentityT<_F> > : _is_traversable<_F> {};
 
 template<class _F>
 struct Traversable<_IdentityT<_F> >
@@ -333,7 +326,7 @@ struct Traversable<_IdentityT<_F> >
     // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
     // traverse f (IdentityT a) = IdentityT <$> traverse f a
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, IdentityT<_F, value_type_t<AP> > > >::type
+    static applicative_type<AP, typeof_t<AP, IdentityT<_F, value_type_t<AP> > > >
     traverse(function_t<AP(Arg)> const& f, IdentityT<_F, fdecay<Arg> > const& x){
         return _(IdentityT_<F_type<value_type_t<AP> > >) / Traversable<_F>::traverse(f, x.run());
     }

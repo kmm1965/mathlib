@@ -39,23 +39,23 @@ try p =
     ParsecT $ \s cok _ eok eerr ->
     unParser p s cok eerr eok eerr
 */
-template<typename S, typename U, typename M, typename A, typename P>
+template<typename S, typename U, typename _M, typename A, typename P>
 struct try_unParser
 {
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    try_unParser(ParsecT<S, U, M, A, P> const& p) : p(p) {}
+    try_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p) {}
 
     IMPLEMENT_UNPARSER_RUN(return p.template run<B>(s, cok, eerr, eok, eerr);)
 
 private:
-    const ParsecT<S, U, M, A, P> p;
+    const ParsecT<S, U, _M, A, P> p;
 };
 
-template<typename S, typename U, typename M, typename A, typename P>
-ParsecT<S, U, M, A, try_unParser<S, U, M, A, P> >
-_try_(ParsecT<S, U, M, A, P> const& p) {
-    return ParsecT<S, U, M, A, try_unParser<S, U, M, A, P> >(try_unParser<S, U, M, A, P>(p));
+template<typename S, typename U, typename _M, typename A, typename P>
+ParsecT<S, U, _M, A, try_unParser<S, U, _M, A, P> >
+_try_(ParsecT<S, U, _M, A, P> const& p) {
+    return ParsecT<S, U, _M, A, try_unParser<S, U, _M, A, P> >(try_unParser<S, U, _M, A, P>(p));
 }
 
 _PARSEC_END

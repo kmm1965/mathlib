@@ -11,8 +11,8 @@ struct _is_monoid : std::false_type {};
 template<class M>
 struct is_monoid : _is_monoid<base_class_t<M> > {};
 
-template<typename M>
-using monoid_type = typename std::enable_if<is_monoid<M>::value, M>::type;
+template<typename M, typename T = M>
+using monoid_type = typename std::enable_if<is_monoid<M>::value, T>::type;
 
 template<class _M1, class _M2>
 struct _is_same_monoid : std::false_type {};
@@ -22,6 +22,9 @@ struct _is_same_monoid<_M, _M> : _is_monoid<_M> {};
 
 template<class M1, class M2>
 using is_same_monoid = _is_same_monoid<base_class_t<M1>, base_class_t<M2> >;
+
+template<class M1, class M2, typename T>
+using same_monoid_type = typename std::enable_if<is_same_monoid<M1, M2>::value, T>::type;
 
 #define IMPLEMENT_MONOID(_M) \
     template<> struct _is_monoid<_M> : std::true_type {}
@@ -47,7 +50,7 @@ mconcat = foldr mappend mempty
 */
 
 template<typename T>
-monoid_type<T> mconcat(List<T> const& m) {
+monoid_type<T> mconcat(List<T> const& m){
     return Monoid_t<T>::mconcat(m);
 }
 

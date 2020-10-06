@@ -17,8 +17,8 @@ struct _is_monad : std::false_type {};
 template<class M>
 using is_monad = _is_monad<base_class_t<M> >;
 
-template<class M>
-using monad_type = typename std::enable_if<is_monad<M>::value, M>::type;
+template<class M, typename T = M>
+using monad_type = typename std::enable_if<is_monad<M>::value, T>::type;
 
 template<class _M1, class _M2>
 struct _is_same_monad : std::false_type {};
@@ -28,6 +28,9 @@ struct _is_same_monad<_M, _M> : _is_monad<_M> {};
 
 template<class M1, class M2>
 using is_same_monad = _is_same_monad<base_class_t<M1>, base_class_t<M2> >;
+
+template<class M1, class M2, typename T>
+using same_monad_type = typename std::enable_if<is_same_monad<M1, M2>::value, T>::type;
 
 // Requires mreturn and >>=
 template<typename M>
@@ -62,12 +65,10 @@ template<typename M>
 join_type<M> join(M const& v);
 
 template<typename MF, typename MG>
-typename std::enable_if<is_same_monad<MF, MG>::value, MG>::type
-operator>>(MF const& f, MG const& g);
+same_monad_type<MF, MG, MG> operator>>(MF const& f, MG const& g);
 
 template<typename RetF, typename RetG>
-typename std::enable_if<is_same_monad<RetF, RetG>::value, f0<RetG> >::type
-operator>>(f0<RetF> const& f, f0<RetG> const& g);
+same_monad_type<RetF, RetG, f0<RetG> > operator>>(f0<RetF> const& f, f0<RetG> const& g);
 
 // >=>
 template<typename RetG, typename ArgG, typename RetF, typename... ArgsF>

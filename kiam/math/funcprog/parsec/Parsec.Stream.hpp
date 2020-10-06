@@ -21,19 +21,19 @@ instance (Monad m) => Stream [tok] m tok where
     uncons []     = return $ Nothing
     uncons (t:ts) = return $ Just (t,ts)
 */
-template<typename M, typename T>
+template<typename _M, typename T>
 struct Stream
 {
-    static_assert(is_monad<M>::value, "M should be a monad");
+    static_assert(is_monad<_M>::value, "_M should be a monad");
 
-    using monad_type = M;
+    using monad_type = _M;
     using token_type = T;
     using stream_type = List<token_type>;
     using pair_type = pair_t<token_type, stream_type>;
-    using return_type = typename M::template type<Maybe<pair_type> >;
+    using return_type = typename _M::template type<Maybe<pair_type> >;
 
     static return_type uncons(stream_type const& l) {
-        return Monad_t<M>::mreturn(null(l) ? Nothing<pair_type>() : Just(pair_type(head(l), tail(l))));
+        return Monad_t<_M>::mreturn(null(l) ? Nothing<pair_type>() : Just(pair_type(head(l), tail(l))));
     }
 };
 

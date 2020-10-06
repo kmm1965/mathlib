@@ -19,10 +19,10 @@ satisfy f           = tokenPrim (\c -> show [c])
                                 (\pos c _cs -> updatePosChar pos c)
                                 (\c -> if f c then Just c else Nothing)
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, tokenPrimEx_unParser<U, M, char, char> >
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >
 satisfy(function_t<bool(char)> const& f){
-    return tokenPrim<U, M, char, char>(
+    return tokenPrim<U, _M, char, char>(
         _([](char c) { return std::string("\"") + c + "\""; }),
         _([](SourcePos const& pos, const char &c, const String &_cs) { return updatePosChar(pos, c); }),
         _([f](const char &c) { return f(c) ? Just(c) : Nothing<char>(); }));
@@ -39,10 +39,10 @@ oneOf :: (Stream s m Char) => [Char] -> ParsecT s u m Char
 oneOf cs            = satisfy (\c -> elem c cs)
 */
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, tokenPrimEx_unParser<U, M, char, char> >
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >
 oneOf(const String &cs) {
-    return satisfy<U, M>(_([cs](char c) { return elem(c, cs); }));
+    return satisfy<U, _M>(_([cs](char c) { return elem(c, cs); }));
 }
 
 /*
@@ -55,10 +55,10 @@ oneOf(const String &cs) {
 noneOf :: (Stream s m Char) => [Char] -> ParsecT s u m Char
 noneOf cs           = satisfy (\c -> not (elem c cs))
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, tokenPrimEx_unParser<U, M, char, char> >
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >
 noneOf(const String &cs) {
-    return satisfy<U, M>(_([cs](char c) { return !elem(c, cs); }));
+    return satisfy<U, _M>(_([cs](char c) { return !elem(c, cs); }));
 }
 
 /*
@@ -70,12 +70,12 @@ noneOf(const String &cs) {
 char :: (Stream s m Char) => Char -> ParsecT s u m Char
 char c              = satisfy (==c)  <?> show [c]
 */
-template<typename U, typename M>
-using char_unParser_t = labels_unParser<String, U, M, char, tokenPrimEx_unParser<U, M, char, char> >;
+template<typename U, typename _M>
+using char_unParser_t = labels_unParser<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >;
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, char_unParser_t<U, M> > _char(char c) {
-    return satisfy<U, M>(_([c](char c1) { return c1 == c; })) & (std::string("\"") + c + '"');
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, char_unParser_t<U, _M> > _char(char c) {
+    return satisfy<U, _M>(_([c](char c1) { return c1 == c; })) & (std::string("\"") + c + '"');
 }
 
 /*
@@ -84,13 +84,13 @@ ParsecT<String, U, M, char, char_unParser_t<U, M> > _char(char c) {
 anyChar :: (Stream s m Char) => ParsecT s u m Char
 anyChar             = satisfy (const True)
 */
-template<typename U, typename M>
-using anyChar_unParser_t = tokenPrimEx_unParser<U, M, char, char>;
+template<typename U, typename _M>
+using anyChar_unParser_t = tokenPrimEx_unParser<U, _M, char, char>;
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, anyChar_unParser_t<U, M> >
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, anyChar_unParser_t<U, _M> >
 anyChar() {
-    return satisfy<U, M>(_const_<char>(true));
+    return satisfy<U, _M>(_const_<char>(true));
 }
 
 /*
@@ -100,12 +100,12 @@ anyChar() {
 space :: (Stream s m Char) => ParsecT s u m Char
 space               = satisfy isSpace       <?> "space"
 */
-template<typename U, typename M>
-using condition_unParser_t = labels_unParser<String, U, M, char, tokenPrimEx_unParser<U, M, char, char> >;
+template<typename U, typename _M>
+using condition_unParser_t = labels_unParser<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >;
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > space() {
-    return satisfy<U, M>(_([](char c) { return std::isspace(c); })) & std::string("space");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > space() {
+    return satisfy<U, _M>(_([](char c) { return std::isspace(c); })) & std::string("space");
 }
 
 /*
@@ -114,13 +114,13 @@ ParsecT<String, U, M, char, condition_unParser_t<U, M> > space() {
 spaces :: (Stream s m Char) => ParsecT s u m ()
 spaces              = skipMany space        <?> "white space"
 */
-template<typename U, typename M>
-using spaces_unParser_t = labels_unParser<String, U, M, EmptyData<char>,
-    skipMany_unParser_t<String, U, M, char, condition_unParser_t<U, M> > >;
+template<typename U, typename _M>
+using spaces_unParser_t = labels_unParser<String, U, _M, EmptyData<char>,
+    skipMany_unParser_t<String, U, _M, char, condition_unParser_t<U, _M> > >;
 
-template<typename U, typename M>
-ParsecT<String, U, M, EmptyData<char>, spaces_unParser_t<U, M> > spaces() {
-    return skipMany(space<U, M>()) & std::string("white space");
+template<typename U, typename _M>
+ParsecT<String, U, _M, EmptyData<char>, spaces_unParser_t<U, _M> > spaces() {
+    return skipMany(space<U, _M>()) & std::string("white space");
 }
 
 /*
@@ -129,12 +129,12 @@ ParsecT<String, U, M, EmptyData<char>, spaces_unParser_t<U, M> > spaces() {
 newline :: (Stream s m Char) => ParsecT s u m Char
 newline             = char '\n'             <?> "lf new-line"
 */
-template<typename U, typename M>
-using single_char_unParser_t = labels_unParser<String, U, M, char, char_unParser_t<U, M> >;
+template<typename U, typename _M>
+using single_char_unParser_t = labels_unParser<String, U, _M, char, char_unParser_t<U, _M> >;
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, single_char_unParser_t<U, M> > newline() {
-    return _char<U, M>('\n') & std::string("lf new-line");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, single_char_unParser_t<U, _M> > newline() {
+    return _char<U, _M>('\n') & std::string("lf new-line");
 }
 
 /*
@@ -144,13 +144,13 @@ ParsecT<String, U, M, char, single_char_unParser_t<U, M> > newline() {
 crlf :: (Stream s m Char) => ParsecT s u m Char
 crlf                = char '\r' *> char '\n' <?> "crlf new-line"
 */
-template<typename U, typename M>
-using crlf_unParser = labels_unParser<String, U, M, char,
-    parserBind_unParser<String, U, M, char, char_unParser_t<U, M>, char, char_unParser_t<U, M> > >;
+template<typename U, typename _M>
+using crlf_unParser = labels_unParser<String, U, _M, char,
+    parserBind_unParser<String, U, _M, char, char_unParser_t<U, _M>, char, char_unParser_t<U, _M> > >;
 
-template<typename U, typename M>
-ParsecT<String, U, M, char, crlf_unParser<U, M> > crlf() {
-    return (_char<U, M>('\r') *= _char<U, M>('\n')) & std::string("crlf new-line");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, crlf_unParser<U, _M> > crlf() {
+    return (_char<U, _M>('\r') *= _char<U, _M>('\n')) & std::string("crlf new-line");
 }
 
 /*
@@ -163,11 +163,11 @@ ParsecT<String, U, M, char, crlf_unParser<U, M> > crlf() {
 endOfLine :: (Stream s m Char) => ParsecT s u m Char
 endOfLine           = newline <|> crlf       <?> "new-line"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, labels_unParser<String, U, M, char,
-    parserPlus_unParser<String, U, M, char, single_char_unParser_t<U, M>, crlf_unParser<U, M> >
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, labels_unParser<String, U, _M, char,
+    parserPlus_unParser<String, U, _M, char, single_char_unParser_t<U, _M>, crlf_unParser<U, _M> >
 > > endOfLine() {
-    return (newline<U, M>() | crlf<U, M>()) & std::string("new-line");
+    return (newline<U, _M>() | crlf<U, _M>()) & std::string("new-line");
 }
 
 /*
@@ -176,9 +176,9 @@ ParsecT<String, U, M, char, labels_unParser<String, U, M, char,
 tab :: (Stream s m Char) => ParsecT s u m Char
 tab                 = char '\t'             <?> "tab"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, single_char_unParser_t<U, M> > tab() {
-    return _char<U, M>('\t') & std::string("tab");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, single_char_unParser_t<U, _M> > tab() {
+    return _char<U, _M>('\t') & std::string("tab");
 }
 
 /*
@@ -188,9 +188,9 @@ ParsecT<String, U, M, char, single_char_unParser_t<U, M> > tab() {
 upper :: (Stream s m Char) => ParsecT s u m Char
 upper               = satisfy isUpper       <?> "uppercase letter"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > upper() {
-    return satisfy<U, M>(_([](char c) { return std::isupper(c); })) & std::string("uppercase letter");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > upper() {
+    return satisfy<U, _M>(_([](char c) { return std::isupper(c); })) & std::string("uppercase letter");
 }
 
 /*
@@ -200,9 +200,9 @@ ParsecT<String, U, M, char, condition_unParser_t<U, M> > upper() {
 lower :: (Stream s m Char) => ParsecT s u m Char
 lower               = satisfy isLower       <?> "lowercase letter"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > lower() {
-    return satisfy<U, M>(_([](char c) { return std::islower(c); })) & std::string("lowercase letter");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > lower() {
+    return satisfy<U, _M>(_([](char c) { return std::islower(c); })) & std::string("lowercase letter");
 }
 
 /*
@@ -212,9 +212,9 @@ ParsecT<String, U, M, char, condition_unParser_t<U, M> > lower() {
 alphaNum :: (Stream s m Char => ParsecT s u m Char)
 alphaNum            = satisfy isAlphaNum    <?> "letter or digit"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > alphaNum() {
-    return satisfy<U, M>(_([](char c) { return std::isalnum(c); })) & std::string("letter or digit");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > alphaNum() {
+    return satisfy<U, _M>(_([](char c) { return std::isalnum(c); })) & std::string("letter or digit");
 }
 
 /*
@@ -224,9 +224,9 @@ ParsecT<String, U, M, char, condition_unParser_t<U, M> > alphaNum() {
 letter :: (Stream s m Char) => ParsecT s u m Char
 letter              = satisfy isAlpha       <?> "letter"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > letter() {
-    return satisfy<U, M>(_([](char c) { return std::isalpha(c); })) & std::string("letter");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > letter() {
+    return satisfy<U, _M>(_([](char c) { return std::isalpha(c); })) & std::string("letter");
 }
 
 /*
@@ -238,9 +238,9 @@ digit               = satisfy isDigit       <?> "digit"
 -- | Parses a hexadecimal digit (a digit or a letter between \'a\' and
 -- \'f\' or \'A\' and \'F\'). Returns the parsed character.
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > digit() {
-    return satisfy<U, M>(_([](char c) { return std::isdigit(c); })) & std::string("digit");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > digit() {
+    return satisfy<U, _M>(_([](char c) { return std::isdigit(c); })) & std::string("digit");
 }
 
 /*
@@ -250,18 +250,18 @@ hexDigit            = satisfy isHexDigit    <?> "hexadecimal digit"
 -- | Parses an octal digit (a character between \'0\' and \'7\'). Returns
 -- the parsed character.
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > hexDigit() {
-    return satisfy<U, M>(_([](char c) { return std::isxdigit(c); })) & std::string("hexadecimal digit");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > hexDigit() {
+    return satisfy<U, _M>(_([](char c) { return std::isxdigit(c); })) & std::string("hexadecimal digit");
 }
 
 /*
 octDigit :: (Stream s m Char) => ParsecT s u m Char
 octDigit            = satisfy isOctDigit    <?> "octal digit"
 */
-template<typename U, typename M>
-ParsecT<String, U, M, char, condition_unParser_t<U, M> > octDigit() {
-    return satisfy<U, M>(_([](char c) { return '0' <= c && c <= '7'; })) & std::string("octal digit");
+template<typename U, typename _M>
+ParsecT<String, U, _M, char, condition_unParser_t<U, _M> > octDigit() {
+    return satisfy<U, _M>(_([](char c) { return '0' <= c && c <= '7'; })) & std::string("octal digit");
 }
 
 /*
@@ -274,9 +274,9 @@ ParsecT<String, U, M, char, condition_unParser_t<U, M> > octDigit() {
 string :: (Stream s m Char) => String -> ParsecT s u m String
 string s            = tokens show updatePosString s
 */
-template<typename U, typename M>
-ParsecT<String, U, M, String, tokens_unParser<String, U, M, char> > _string(const char *s) {
-    return tokens<String, U, M, char>(show<String>,
+template<typename U, typename _M>
+ParsecT<String, U, _M, String, tokens_unParser<String, U, _M, char> > _string(const char *s) {
+    return tokens<String, U, _M, char>(show<String>,
         _([](SourcePos const& pos, const String &s) { return updatePosString(pos, s.c_str()); }),
         String(s));
 }

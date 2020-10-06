@@ -59,7 +59,7 @@ DECLARE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3
 template<typename S, typename U, typename _M>
 struct _ParsecT
 {
-    static_assert(is_monad<_M>::value, "M should be a monad");
+    static_assert(_is_monad<_M>::value, "_M should be a monad");
     using base_class = _ParsecT;
     
     template<typename A>

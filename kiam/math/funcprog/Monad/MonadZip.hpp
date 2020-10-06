@@ -82,10 +82,7 @@ struct _MonadZip
 };
 
 template<typename MA, typename MB>
-using mzip_type =
-    typename std::enable_if<is_same_monad<MA, MB>::value,
-        typeof_t<MA, pair_t<value_type_t<MA>, value_type_t<MB> > >
-    >::type;
+using mzip_type = same_monad_type<MA, MB, typeof_t<MA, pair_t<value_type_t<MA>, value_type_t<MB> > > >;
 
 
 #define MZIP_TYPE_(MA, MB) BOOST_IDENTITY_TYPE((mzip_type<MA, MB>))

@@ -6,18 +6,18 @@ _FUNCPROG_BEGIN
 
 // Constructors
 template<typename T>
-Maybe<fdecay<T> > Just(T const& value) {
+Maybe<fdecay<T> > Just(T const& value){
     return value;
 }
 
 template<typename A>
-Maybe<A> Nothing() {
+Maybe<A> Nothing(){
     return Maybe<A>();
 }
 
 template<typename A>
-f0<Maybe<A> > _Nothing() {
-    return []() { return Nothing<A>(); };
+f0<Maybe<A> > _Nothing(){
+    return [](){ return Nothing<A>(); };
 }
 
 // Functor
@@ -32,7 +32,7 @@ Functor<_Maybe>::fmap(function_t<Ret(Arg, Args...)> const& f, Maybe<fdecay<Arg> 
 // Applicative
 // pure = Just
 template<typename T>
-Maybe<fdecay<T> > Applicative<_Maybe>::pure(T const& x) {
+Maybe<fdecay<T> > Applicative<_Maybe>::pure(T const& x){
     return Just(x);
 }
 
@@ -59,27 +59,25 @@ IMPLEMENT_DEFAULT_MONADPLUS(Maybe, _Maybe)
 // Alternative
 // empty = Nothing
 template<typename A>
-Maybe<A> Alternative<_Maybe>::empty() {
+Maybe<A> Alternative<_Maybe>::empty(){
     return Nothing<A>();
 }
 
 // Nothing <|> r = r
 // l       <|> _ = l
 template<typename A>
-Maybe<A> Alternative<_Maybe>::alt_op(Maybe<A> const& l, Maybe<A> const&r) {
+Maybe<A> Alternative<_Maybe>::alt_op(Maybe<A> const& l, Maybe<A> const&r){
     return l ? l : r;
 }
 
 // Semigroup
 template<typename A>
-typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type
-Semigroup<_Maybe>::semigroup_op(Maybe<A> const& x, Maybe<A> const& y) {
+semigroup_type<A, Maybe<A> > Semigroup<_Maybe>::semigroup_op(Maybe<A> const& x, Maybe<A> const& y){
     return !x ? y : !y ? x : Just(x.value() % y.value());
 }
 
 template<typename A>
-typename std::enable_if<is_semigroup<A>::value, Maybe<A> >::type
-Semigroup<_Maybe>::stimes(int n, Maybe<A> const& m)
+semigroup_type<A, Maybe<A> > Semigroup<_Maybe>::stimes(int n, Maybe<A> const& m)
 {
     assert(n >= 0);
     if (n < 0) throw maybe_error("stimes: Maybe, negative multiplier");
@@ -129,7 +127,7 @@ Foldable<_Maybe>::foldr1(function_t<A(Arg1, Arg2)> const&, Maybe<A> const& x)
 //    traverse _ Nothing = pure Nothing
 //    traverse f (Just x) = Just <$> f x
 template<typename AP, typename Arg>
-typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, Maybe<value_type_t<AP> > > >::type
+applicative_type<AP, typeof_t<AP, Maybe<value_type_t<AP> > > >
 Traversable<_Maybe>::traverse(function_t<AP(Arg)> const& f, Maybe<fdecay<Arg> > const& x){
     return x ? _(Just<value_type_t<AP> >) / f(x.value()) : Applicative_t<AP>::pure(Nothing<value_type_t<AP> >());
 }
@@ -140,7 +138,7 @@ DEFAULT_SEQUENCEA_IMPL(Maybe, _Maybe)
 // throwError :: e -> m a
 // throwError () = Nothing
 template<typename A>
-Maybe<A> MonadError<_Maybe>::throwError(error_type<A> const&) {
+Maybe<A> MonadError<_Maybe>::throwError(error_type<A> const&){
     return Nothing<A>();
 }
 
@@ -148,7 +146,7 @@ Maybe<A> MonadError<_Maybe>::throwError(error_type<A> const&) {
 // catchError Nothing f = f ()
 // catchError x       _ = x
 template<typename A>
-Maybe<A> MonadError<_Maybe>::catchError(Maybe<A> const& x, function_t<Maybe<A>(error_type<A> const&)> const& f) {
+Maybe<A> MonadError<_Maybe>::catchError(Maybe<A> const& x, function_t<Maybe<A>(error_type<A> const&)> const& f){
     return x ? x : f(error_type<A>());
 }
 
@@ -157,12 +155,12 @@ DEFINE_FUNCTION_3(2, Maybe<T1>, maybe, T1 const&, default_value, function_t<T1(T
     return Just(v ? f(v.value()) : default_value);)
 
 template<typename T>
-bool isJust(Maybe<T> const& value) {
+bool isJust(Maybe<T> const& value){
     return (bool)value;
 }
 
 template<typename T>
-bool isNothing(Maybe<T> const& value) {
+bool isNothing(Maybe<T> const& value){
     return !value;
 }
 
@@ -177,7 +175,7 @@ T fromJust(Maybe<T> const& value)
 DEFINE_FUNCTION_2(1, T0, fromMaybe, T0 const&, default_value, Maybe<T0> const&, value,
     return value ? value.value() : default_value;)
 
-template<typename T0> T0 fromMaybe(f0<T0> const& f, Maybe<T0> const& value) {
+template<typename T0> T0 fromMaybe(f0<T0> const& f, Maybe<T0> const& value){
     return value ? value.value() : *f;
 }
 
@@ -186,38 +184,38 @@ _FUNCPROG_END
 namespace std {
 
 template<typename T>
-ostream& operator<<(ostream& os, _FUNCPROG::Maybe<T> const& mv) {
+ostream& operator<<(ostream& os, _FUNCPROG::Maybe<T> const& mv){
     return mv ? os << "Just(" << mv.value() << ')' : os << "Nothing";
 }
 
 template<typename T>
-wostream& operator<<(wostream& os, _FUNCPROG::Maybe<T> const& mv) {
+wostream& operator<<(wostream& os, _FUNCPROG::Maybe<T> const& mv){
     return mv ? os << L"Just(" << mv.value() << L')' : os << L"Nothing";
 }
 
-ostream& operator<<(ostream& os, _FUNCPROG::Maybe<string> const& mv) {
+ostream& operator<<(ostream& os, _FUNCPROG::Maybe<string> const& mv){
     return mv ? os << "Just(\"" << mv.value() << "\")" : os << "Nothing";
 }
 
-wostream& operator<<(wostream& os, _FUNCPROG::Maybe<wstring> const& mv) {
+wostream& operator<<(wostream& os, _FUNCPROG::Maybe<wstring> const& mv){
     return mv ? os << L"Just(\"" << mv.value() << L"\")" : os << L"Nothing";
 }
 
-ostream& operator<<(ostream& os, _FUNCPROG::Maybe<_FUNCPROG::f0<string> > const& mv) {
+ostream& operator<<(ostream& os, _FUNCPROG::Maybe<_FUNCPROG::f0<string> > const& mv){
     return mv ? os << "Just(\"" << mv.value()() << "\")" : os << "Nothing";
 }
 
-wostream& operator<<(wostream& os, _FUNCPROG::Maybe<_FUNCPROG::f0<wstring> > const& mv) {
+wostream& operator<<(wostream& os, _FUNCPROG::Maybe<_FUNCPROG::f0<wstring> > const& mv){
     return mv ? os << L"Just(\"" << mv.value()() << L"\")" : os << L"Nothing";
 }
 
 template<typename A>
-std::ostream& operator<<(std::ostream& os, _FUNCPROG::EmptyData<A> const&) {
+std::ostream& operator<<(std::ostream& os, _FUNCPROG::EmptyData<A> const&){
     return os << "()";
 }
 
 template<typename A>
-std::wostream& operator<<(std::wostream& os, _FUNCPROG::EmptyData<A> const&) {
+std::wostream& operator<<(std::wostream& os, _FUNCPROG::EmptyData<A> const&){
     return os << L"()";
 }
 

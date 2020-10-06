@@ -53,7 +53,7 @@ struct __ReaderT
 template<typename R, typename _M>
 struct _ReaderT
 {
-    static_assert(is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad<_M>::value, "Should be a monad");
     using base_class = _ReaderT;
 
     template<typename A>
@@ -123,13 +123,13 @@ private:
 };
 
 template<typename R, class _M, typename A>
-typename std::enable_if<is_monad<_M>::value, typename _M::template type<A> >::type
+typename std::enable_if<_is_monad<_M>::value, typename _M::template type<A> >::type
 runReaderT(ReaderT<R, _M, A> const& m, R const& r) {
     return m.run(r);
 }
 
 template<typename R, class _M, typename A>
-typename std::enable_if<is_monad<_M>::value, function_t<typename _M::template type<A>(R const&)> >::type
+typename std::enable_if<_is_monad<_M>::value, function_t<typename _M::template type<A>(R const&)> >::type
 _runReaderT(ReaderT<R, _M, A> const& m) {
     return [m](R const& r) { return runReaderT(m, r); };
 }
@@ -372,10 +372,7 @@ ReaderT<R, _M, Fb> operator>>(ReaderT<R, _M, Fa> const& a, ReaderT<R, _M, Fb> co
 
 // MonadPlus
 template<typename R, typename _M>
-struct is_monad_plus<_ReaderT<R, _M> > : is_monad_plus<_M> {};
-
-template<typename R, typename _M>
-struct is_same_monad_plus<_ReaderT<R, _M>, _ReaderT<R, _M> > : is_monad_plus<_M> {};
+struct _is_monad_plus<_ReaderT<R, _M> > : _is_monad_plus<_M> {};
 
 template<typename R, typename _M>
 struct MonadPlus<_ReaderT<R, _M> > : Monad<_ReaderT<R, _M> >
@@ -409,10 +406,7 @@ struct MonadPlus<_ReaderT<R, _M> > : Monad<_ReaderT<R, _M> >
 
 // Alternative
 template<typename R, typename _M>
-struct is_alternative<_ReaderT<R, _M> > : is_alternative<_M> {};
-
-template<typename R, typename _M>
-struct is_same_alternative<_ReaderT<R, _M>, _ReaderT<R, _M> > : is_alternative<_M> {};
+struct _is_alternative<_ReaderT<R, _M> > : _is_alternative<_M> {};
 
 template<typename R, typename _M>
 struct Alternative<_ReaderT<R, _M> >

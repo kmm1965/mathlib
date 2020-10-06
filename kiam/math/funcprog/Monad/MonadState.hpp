@@ -32,7 +32,7 @@ using MonadState_t = MonadState<S, base_class_t<T> >;
 template<typename S, typename _M, typename MS>
 struct _MonadState
 {
-    static_assert(is_monad<_M>::value, "Should be a Monad");
+    static_assert(_is_monad<_M>::value, "Should be a Monad");
 
     template<typename T>
     using type = typename _M::template type<T>;

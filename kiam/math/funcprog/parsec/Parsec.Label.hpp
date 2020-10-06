@@ -20,12 +20,12 @@ labels p msgs =
        = foldr (\msg' err' -> addErrorMessage (Expect msg') err')
          (setErrorMessage (Expect msg) err) msgs
 */
-template<typename S, typename U, typename M, typename A, typename P>
+template<typename S, typename U, typename _M, typename A, typename P>
 struct labels_unParser
 {
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    labels_unParser(ParsecT<S, U, M, A, P> const& p, List<std::string> const& msgs) : p(p), msgs(msgs) {}
+    labels_unParser(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) : p(p), msgs(msgs) {}
 
     template<typename B>
     typename ParsecT_base_t::template return_type<B> run(
@@ -61,14 +61,14 @@ struct labels_unParser
     }
 
 private:
-    const ParsecT<S, U, M, A, P> p;
+    const ParsecT<S, U, _M, A, P> p;
     const List<std::string> msgs;
 };
 
-template<typename S, typename U, typename M, typename A, typename P>
-ParsecT<S, U, M, A, labels_unParser<S, U, M, A, P> >
-labels(ParsecT<S, U, M, A, P> const& p, List<std::string> const& msgs) {
-    return ParsecT<S, U, M, A, labels_unParser<S, U, M, A, P> >(labels_unParser<S, U, M, A, P>(p, msgs));
+template<typename S, typename U, typename _M, typename A, typename P>
+ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
+labels(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) {
+    return ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >(labels_unParser<S, U, _M, A, P>(p, msgs));
 }
 
 /*
@@ -77,15 +77,15 @@ label :: ParsecT s u m a -> String -> ParsecT s u m a
 label p msg
   = labels p [msg]
 */
-template<typename S, typename U, typename M, typename A, typename P>
-ParsecT<S, U, M, A, labels_unParser<S, U, M, A, P> >
-label(ParsecT<S, U, M, A, P> const& p, std::string const& msg) {
+template<typename S, typename U, typename _M, typename A, typename P>
+ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
+label(ParsecT<S, U, _M, A, P> const& p, std::string const& msg) {
     return labels(p, List<std::string>({ msg }));
 }
 
-template<typename S, typename U, typename M, typename A, typename P>
-ParsecT<S, U, M, A, labels_unParser<S, U, M, A, P> >
-operator&(ParsecT<S, U, M, A, P> const& p, std::string const& msg) {
+template<typename S, typename U, typename _M, typename A, typename P>
+ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
+operator&(ParsecT<S, U, _M, A, P> const& p, std::string const& msg) {
     return label(p, msg);
 }
 

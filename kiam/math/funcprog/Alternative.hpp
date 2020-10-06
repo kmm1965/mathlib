@@ -36,6 +36,27 @@ class Applicative f => Alternative f where
         many_v = some_v <|> pure []
         some_v = liftA2 (:) v many_v
 */
+template<class A>
+struct _is_alternative : std::false_type {};
+
+template<class A>
+using is_alternative = _is_alternative<base_class_t<A> >;
+
+template<class A, typename T = A>
+using alternative_type = typename std::enable_if<is_alternative<A>::value, T>::type;
+
+template<class _A1, class _A2>
+struct _is_same_alternative : std::false_type {};
+
+template<class _A>
+struct _is_same_alternative<_A, _A> : _is_alternative<_A> {};
+
+template<class A1, class A2>
+using is_same_alternative = _is_same_alternative<base_class_t<A1>, base_class_t<A2> >;
+
+template<class A1, class A2, typename T>
+using same_alternative_type = typename std::enable_if<is_same_alternative<A1, A2>::value, T>::type;
+
 // Requires _empty, operator|
 template<typename ALT>
 struct Alternative;
@@ -43,21 +64,8 @@ struct Alternative;
 template<typename A>
 using Alternative_t = Alternative<base_class_t<A> >;
 
-template<class A>
-struct is_alternative : std::false_type {};
-
-template<class A>
-using is_alternative_t = is_alternative<base_class_t<A> >;
-
-template<class A1, class A2>
-struct is_same_alternative : std::false_type {};
-
-template<class A1, class A2>
-using is_same_alternative_t = is_same_alternative<base_class_t<A1>, base_class_t<A2> >;
-
-#define IMPLEMENT_ALTERNATIVE(ALT, _ALT) \
-    template<> struct is_alternative<_ALT> : std::true_type {}; \
-    template<> struct is_same_alternative<_ALT, _ALT> : std::true_type {};
+#define IMPLEMENT_ALTERNATIVE(_ALT) \
+    template<> struct _is_alternative<_ALT> : std::true_type {}
 
 #define DECLARE_ALTERNATIVE_CLASS(ALT) \
     template<typename T> struct alt_op_result_type; \
@@ -70,10 +78,7 @@ using is_same_alternative_t = is_same_alternative<base_class_t<A1>, base_class_t
     template<typename T> static ALT<T> alt_op(ALT<T> const& op1, ALT<T> const& op2);
 
 template<class ALT>
-using alt_op_result_type = typename std::enable_if<
-    is_alternative_t<ALT>::value,
-    typename Alternative_t<ALT>::template alt_op_result_type_t<ALT>
->::type;
+using alt_op_result_type = alternative_type<ALT, typename Alternative_t<ALT>::template alt_op_result_type_t<ALT> >;
 
 template<class ALT>
 alt_op_result_type<ALT> operator|(ALT const& op1, ALT const& op2) {

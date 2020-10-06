@@ -4,6 +4,15 @@
 
 _FUNCPROG_BEGIN
 
+template<class T>
+struct _is_traversable : std::false_type {};
+
+template<class T>
+using is_traversable = _is_traversable<base_class_t<T> >;
+
+template<class TR, typename T = TR>
+using traversable_type = typename std::enable_if<is_traversable<TR>::value, T>::type;
+
 // requires traverse, sequenceA
 template<typename T>
 struct Traversable;
@@ -11,30 +20,27 @@ struct Traversable;
 template<typename T>
 using Traversable_t = Traversable<base_class_t<T> >;
 
-template<class T>
-struct is_traversable : std::false_type {};
+#define IMPLEMENT_TRAVERSABLE(_T) \
+    template<> struct _is_traversable<_T> : std::true_type {}
 
 #define DECLARE_TRAVERSABLE_CLASS(T) \
     /* traverse :: Applicative f => (a -> f b) -> t a -> f (t b) */ \
     template<typename AP, typename Arg> \
-    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, T<value_type_t<AP> > > >::type \
+    static applicative_type<AP, typeof_t<AP, T<value_type_t<AP> > > > \
     traverse(function_t<AP(Arg)> const& f, T<fdecay<Arg> > const& x); \
     \
     /* sequenceA :: Applicative f => t (f a) -> f (t a) */ \
     template<typename A> \
-    static typename std::enable_if<is_applicative<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
+    static applicative_type<A, typeof_t<A, T<value_type_t<A> > > > \
     sequenceA(T<A> const& x);
 
 #define DEFAULT_SEQUENCEA_IMPL(T, _T) \
     /* sequenceA = traverse id */ \
     template<typename A> \
-    typename std::enable_if<is_applicative<A>::value, typeof_t<A, T<value_type_t<A> > > >::type \
+    applicative_type<A, typeof_t<A, T<value_type_t<A> > > > \
     Traversable<_T>::sequenceA(T<A> const& x) { \
         return traverse(_(id<A>), x); \
     }
-
-#define IMPLEMENT_TRAVERSABLE(T) \
-    template<typename A> struct is_traversable<T<A> > : std::true_type {}
 
 // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 template<typename T, typename AP, typename Arg>

@@ -19,11 +19,11 @@ mkPT k = ParsecT $ \s cok cerr eok eerr -> do
                          Ok x s' err -> eok x s' err
                          Error err -> eerr err
 */
-template<typename S, typename U, typename M, typename A>
+template<typename S, typename U, typename _M, typename A>
 struct mkPT_unParser
 {
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
-    using k_type = function_t<typename M::template type<Consumed<typename M::template type<Reply<S, U, A> > > >(State<S, U> const&)>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
+    using k_type = function_t<typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >(State<S, U> const&)>;
 
     mkPT_unParser(const k_type &k) : k(k) {}
 
@@ -48,10 +48,10 @@ private:
     const k_type k;
 };
 
-template<typename S, typename U, typename M, typename A>
-ParsecT<S, U, M, A, mkPT_unParser<S, U, M, A> >
-mkPT(const typename mkPT_unParser<S, U, M, A>::k_type &k) {
-    return ParsecT<S, U, M, A, mkPT_unParser<S, U, M, A> >(mkPT_unParser<S, U, M, A>(k));
+template<typename S, typename U, typename _M, typename A>
+ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >
+mkPT(const typename mkPT_unParser<S, U, _M, A>::k_type &k) {
+    return ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >(mkPT_unParser<S, U, _M, A>(k));
 }
 
 /*
@@ -71,20 +71,20 @@ runPT p u name s
                 Consumed r -> r
                 Empty    r -> r
 */
-template<typename S, typename U, typename M, typename A, class P>
-typename M::template type<Either<ParseError, A> >
-runPT(ParsecT<S, U, M, A, P> const& p, U const& u, SourceName const& name, S const& s)
+template<typename S, typename U, typename _M, typename A, class P>
+typename _M::template type<Either<ParseError, A> >
+runPT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s)
 {
     using Reply_t = Reply<S, U, A>;
     using Either_t = Either<ParseError, A>;
-    using mrep_type = typename M::template type<Reply_t>;
+    using mrep_type = typename _M::template type<Reply_t>;
     const function_t<mrep_type(Consumed<mrep_type> const&)> parserReply =
         [](Consumed<mrep_type> const& res) {
         return res.index() == Consumed_ ? *(res.consumed()) : *(res.empty());
     };
     return _do2(res, p.run(State<S, U>(s, initialPos(name), u)),
         r, parserReply(res),
-        return Monad_t<M>::mreturn(r.index() == Ok_ ?
+        return Monad_t<_M>::mreturn(r.index() == Ok_ ?
             Either_t(_Right<A>(r.ok().value)) :
             Either_t(_Left<ParseError>(r.error().error)));
     );
@@ -113,9 +113,9 @@ runParserT :: (Stream s m t)
            => ParsecT s u m a -> u -> SourceName -> s -> m (Either ParseError a)
 runParserT = runPT
 */
-template<typename S, typename U, typename M, typename A, class P>
-typename M::template type<Either<ParseError, A> >
-runParserT(ParsecT<S, U, M, A, P> const& p, U const& u, SourceName const& name, S const& s) {
+template<typename S, typename U, typename _M, typename A, class P>
+typename _M::template type<Either<ParseError, A> >
+runParserT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s) {
     return runPT(p, u, name, s);
 }
 

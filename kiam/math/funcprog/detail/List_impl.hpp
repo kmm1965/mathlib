@@ -140,7 +140,7 @@ Foldable<_List>::foldr1(function_t<A(Arg1, Arg2)> const& f, List<A> const& l){
 //    traverse f = List.foldr cons_f (pure [])
 //       where cons_f x ys = liftA2 (:) (f x) ys
 template<typename AP, typename Arg>
-typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, List<value_type_t<AP> > > >::type
+applicative_type<AP, typeof_t<AP, List<value_type_t<AP> > > >
 Traversable<_List>::traverse(function_t<AP(Arg)> const& f, List<fdecay<Arg> > const& l)
 {
     using A = fdecay<Arg>;

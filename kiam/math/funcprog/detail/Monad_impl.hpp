@@ -47,14 +47,12 @@ DEFINE_FUNCTION_2(2, AP_TYPE(T0, T1), ap, T1 const&, mf, T0 const&, mv,
     return _do2(f, mf, v, mv, return Monad_t<T0>::mreturn(invoke_f0(f << v)););)
 
 template<typename MF, typename MG>
-typename std::enable_if<is_same_monad<MF, MG>::value, MG>::type
-operator>>(MF const& f, MG const& g) {
+same_monad_type<MF, MG, MG> operator>>(MF const& f, MG const& g) {
     return _do(__unused__, f, return g;);
 }
 
 template<typename RetF, typename RetG>
-typename std::enable_if<is_same_monad<RetF, RetG>::value, f0<RetG> >::type
-operator>>(f0<RetF> const& f, f0<RetG> const& g) {
+same_monad_type<RetF, RetG, f0<RetG> > operator>>(f0<RetF> const& f, f0<RetG> const& g) {
     return [f, g](){ return _do(__unused__, f(), return g();); };
 }
 

@@ -56,7 +56,7 @@ struct __StateT
 template<typename S, typename _M>
 struct _StateT
 {
-    static_assert(is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad<_M>::value, "Should be a monad");
 
     using base_class = _StateT;
 
@@ -414,7 +414,7 @@ typename std::enable_if<
 
 // Functor
 template<typename S, typename _M>
-struct _is_functor<_StateT<S, _M> > : is_functor<_M> {};
+struct _is_functor<_StateT<S, _M> > : _is_functor<_M> {};
 
 template<typename S, typename _M>
 struct Functor<_StateT<S, _M> >
@@ -514,10 +514,7 @@ struct Monad<_StateT<S, _M> > : Applicative<_StateT<S, _M> >
 
 // MonadPlus
 template<typename S, typename _M>
-struct is_monad_plus<_StateT<S, _M> > : is_monad_plus<_M> {};
-
-template<typename S, typename _M>
-struct is_same_monad_plus<_StateT<S, _M>, _StateT<S, _M> > : is_monad_plus<_M> {};
+struct _is_monad_plus<_StateT<S, _M> > : _is_monad_plus<_M> {};
 
 template<typename S, typename _M>
 struct MonadPlus<_StateT<S, _M> > : Monad<_StateT<S, _M> >
@@ -551,10 +548,7 @@ struct MonadPlus<_StateT<S, _M> > : Monad<_StateT<S, _M> >
 
 // Alternative
 template<typename S, typename _M>
-struct is_alternative<_StateT<S, _M> > : is_monad_plus<_M> {};
-
-template<typename S, typename _M>
-struct is_same_alternative<_StateT<S, _M>, _StateT<S, _M> > : is_monad_plus<_M> {};
+struct _is_alternative<_StateT<S, _M> > : _is_monad_plus<_M> {};
 
 template<typename S, typename _M>
 struct Alternative<_StateT<S, _M> >

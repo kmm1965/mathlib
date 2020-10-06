@@ -14,12 +14,12 @@ lookAhead p =
         let eok' a _ _ = eok a s (newErrorUnknown (statePos s))
         unParser p s eok' cerr eok' eerr
 */
-template<typename S, typename U, typename M, typename A, typename P>
+template<typename S, typename U, typename _M, typename A, typename P>
 struct lookAhead_unParser
 {
-    using ParsecT_base_t = ParsecT_base<S, U, M, A>;
+    using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    lookAhead_unParser(ParsecT<S, U, M, A, P> const& p) : p(p) {}
+    lookAhead_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p) {}
 
     template<typename B>
     typename ParsecT_base_t::template return_type<B> run(
@@ -36,13 +36,13 @@ struct lookAhead_unParser
     }
 
 private:
-    const ParsecT<S, U, M, A, P> p;
+    const ParsecT<S, U, _M, A, P> p;
 };
 
-template<typename S, typename U, typename M, typename A, typename P>
-ParsecT<S, U, M, A, lookAhead_unParser<S, U, M, A, P> >
-lookAhead(ParsecT<S, U, M, A, P> const& p) {
-    return ParsecT<S, U, M, A, lookAhead_unParser<S, U, M, A, P> >(lookAhead_unParser<S, U, M, A, P>(p));
+template<typename S, typename U, typename _M, typename A, typename P>
+ParsecT<S, U, _M, A, lookAhead_unParser<S, U, _M, A, P> >
+lookAhead(ParsecT<S, U, _M, A, P> const& p) {
+    return ParsecT<S, U, _M, A, lookAhead_unParser<S, U, _M, A, P> >(lookAhead_unParser<S, U, _M, A, P>(p));
 }
 
 _PARSEC_END

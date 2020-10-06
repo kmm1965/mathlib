@@ -4,6 +4,15 @@
 
 _FUNCPROG_BEGIN
 
+template<class _F>
+struct _is_foldable : std::false_type {};
+
+template<class F>
+using is_foldable = _is_foldable<base_class_t<F> >;
+
+template<class F, typename T = F>
+using foldable_type = typename std::enable_if<is_foldable<F>::value, T>::type;
+
 // requires foldl, foldl1, foldr, foldr1
 template<typename F>
 struct Foldable;
@@ -11,8 +20,8 @@ struct Foldable;
 template<typename T>
 using Foldable_t = Foldable<base_class_t<T> >;
 
-template<class F>
-struct is_foldable : std::false_type {};
+#define IMPLEMENT_FOLDABLE(_F) \
+    template<> struct _is_foldable<_F> : std::true_type {}
 
 #define DECLARE_FOLDABLE_CLASS(F) \
     /* foldMap :: Monoid m => (a -> m) -> t a -> m */ \
@@ -45,10 +54,6 @@ struct is_foldable : std::false_type {};
     monoid_type<M> Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
         return foldr(_(mappend<M>) & f, Monoid_t<M>::template mempty<value_type_t<M> >(), x); \
     }
-
-#define IMPLEMENT_FOLDABLE(F) \
-    template<typename A> \
-    struct is_foldable<F<A> > : std::true_type {};
 
 /*
 -- | Map each element of the structure to a monoid,
@@ -98,7 +103,7 @@ using foldlr_type = typename std::enable_if<
 #define FOLDLR_TYPE(FO, A, B, Ret) typename FOLDLR_TYPE_(FO, A, B, Ret)
 
 template<typename FO>
-using fold1_type = typename std::enable_if<is_foldable<FO>::value, value_type_t<FO> >::type;
+using fold1_type = foldable_type<FO, value_type_t<FO> >;
 
 DEFINE_FUNCTION_3(4, FOLDLR_TYPE(T0, T1, T2, T3), foldl, function_t<T3(T2, T1)> const&, f, T3 const&, z, T0 const&, x,
     return Foldable_t<T0>::foldl(f, z, x);)

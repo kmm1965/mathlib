@@ -65,7 +65,7 @@ function_t<MaybeT<base_class_t<NB>, value_type_t<value_type_t<NB> > >(
 template<class _M>
 struct _MaybeT
 {
-    static_assert(is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad<_M>::value, "Should be a monad");
 
     using base_class = _MaybeT;
 
@@ -163,7 +163,7 @@ struct Functor<_MaybeT<_M> >
 
 // Applicative
 template<class _M>
-struct _is_applicative<_MaybeT<_M> > : is_monad<_M> {};
+struct _is_applicative<_MaybeT<_M> > : _is_monad<_M> {};
 
 template<class _M>
 struct Applicative<_MaybeT<_M> > : Functor<_MaybeT<_M> >
@@ -272,10 +272,7 @@ instance (Monad m) => MonadPlus (MaybeT m) where
     {-# INLINE mplus #-}
 */
 template<class _M>
-struct is_monad_plus<_MaybeT<_M> > : is_monad<_M> {};
-
-template<class _M>
-struct is_same_monad_plus<_MaybeT<_M>, _MaybeT<_M> > : is_monad_plus<_M> {};
+struct _is_monad_plus<_MaybeT<_M> > : _is_monad<_M> {};
 
 template<class _M>
 struct MonadPlus<_MaybeT<_M> > : Monad<_MaybeT<_M> >
@@ -323,10 +320,7 @@ instance (Functor m, Monad m) => Alternative (MaybeT m) where
     {-# INLINE (<|>) #-}
 */
 template<class _M>
-struct is_alternative<_MaybeT<_M> > : is_monad<_M> {};
-
-template<class _M>
-struct is_same_alternative<_MaybeT<_M>, _MaybeT<_M> > : is_alternative<_M> {};
+struct _is_alternative<_MaybeT<_M> > : _is_monad<_M> {};
 
 template<class _M>
 struct Alternative<_MaybeT<_M> >
@@ -360,8 +354,8 @@ MaybeT<_M, A> operator|(MaybeT<_M, A> const& x, MaybeT<_M, A> const& y) {
 }
 
 // Foldable
-template<class _M, typename A>
-struct is_foldable<MaybeT<_M, A> > : is_foldable<typename _M::template type<Maybe<A> > > {};
+template<class _M>
+struct _is_foldable<_MaybeT<_M> > : _is_foldable<_M> {};
 
 template<class _M>
 struct Foldable<_MaybeT<_M> >
@@ -375,15 +369,15 @@ struct Foldable<_MaybeT<_M> >
 };
 
 // Traversable
-template<class _M, typename A>
-struct is_traversable<MaybeT<_M, A> > : is_traversable<typename _M::template type<A> >{};
+template<class _M>
+struct _is_traversable<_MaybeT<_M> > : _is_traversable<_M>{};
 
 template<class _M>
 struct Traversable<_MaybeT<_M> >
 {
     // traverse f (MaybeT a) = MaybeT <$> traverse (traverse f) a
     template<typename AP, typename Arg>
-    static typename std::enable_if<is_applicative<AP>::value, typeof_t<AP, MaybeT<_M, fdecay<Arg> > > >::type
+    static applicative_type<AP, typeof_t<AP, MaybeT<_M, fdecay<Arg> > > >
     traverse(function_t<AP(Arg)> const& f, MaybeT<_M, fdecay<Arg> > const& x){
         return _(MaybeT_<_M, fdecay<Arg> >) / Traversable<_M>::traverse(_traverse<Maybe<fdecay<Arg> > >(f), x.run());
     }

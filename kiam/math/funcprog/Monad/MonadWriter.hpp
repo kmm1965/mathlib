@@ -35,7 +35,7 @@ struct _MonadWriter
     using type = typename _M::template type<T>;
 
     static_assert(is_monoid<W>::value, "Should be a Monoid");
-    static_assert(is_monad<_M>::value, "Should be a Monad");
+    static_assert(_is_monad<_M>::value, "Should be a Monad");
 
 /*
     -- | @'writer' (a,w)@ embeds a simple writer action.
