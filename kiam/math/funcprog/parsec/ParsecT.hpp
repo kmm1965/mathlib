@@ -14,7 +14,7 @@ _PARSEC_BEGIN
 
 struct parse_error : std::runtime_error
 {
-    parse_error(const char *msg) : std::runtime_error(msg) {}
+    parse_error(const char *msg) : std::runtime_error(msg){}
 };
 
 template<typename S, typename U, typename _M, typename A, class P>
@@ -95,12 +95,17 @@ struct ParsecT_base : _ParsecT<S, U, _M>
 #define PARSECT_BASE_(S, U, _M, A) BOOST_IDENTITY_TYPE((_PARSEC::ParsecT_base<S, U, _M, A>))
 #define PARSECT_BASE(S, U, _M, A) typename PARSECT_BASE_(S, U, _M, A)
 
+#define DECLARE_OK_ERR_TYPES() \
+    template<typename B> using ok_type = typename ParsecT_base_t::template ok_type<B>; \
+    template<typename B> using err_type = typename ParsecT_base_t::template err_type<B>
+
 template<typename S, typename U, typename _M, typename A, class P>
 struct ParsecT : ParsecT_base<S, U, _M, A>
 {
     using super = ParsecT_base<S, U, _M, A>;
+    using unParser_type = P;
 
-    ParsecT(P const& unParser) : unParser(unParser) {}
+    ParsecT(P const& unParser) : unParser(unParser){}
 
     template<typename B>
     typename super::template return_type<B> run(State<S, U> const& s,
@@ -130,17 +135,17 @@ struct ParsecT : ParsecT_base<S, U, _M, A>
         using mrep_type = typename _M::template type<Reply_t>;
         using B = Consumed<mrep_type>;
         const typename ParsecT<S, U, _M, A, P>::template ok_type<B>
-            cok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
+            cok = [](A const& a, State<S, U> const& s_, ParseError const& err){
                 return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
             },
-            eok = [](A const& a, State<S, U> const& s_, ParseError const& err) {
+            eok = [](A const& a, State<S, U> const& s_, ParseError const& err){
                 return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Ok<S, U, A>(a, s_, err))))));
             };
         const typename ParsecT<S, U, _M, A, P>::template err_type<B>
-            cerr = [](ParseError const& err) {
+            cerr = [](ParseError const& err){
                 return Monad<_M>::mreturn(B(c_Consumed<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
             },
-            eerr = [](ParseError const& err) {
+            eerr = [](ParseError const& err){
                 return Monad<_M>::mreturn(B(c_Empty<mrep_type>(Monad<_M>::mreturn(Reply_t(c_Error(err))))));
             };
         return unParser.template run<B>(s, cok, cerr, eok, eerr);
@@ -151,13 +156,13 @@ private:
 };
 
 template<typename S, typename U, typename _M, typename A, class P>
-ParsecT<S, U, _M, A, P> getParsecT(P const& unParser) {
+ParsecT<S, U, _M, A, P> getParsecT(P const& unParser){
     return ParsecT<S, U, _M, A, P>(unParser);
 }
 
 template<typename S, typename U, typename _M, typename A, typename P>
 typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >
-runParsecT(ParsecT<S, U, _M, A, P> const& p, State<S, U> const& s) {
+runParsecT(ParsecT<S, U, _M, A, P> const& p, State<S, U> const& s){
     return p.run(s);
 }
 
@@ -170,13 +175,10 @@ template<typename A, typename P>
 using Parser = Parsec<String, None, A, P>;
 
 #define IMPLEMENT_UNPARSER_RUN(impl) \
+    DECLARE_OK_ERR_TYPES(); \
     template<typename B> \
-    typename ParsecT_base_t::template return_type<B> run( \
-        State<S, U> const& s, \
-        typename ParsecT_base_t::template ok_type<B> const& cok, \
-        typename ParsecT_base_t::template err_type<B> const& cerr, \
-        typename ParsecT_base_t::template ok_type<B> const& eok, \
-        typename ParsecT_base_t::template err_type<B> const& eerr) const \
+    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s, \
+        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const \
     { impl }
 
 /*
@@ -199,7 +201,7 @@ struct unexpected_unParser
 {
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    unexpected_unParser(std::string const& msg) : msg(msg) {}
+    unexpected_unParser(std::string const& msg) : msg(msg){}
 
     IMPLEMENT_UNPARSER_RUN(return eerr(newErrorMessage(Message(UnExpect, msg), s.pos));)
 
@@ -208,14 +210,14 @@ private:
 };
 
 template<typename S, typename U, typename _M, typename A>
-ParsecT<S, U, _M, A, unexpected_unParser<S, U, _M, A> > unexpected(std::string const& msg) {
+ParsecT<S, U, _M, A, unexpected_unParser<S, U, _M, A> > unexpected(std::string const& msg){
     return ParsecT<S, U, _M, A, unexpected_unParser<S, U, _M, A> >(unexpected_unParser<S, U, _M, A>(msg));
 }
 
 // sysUnExpectError :: String -> SourcePos -> Reply s u a
 // sysUnExpectError msg pos  = Error (newErrorMessage (SysUnExpect msg) pos)
 template<typename S, typename U, typename A>
-Reply<S, U, A> sysUnExpectError(std::string const& msg, SourcePos const& pos) {
+Reply<S, U, A> sysUnExpectError(std::string const& msg, SourcePos const& pos){
     return c_Error(newErrorMessage(Message(SysUnExpect, msg), pos));
 }
 

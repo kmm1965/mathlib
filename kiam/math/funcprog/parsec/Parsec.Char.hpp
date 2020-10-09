@@ -24,8 +24,8 @@ ParsecT<String, U, _M, char, tokenPrimEx_unParser<U, _M, char, char> >
 satisfy(function_t<bool(char)> const& f){
     return tokenPrim<U, _M, char, char>(
         _([](char c) { return std::string("\"") + c + "\""; }),
-        _([](SourcePos const& pos, const char &c, const String &_cs) { return updatePosChar(pos, c); }),
-        _([f](const char &c) { return f(c) ? Just(c) : Nothing<char>(); }));
+        _([](SourcePos const& pos, char c, const String &_cs) { return updatePosChar(pos, c); }),
+        _([f](char c) { return f(c) ? Just(c) : Nothing<char>(); }));
 }
 
 /*

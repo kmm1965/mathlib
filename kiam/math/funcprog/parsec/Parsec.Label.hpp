@@ -25,15 +25,13 @@ struct labels_unParser
 {
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    labels_unParser(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) : p(p), msgs(msgs) {}
+    DECLARE_OK_ERR_TYPES();
+
+    labels_unParser(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) : p(p), msgs(msgs){}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(
-        State<S, U> const& s,
-        typename ParsecT_base_t::template ok_type<B> const& cok,
-        typename ParsecT_base_t::template err_type<B> const& cerr,
-        typename ParsecT_base_t::template ok_type<B> const& eok,
-        typename ParsecT_base_t::template err_type<B> const& eerr) const
+    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
+        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
         const function_t<ParseError(ParseError const&, List<std::string> const&)> setExpectErrors =
             [](ParseError const& err, List<std::string> const& msgs)
@@ -41,7 +39,7 @@ struct labels_unParser
             const int lmsgs = length(msgs);
             if (lmsgs == 0) return setErrorMessage(Message(Expect, ""), err);
             else if (lmsgs == 1) return setErrorMessage(Message(Expect, msgs.front()), err);
-            else return foldr(_([](std::string const& msg_, ParseError const& err_) {
+            else return foldr(_([](std::string const& msg_, ParseError const& err_){
                 return addErrorMessage(Message(Expect, msg_), err_); }),
                 setErrorMessage(Message(Expect, head(msgs)), err), tail(msgs));
         };
@@ -51,10 +49,10 @@ struct labels_unParser
                   else setExpectErrors error msgs
             eerr' err = eerr $ setExpectErrors err msgs
         */
-        const typename ParsecT_base_t::template ok_type<B> eok_ = [this, &eok, &setExpectErrors](A const& x, State<S, U> const& s_, ParseError const& error) {
+        ok_type<B> const eok_ = [this, &eok, &setExpectErrors](A const& x, State<S, U> const& s_, ParseError const& error){
             return eok(x, s_, errorIsUnknown(error) ? error : setExpectErrors(error, msgs));
         };
-        const typename ParsecT_base_t::template err_type<B> eerr_ = [this, &eerr, &setExpectErrors](ParseError const& err) {
+        err_type<B> const eerr_ = [this, &eerr, &setExpectErrors](ParseError const& err){
             return eerr(setExpectErrors(err, msgs));
         };
         return p.template run<B>(s, cok, cerr, eok_, eerr_);
@@ -67,7 +65,7 @@ private:
 
 template<typename S, typename U, typename _M, typename A, typename P>
 ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-labels(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) {
+labels(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs){
     return ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >(labels_unParser<S, U, _M, A, P>(p, msgs));
 }
 
@@ -79,13 +77,13 @@ label p msg
 */
 template<typename S, typename U, typename _M, typename A, typename P>
 ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-label(ParsecT<S, U, _M, A, P> const& p, std::string const& msg) {
+label(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
     return labels(p, List<std::string>({ msg }));
 }
 
 template<typename S, typename U, typename _M, typename A, typename P>
 ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-operator&(ParsecT<S, U, _M, A, P> const& p, std::string const& msg) {
+operator&(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
     return label(p, msg);
 }
 

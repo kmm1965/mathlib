@@ -19,17 +19,15 @@ struct lookAhead_unParser
 {
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    lookAhead_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p) {}
+    DECLARE_OK_ERR_TYPES();
+
+    lookAhead_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p){}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(
-        State<S, U> const& s,
-        typename ParsecT_base_t::template ok_type<B> const& cok_,
-        typename ParsecT_base_t::template err_type<B> const& cerr,
-        typename ParsecT_base_t::template ok_type<B> const& eok,
-        typename ParsecT_base_t::template err_type<B> const& eerr) const
+    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
+        ok_type<B> const& cok_, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
-        const typename ParsecT_base_t::template ok_type<B> eok_ = [s, eok](A const& a, State<S, U> const&, ParseError const&) {
+        ok_type<B> const eok_ = [s, eok](A const& a, State<S, U> const&, ParseError const&){
             return eok(a, s, newErrorUnknown(statePos(s)));
         };
         return p.template run<B>(s, eok_, cerr, eok_, eerr);
@@ -41,7 +39,7 @@ private:
 
 template<typename S, typename U, typename _M, typename A, typename P>
 ParsecT<S, U, _M, A, lookAhead_unParser<S, U, _M, A, P> >
-lookAhead(ParsecT<S, U, _M, A, P> const& p) {
+lookAhead(ParsecT<S, U, _M, A, P> const& p){
     return ParsecT<S, U, _M, A, lookAhead_unParser<S, U, _M, A, P> >(lookAhead_unParser<S, U, _M, A, P>(p));
 }
 

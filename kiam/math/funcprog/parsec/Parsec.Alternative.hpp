@@ -43,27 +43,21 @@ struct parserPlus_unParser
 {
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
+    DECLARE_OK_ERR_TYPES();
+
     parserPlus_unParser(ParsecT<S, U, _M, A, PM> const& m, ParsecT<S, U, _M, A, PN> const& n) : m(m), n(n){}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(
-        State<S, U> const& s,
-        typename ParsecT_base_t::template ok_type<B> const& cok,
-        typename ParsecT_base_t::template err_type<B> const& cerr,
-        typename ParsecT_base_t::template ok_type<B> const& eok,
-        typename ParsecT_base_t::template err_type<B> const& eerr) const
+    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
+        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
-        const typename ParsecT_base_t::template err_type<B> meerr =
+        err_type<B> const meerr =
             [&](ParseError const& err)
         {
-            const typename ParsecT_base_t::template ok_type<B> neok =
-                [&eok, &err](A const& y, State<S, U> const& s_, ParseError const& err_)
-            {
+            ok_type<B> const neok = [&eok, &err](A const& y, State<S, U> const& s_, ParseError const& err_){
                 return eok(y, s_, mergeError(err, err_));
             };
-            const typename ParsecT_base_t::template err_type<B> neerr =
-                [&eerr, &err](ParseError const& err_)
-            {
+            err_type<B> const neerr = [&eerr, &err](ParseError const& err_){
                 return eerr(mergeError(err, err_));
             };
             return n.template run<B>(s, cok, cerr, neok, neerr);

@@ -25,19 +25,19 @@ struct mkPT_unParser
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
     using k_type = function_t<typename _M::template type<Consumed<typename _M::template type<Reply<S, U, A> > > >(State<S, U> const&)>;
 
-    mkPT_unParser(const k_type &k) : k(k) {}
+    mkPT_unParser(const k_type &k) : k(k){}
 
     IMPLEMENT_UNPARSER_RUN(
         return _do(cons, k(s),
             return cons.index() == Consumed_ ?
                 _do(rep, cons.consumed().value,
-                    if (rep.index() == Ok_) {
+                    if (rep.index() == Ok_){
                         const OK(S, U, A) &ok = rep.ok();
                         return cok(ok.value, ok.state, ok.error);
                     } else return cerr(rep.error().error);
                 ) : // Empty_
                 _do(rep, cons.empty().value,
-                    if (rep.index() == Ok_) {
+                    if (rep.index() == Ok_){
                         const OK(S, U, A) &ok = rep.ok();
                         return eok(ok.value, ok.state, ok.error);
                     } else return eerr(rep.error().error);
@@ -50,7 +50,7 @@ private:
 
 template<typename S, typename U, typename _M, typename A>
 ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >
-mkPT(const typename mkPT_unParser<S, U, _M, A>::k_type &k) {
+mkPT(const typename mkPT_unParser<S, U, _M, A>::k_type &k){
     return ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >(mkPT_unParser<S, U, _M, A>(k));
 }
 
@@ -78,8 +78,7 @@ runPT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S co
     using Reply_t = Reply<S, U, A>;
     using Either_t = Either<ParseError, A>;
     using mrep_type = typename _M::template type<Reply_t>;
-    const function_t<mrep_type(Consumed<mrep_type> const&)> parserReply =
-        [](Consumed<mrep_type> const& res) {
+    auto const parserReply = [](Consumed<mrep_type> const& res){
         return res.index() == Consumed_ ? *(res.consumed()) : *(res.empty());
     };
     return _do2(res, p.run(State<S, U>(s, initialPos(name), u)),
@@ -97,7 +96,7 @@ runP p u name s = runIdentity $ runPT p u name s
 */
 template<typename S, typename U, typename A, class P>
 Either<ParseError, A>
-runP(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s) {
+runP(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runPT(p, u, name, s).run();
 }
 
@@ -115,7 +114,7 @@ runParserT = runPT
 */
 template<typename S, typename U, typename _M, typename A, class P>
 typename _M::template type<Either<ParseError, A> >
-runParserT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s) {
+runParserT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runPT(p, u, name, s);
 }
 
@@ -138,7 +137,7 @@ runParser = runP
 */
 template<typename S, typename U, typename A, class P>
 Either<ParseError, A>
-runParser(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s) {
+runParser(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runP(p, u, name, s);
 }
 
@@ -161,7 +160,7 @@ parse p = runP p ()
 
 template<typename S, typename A, class P>
 Either<ParseError, A>
-parse(Parsec<S, None, A, P> const& p, SourceName const& name, S const& s) {
+parse(Parsec<S, None, A, P> const& p, SourceName const& name, S const& s){
     return runP(p, None(), name, s);
 }
 
