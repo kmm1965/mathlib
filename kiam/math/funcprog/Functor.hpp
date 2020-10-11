@@ -34,7 +34,7 @@ using is_same_functor = _is_same_functor<base_class_t<F1>, base_class_t<F2> >;
 template<class F1, class F2, typename T>
 using same_functor_type = typename std::enable_if<is_same_functor<F1, F2>::value, T>::type;
 
-// Requires operator/ (analogue to <$>)
+// Requires operator/ (analogue to <$> in Haskell)
 template<typename F>
 struct Functor;
 
@@ -47,7 +47,7 @@ using Functor_t = Functor<base_class_t<T> >;
 #define DECLARE_FUNCTOR_CLASS(F) \
     /* <$> fmap :: Functor f => (a -> b) -> f a -> f b */ \
     template<typename Ret, typename Arg, typename... Args> \
-    static F<remove_f0_t<function_t<Ret(Args...)> > > \
+    static constexpr F<remove_f0_t<function_t<Ret(Args...)> > > \
     fmap(function_t<Ret(Arg, Args...)> const& f, F<fdecay<Arg> > const& v);
 
 template<typename F, typename FT>
@@ -73,16 +73,16 @@ using fmap_type = typename std::enable_if<
 #define FMAP_TYPE(F, FT) typename FMAP_TYPE_(F, FT)
 
 // <$> fmap :: Functor f => (a -> b) -> f a -> f b
-DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), fmap, function_t<T1> const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, constexpr FMAP_TYPE(T0, T1), fmap, function_t<T1> const&, f, T0 const&, v,
     return Functor_t<T0>::fmap(f, v);)
 
 template<typename F, typename FT>
-fmap_type<F, FT> operator/(function_t<FT> const& f, F const& v){
+constexpr fmap_type<F, FT> operator/(function_t<FT> const& f, F const& v){
     return fmap(f, v);
 }
 
 // liftA == fmap
-DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, constexpr FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 const&, v,
     return fmap(f, v);)
 
 /*
@@ -93,19 +93,19 @@ DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 cons
 (<$) = fmap . const
 */
 template<typename F, typename T>
-functor_type<F, typeof_t<F, T> > left_fmap(T const& v, F const& f){
+constexpr functor_type<F, typeof_t<F, T> > left_fmap(T const& v, F const& f){
     return _const_<value_type_t<F> >(v) / f;
 }
 
 template<typename F, typename T>
-functor_type<F, function_t<typeof_t<F, T>(F const&)> > _left_fmap(T const& v){
+constexpr functor_type<F, function_t<typeof_t<F, T>(F const&)> > _left_fmap(T const& v){
     return [v](F const& f){
         return left_fmap(v, f);
     };
 }
 
 template<typename F, typename T>
-functor_type<F, typeof_t<F, T> > operator/=(T const& v, F const& f){
+constexpr functor_type<F, typeof_t<F, T> > operator/=(T const& v, F const& f){
     return left_fmap(v, f);
 }
 

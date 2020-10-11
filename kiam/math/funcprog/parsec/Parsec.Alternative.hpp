@@ -21,8 +21,9 @@ struct parserZero_unParser
 };
 
 template<typename S, typename U, typename _M, typename A>
-ParsecT<S, U, _M, A, parserZero_unParser<S, U, _M, A> > parserZero(){
-    return ParsecT<S, U, _M, A, parserZero_unParser<S, U, _M, A> >(parserZero_unParser<S, U, _M, A>());
+constexpr ParsecT<S, U, _M, A, parserZero_unParser<S, U, _M, A> >
+parserZero(){
+    return parserZero_unParser<S, U, _M, A>();
 }
 
 /*
@@ -48,8 +49,7 @@ struct parserPlus_unParser
     parserPlus_unParser(ParsecT<S, U, _M, A, PM> const& m, ParsecT<S, U, _M, A, PN> const& n) : m(m), n(n){}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
-        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
+    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
         err_type<B> const meerr =
             [&](ParseError const& err)
@@ -70,7 +70,7 @@ private:
     const ParsecT<S, U, _M, A, PN> n;
 };
 
-DEFINE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
+DEFINE_FUNCTION_2(6, constexpr PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
     parserPlus, PARSECT(T0, T1, T2, T3, T4) const&, m, PARSECT(T0, T1, T2, T3, T5) const&, n,
     return PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5))(PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)(m, n));)
 
@@ -103,7 +103,7 @@ template<typename S, typename U, typename _M>
 struct Alternative<parsec::_ParsecT<S, U, _M> >
 {
     template<typename A>
-    parsec::ParsecT<S, U, _M, A, parsec::parserZero_unParser<S, U, _M, A> > empty(){
+    constexpr auto empty(){
         return parsec::parserZero<S, U, _M, A>();
     }
     
@@ -119,17 +119,13 @@ struct Alternative<parsec::_ParsecT<S, U, _M> >
     };
 
     template<typename A, typename P, typename P2>
-    static alt_op_result_type_t<parsec::ParsecT<S, U, _M, A, P2>, P>
-    alt_op(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
+    static constexpr auto alt_op(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
         return parsec::parserPlus<S, U, _M, A, P, P2>(op1, op2);
     }
 };
 
 template<typename S, typename U, typename _M, typename A, typename P, typename P2>
-using parsec_alt_op_result_type = typename Alternative<parsec::_ParsecT<S, U, _M> >::template alt_op_result_type_t<parsec::ParsecT<S, U, _M, A, P2>, P>;
-
-template<typename S, typename U, typename _M, typename A, typename P, typename P2>
-parsec_alt_op_result_type<S, U, _M, A, P, P2> operator|(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
+constexpr auto operator|(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
     return Alternative<parsec::_ParsecT<S, U, _M> >::alt_op(op1, op2);
 }
 

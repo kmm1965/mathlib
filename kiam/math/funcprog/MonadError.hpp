@@ -30,10 +30,10 @@ using MonadError_t = MonadError<base_class_t<T> >;
 #define DECLARE_MONADERROR_CLASS(ME) \
     /* throwError :: e -> m a */ \
     template<typename A> \
-    static ME<A> throwError(error_type<A> const&); \
+    static constexpr ME<A> throwError(error_type<A> const&); \
     /* catchError :: m a -> (e -> m a) -> m a */ \
     template<typename A> \
-    static ME<A> catchError(ME<A> const& x, function_t<ME<A>(error_type<A> const&)> const& f);
+    static constexpr ME<A> catchError(ME<A> const& x, function_t<ME<A>(error_type<A> const&)> const& f);
 
 template<typename _ME>
 struct MonadError_base
@@ -52,7 +52,7 @@ liftEither :: MonadError e m => Either e a -> m a
 liftEither = either throwError return
 */
     template<typename E, typename A>
-    static typeof_t<_ME, A> liftEither(Either<E, A> const& x) {
+    static constexpr typeof_t<_ME, A> liftEither(Either<E, A> const& x) {
         return either(_(MonadError<_ME>::template throwError<A>), _(Monad<_ME>::template mreturn<A>), x);
     }
 };
@@ -61,16 +61,16 @@ template<typename M>
 using MonadError_error_type = typename MonadError_t<M>::template error_type<value_type_t<M> >;
 
 template<typename M>
-monad_type<M> liftEither(Either<MonadError_error_type<M>, value_type_t<M> > const& x) {
+constexpr monad_type<M> liftEither(Either<MonadError_error_type<M>, value_type_t<M> > const& x) {
     return MonadError_t<M>::template liftEither<MonadError_error_type<M> >(x);
 }
 
 template<typename M, typename A>
-monad_type<M> throwError(A const& e){
+constexpr monad_type<M> throwError(A const& e){
     return MonadError_t<M>::template throwError<value_type_t<M> >(e);
 }
 
-DEFINE_FUNCTION_2(2, monad_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
+DEFINE_FUNCTION_2(2, constexpr monad_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
     return MonadError_t<T0>::catchError(x, f);)
 
 _FUNCPROG_END

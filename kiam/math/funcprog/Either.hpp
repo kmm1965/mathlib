@@ -84,8 +84,6 @@ struct Either : variant_t<_Left<A>, _Right<B> >, _Either<A>
 template<typename A>
 struct Functor<_Either<A> >
 {
-    template<typename FUNC> struct fmap_result_type;
-
     template<typename Ret, typename Arg, typename... Args>
     static Either<A, remove_f0_t<function_t<Ret(Args...)> > >
     fmap(function_t<Ret(Arg, Args...)> const& f, Either<A, fdecay<Arg> > const& x);
@@ -188,8 +186,6 @@ private:
 template<>
 struct Functor<_Either<void> >
 {
-    template<typename FUNC> struct fmap_result_type;
-
     template<typename Ret, typename Arg, typename... Args>
     static Either<void, remove_f0_t<function_t<Ret(Args...)> > >
     fmap(function_t<Ret(Arg, Args...)> const& f, Either<void, fdecay<Arg> > const& x);

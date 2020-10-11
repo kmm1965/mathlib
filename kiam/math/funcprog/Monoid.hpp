@@ -36,7 +36,7 @@ struct Monoid;
 template<typename T>
 using Monoid_t = Monoid<base_class_t<T> >;
 
-DEFINE_FUNCTION_2(1, monoid_type<T0>, mappend, T0 const&, x, T0 const&, y,
+DEFINE_FUNCTION_2(1, constexpr monoid_type<T0>, mappend, T0 const&, x, T0 const&, y,
     return Monoid_t<T0>::mappend(x, y);)
 
 /*
@@ -50,7 +50,7 @@ mconcat = foldr mappend mempty
 */
 
 template<typename T>
-monoid_type<T> mconcat(List<T> const& m){
+constexpr monoid_type<T> mconcat(List<T> const& m){
     return Monoid_t<T>::mconcat(m);
 }
 
@@ -67,7 +67,7 @@ struct _Monoid
     // mconcat :: [a] -> a
     // mconcat = foldr mappend mempty
     template<typename M>
-    static monoid_type<M> mconcat(List<M> const& m){
+    static constexpr monoid_type<M> mconcat(List<M> const& m){
         return foldr(_(mappend<M>), Monoid_t<M>::template mempty<value_type_t<M> >(), m);
     }
 };

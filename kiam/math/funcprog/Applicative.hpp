@@ -25,7 +25,7 @@ using is_same_applicative = _is_same_applicative<base_class_t<A1>, base_class_t<
 template<class A1, class A2, typename T>
 using same_applicative_type = typename std::enable_if<is_same_applicative<A1, A2>::value, T>::type;
 
-// Requires pure, / (analogue to <$>) and * (analogue to <*>)
+// Requires pure, / (analogue to <$> in Haskell) and * (analogue to <*> in Haskell)
 template<typename AP>
 struct Applicative;
 
@@ -36,9 +36,9 @@ using Applicative_t = Applicative<base_class_t<T> >;
     template<> struct _is_applicative<_AP> : std::true_type {}
 
 #define DECLARE_APPLICATIVE_CLASS(AP) \
-    template<typename T> static AP<fdecay<T> > pure(T const& x); \
+    template<typename T> static constexpr AP<fdecay<T> > pure(T const& x); \
     template<typename Ret, typename Arg, typename... Args> \
-    static AP<remove_f0_t<function_t<Ret(Args...)> > > \
+    static constexpr AP<remove_f0_t<function_t<Ret(Args...)> > > \
     apply(AP<function_t<Ret(Arg, Args...)> > const& f, AP<fdecay<Arg> > const& v);
 
 
@@ -67,11 +67,11 @@ using apply_type = typename std::enable_if<
 #define _APPLY_TYPE(AP, AF) BOOST_IDENTITY_TYPE((apply_type<AP, AF>))
 #define APPLY_TYPE(AP, AF) typename _APPLY_TYPE(AP, AF)
 
-DEFINE_FUNCTION_2(2, APPLY_TYPE(T0, T1), apply, T1 const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, constexpr APPLY_TYPE(T0, T1), apply, T1 const&, f, T0 const&, v,
     return Applicative_t<T0>::apply(f, v);)
 
 template<class AP, class AF>
-apply_type<AP, AF> operator*(AF const& f, AP const& v){
+constexpr apply_type<AP, AF> operator*(AF const& f, AP const& v){
     return apply(f, v);
 }
 
@@ -87,7 +87,7 @@ using liftA2_type = typename std::enable_if<
 #define LIFTA2_TYPE_(AY, AX, FT) BOOST_IDENTITY_TYPE((liftA2_type<AY, AX, FT>))
 #define LIFTA2_TYPE(AY, AX, FT) typename LIFTA2_TYPE_(AY, AX, FT)
 
-DEFINE_FUNCTION_3(3, LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, T1 const&, x, T0 const&, y,
+DEFINE_FUNCTION_3(3, constexpr LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, T1 const&, x, T0 const&, y,
     return f / x * y;)
 
 // liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
@@ -104,7 +104,7 @@ using liftA3_type = typename std::enable_if<
 #define LIFTA3_TYPE_(AZ, AY, AX, FT) BOOST_IDENTITY_TYPE((liftA3_type<AZ, AY, AX, FT>))
 #define LIFTA3_TYPE(AZ, AY, AX, FT) typename LIFTA3_TYPE_(AZ, AY, AX, FT)
 
-DEFINE_FUNCTION_4(4, LIFTA3_TYPE(T0, T1, T2, T3), liftA3, function_t<T3> const&, f, T2 const&, x, T1 const&, y, T0 const&, z,
+DEFINE_FUNCTION_4(4, constexpr LIFTA3_TYPE(T0, T1, T2, T3), liftA3, function_t<T3> const&, f, T2 const&, x, T1 const&, y, T0 const&, z,
     return f / x * y * z;)
 
 /*
@@ -126,23 +126,23 @@ a1 *> a2 = (id <$ a1) <*> a2
 */
 // (*>) a1 *> a2 = (id <$ a1) <*> a2
 template<typename Fa, typename Fb>
-same_applicative_type<Fa, Fb, Fb> ap_r(Fa const& a, Fb const& b){
+constexpr same_applicative_type<Fa, Fb, Fb> ap_r(Fa const& a, Fb const& b){
     return (_(id<typename Fb::value_type>) /= a) * b;
 }
 
 template<typename Fa, typename Fb>
-same_applicative_type<Fa, Fb, Fb> operator*=(Fa const& a, Fb const& b){
+constexpr same_applicative_type<Fa, Fb, Fb> operator*=(Fa const& a, Fb const& b){
     return ap_r(a, b);
 }
 
 // (<*) = liftA2 const
 template<typename Fa, typename Fb>
-same_applicative_type<Fa, Fb, Fa> ap_l(Fa const& a, Fb const& b){
+constexpr same_applicative_type<Fa, Fb, Fa> ap_l(Fa const& a, Fb const& b){
     return liftA2(_(const_<typename Fb::value_type, typename Fa::value_type>), a, b);
 }
 
 template<typename Fa, typename Fb>
-same_applicative_type<Fa, Fb, Fa> operator^=(Fa const& a, Fb const& b){
+constexpr same_applicative_type<Fa, Fb, Fa> operator^=(Fa const& a, Fb const& b){
     return ap_l(a, b);
 }
 

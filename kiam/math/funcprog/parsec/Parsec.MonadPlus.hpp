@@ -14,7 +14,7 @@ struct MonadPlus<parsec::_ParsecT<S, U, _M> > :
     Monad<parsec::_ParsecT<S, U, _M> >, Alternative<parsec::_ParsecT<S, U, _M> >
 {
     template<typename A>
-    parsec::ParsecT<S, U, _M, A, parsec::parserZero_unParser<S, U, _M, A> > mzero(){
+    constexpr auto mzero(){
         return Alternative<parsec::_ParsecT<S, U, _M> >::template empty<A>();
     }
 };

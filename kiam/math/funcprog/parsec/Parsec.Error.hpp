@@ -54,7 +54,7 @@ errorIsUnknown (ParseError _pos msgs)
     = null msgs
 
 */
-inline bool errorIsUnknown(ParseError const& err) {
+inline constexpr bool errorIsUnknown(ParseError const& err) {
     return null(err.msgs);
 }
 
@@ -231,7 +231,7 @@ showMany pre msgs3 = case clean (map messageString msgs3) of
 // unknownError :: State s u -> ParseError
 // unknownError state        = newErrorUnknown (statePos state)
 template<typename S, typename U>
-ParseError unknownError(State<S, U> const& state) {
+constexpr ParseError unknownError(State<S, U> const& state) {
     return newErrorUnknown(state.pos);
 }
 
@@ -248,4 +248,3 @@ namespace std {
         return os << err.pos << ':' << _PARSEC::showErrorMessages("or", "unknown parse error", "expecting", "unexpected", "end of input", _PARSEC::errorMessages(err));
     }
 }
-

@@ -73,15 +73,15 @@ using MonadPlus_t = MonadPlus<base_class_t<T> >;
         using type = MP<T>; \
     }; \
     template<typename T> \
-    static MP<T> mzero(); \
+    static constexpr MP<T> mzero(); \
     template<typename A> \
-    static MP<A> mplus(MP<A> const& op1, MP<A> const& op2);
+    static constexpr MP<A> mplus(MP<A> const& op1, MP<A> const& op2);
 
 #define IMPLEMENT_DEFAULT_MONADPLUS(MP, _MP) \
     template<typename T> \
-    MP<T> MonadPlus<_MP>::mzero(){ return Alternative<_MP>::template empty<T>(); } \
+    constexpr MP<T> MonadPlus<_MP>::mzero(){ return Alternative<_MP>::template empty<T>(); } \
     template<typename T> \
-    MP<T> MonadPlus<_MP>::mplus(MP<T> const& op1, MP<T> const& op2){ return op1 | op2; }
+    constexpr MP<T> MonadPlus<_MP>::mplus(MP<T> const& op1, MP<T> const& op2){ return op1 | op2; }
 
 template<typename MP1, typename MP2>
 using mplus_type = same_monad_plus_type<MP1, MP2, typename MonadPlus_t<MP1>::template mplus_result_type_t<MP2> >;
@@ -89,6 +89,6 @@ using mplus_type = same_monad_plus_type<MP1, MP2, typename MonadPlus_t<MP1>::tem
 #define MPLUS_TYPE_(MP1, MP2) BOOST_IDENTITY_TYPE((mplus_type<MP1, MP2>))
 #define MPLUS_TYPE(MP1, MP2) typename MPLUS_TYPE_(MP1, MP2)
 
-DEFINE_FUNCTION_2(2, MPLUS_TYPE(T0, T1), mplus, T0 const&, x, T1 const&, y, return MonadPlus_t<T1>::mplus(x, y);)
+DEFINE_FUNCTION_2(2, constexpr MPLUS_TYPE(T0, T1), mplus, T0 const&, x, T1 const&, y, return MonadPlus_t<T1>::mplus(x, y);)
 
 _FUNCPROG_END

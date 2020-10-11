@@ -32,7 +32,7 @@ struct Stream
     using pair_type = pair_t<token_type, stream_type>;
     using return_type = typename _M::template type<Maybe<pair_type> >;
 
-    static return_type uncons(stream_type const& l) {
+    static constexpr return_type uncons(stream_type const& l) {
         return Monad_t<_M>::mreturn(null(l) ? Nothing<pair_type>() : Just(pair_type(head(l), tail(l))));
     }
 };

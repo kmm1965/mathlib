@@ -29,7 +29,7 @@ struct Identity : _Identity
     Identity(f0<Identity> const& fivalue) : value((*fivalue).value){}
     //Identity(f0<Identity> const& fivalue) : value(_([fivalue](){ return (*fivalue).value(); })){}
 
-    value_type run() const {
+    constexpr value_type run() const {
         return value();
     }
 
@@ -38,18 +38,18 @@ private:
 };
 
 template<typename T>
-T runIdentity(Identity<T> const& x){
+constexpr T runIdentity(Identity<T> const& x){
     return x.run();
 }
 
 // Constructor
 template<typename T>
-Identity<T> Identity_(T const& value){
+constexpr Identity<T> Identity_(T const& value){
     return value;
 }
 
 template<typename T>
-Identity<T> Identity_f(f0<T> const& fvalue){
+constexpr Identity<T> Identity_f(f0<T> const& fvalue){
     return fvalue;
 }
 

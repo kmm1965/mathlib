@@ -30,8 +30,7 @@ struct labels_unParser
     labels_unParser(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs) : p(p), msgs(msgs){}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
-        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
+    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
         const function_t<ParseError(ParseError const&, List<std::string> const&)> setExpectErrors =
             [](ParseError const& err, List<std::string> const& msgs)
@@ -64,8 +63,7 @@ private:
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>
-ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-labels(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs){
+constexpr auto labels(ParsecT<S, U, _M, A, P> const& p, List<std::string> const& msgs){
     return ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >(labels_unParser<S, U, _M, A, P>(p, msgs));
 }
 
@@ -76,14 +74,12 @@ label p msg
   = labels p [msg]
 */
 template<typename S, typename U, typename _M, typename A, typename P>
-ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-label(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
+constexpr auto label(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
     return labels(p, List<std::string>({ msg }));
 }
 
 template<typename S, typename U, typename _M, typename A, typename P>
-ParsecT<S, U, _M, A, labels_unParser<S, U, _M, A, P> >
-operator&(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
+constexpr auto operator&(ParsecT<S, U, _M, A, P> const& p, std::string const& msg){
     return label(p, msg);
 }
 

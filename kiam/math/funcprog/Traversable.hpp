@@ -26,19 +26,19 @@ using Traversable_t = Traversable<base_class_t<T> >;
 #define DECLARE_TRAVERSABLE_CLASS(T) \
     /* traverse :: Applicative f => (a -> f b) -> t a -> f (t b) */ \
     template<typename AP, typename Arg> \
-    static applicative_type<AP, typeof_t<AP, T<value_type_t<AP> > > > \
+    static constexpr applicative_type<AP, typeof_t<AP, T<value_type_t<AP> > > > \
     traverse(function_t<AP(Arg)> const& f, T<fdecay<Arg> > const& x); \
     \
     /* sequenceA :: Applicative f => t (f a) -> f (t a) */ \
     template<typename A> \
-    static applicative_type<A, typeof_t<A, T<value_type_t<A> > > > \
+    static constexpr applicative_type<A, typeof_t<A, T<value_type_t<A> > > > \
     sequenceA(T<A> const& x);
 
 #define DEFAULT_SEQUENCEA_IMPL(T, _T) \
     /* sequenceA = traverse id */ \
     template<typename A> \
     applicative_type<A, typeof_t<A, T<value_type_t<A> > > > \
-    Traversable<_T>::sequenceA(T<A> const& x) { \
+    constexpr Traversable<_T>::sequenceA(T<A> const& x) { \
         return traverse(_(id<A>), x); \
     }
 
@@ -52,7 +52,7 @@ using traverse_type = typename std::enable_if<
 #define TRAVERSE_TYPE_(T, AP, ARG) BOOST_IDENTITY_TYPE((traverse_type<T, AP, ARG>))
 #define TRAVERSE_TYPE(T, AP, ARG) typename TRAVERSE_TYPE_(T, AP, ARG)
 
-DEFINE_FUNCTION_2(3, TRAVERSE_TYPE(T0, T1, T2), traverse, function_t<T1(T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(3, constexpr TRAVERSE_TYPE(T0, T1, T2), traverse, function_t<T1(T2)> const&, f, T0 const&, x,
     return Traversable_t<T0>::traverse(f, x);)
 
 // sequenceA :: Applicative f => t (f a) -> f (t a)
@@ -63,7 +63,7 @@ using sequenceA_type = typename std::enable_if<
 >::type;
 
 template<typename T>
-sequenceA_type<T> sequenceA(T const& x) {
+constexpr sequenceA_type<T> sequenceA(T const& x) {
     return Traversable_t<T>::sequenceA(x);
 }
 
@@ -77,7 +77,7 @@ using mapM_type = typename std::enable_if<
 #define MAPM_TYPE_(T, M, ARG) BOOST_IDENTITY_TYPE((mapM_type<T, M, ARG>))
 #define MAPM_TYPE(T, M, ARG) typename MAPM_TYPE_(T, M, ARG)
 
-DEFINE_FUNCTION_2(3, MAPM_TYPE(T0, T1, T2), mapM, function_t<T1(T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(3, constexpr MAPM_TYPE(T0, T1, T2), mapM, function_t<T1(T2)> const&, f, T0 const&, x,
     return traverse(f, x);)
 
 // sequence :: Monad m => t (m a) -> m (t a)
@@ -88,7 +88,7 @@ using sequence_type = typename std::enable_if<
 >::type;
 
 template<typename T>
-sequence_type<T> sequence(T const& x) {
+constexpr sequence_type<T> sequence(T const& x) {
     return sequenceA(x);
 }
 

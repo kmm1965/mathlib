@@ -113,10 +113,10 @@ template<>
 struct Semigroup<_Maybe>
 {
     template<typename A>
-    static semigroup_type<A, Maybe<A> > semigroup_op(Maybe<A> const& x, Maybe<A> const& y);
+    static constexpr semigroup_type<A, Maybe<A> > semigroup_op(Maybe<A> const& x, Maybe<A> const& y);
 
     template<typename A>
-    static semigroup_type<A, Maybe<A> > stimes(int n, Maybe<A> const&);
+    static constexpr semigroup_type<A, Maybe<A> > stimes(int n, Maybe<A> const&);
 };
 
 // Monoid

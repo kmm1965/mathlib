@@ -9,14 +9,15 @@ struct _Identity;
 template<typename A>
 struct Identity;
 
-template<typename T> T runIdentity(Identity<T> const&);
+template<typename T>
+constexpr T runIdentity(Identity<T> const&);
 
 // Constructor
 template<typename T>
-Identity<T> Identity_(T const&);
+constexpr Identity<T> Identity_(T const&);
 
 template<typename T>
-Identity<T> Identity_f(f0<T> const& fvalue);
+constexpr Identity<T> Identity_f(f0<T> const& fvalue);
 
 _FUNCPROG_END
 

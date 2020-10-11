@@ -104,10 +104,10 @@ struct Monad<_List> : Applicative<_List>
     typedef Applicative<_List> super;
 
     template<typename A>
-    static List<fdecay<A> > mreturn(A const& x);
+    static constexpr List<fdecay<A> > mreturn(A const& x);
 
     template<typename Ret, typename Arg, typename... Args>
-    static remove_f0_t<function_t<List<Ret>(Args...)> >
+    static constexpr remove_f0_t<function_t<List<Ret>(Args...)> >
     mbind(List<fdecay<Arg> > const& m, function_t<List<Ret>(Arg, Args...)> const& f);
 
     template<typename A>

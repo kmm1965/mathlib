@@ -21,9 +21,9 @@ using semigroup_type = typename std::enable_if<is_semigroup<S>::value, T>::type;
 
 #define DECLARE_SEMIGROUP_CLASS(S) \
     template<typename A> \
-    static S<A> semigroup_op(S<A> const& x, S<A> const& y); \
+    static constexpr S<A> semigroup_op(S<A> const& x, S<A> const& y); \
     template<typename A> \
-    static S<A> stimes(int n, S<A> const&);
+    static constexpr S<A> stimes(int n, S<A> const&);
 
 // requires operator%
 template<typename S>
@@ -33,11 +33,11 @@ template<typename T>
 using Semigroup_t = Semigroup<base_class_t<T> >;
 
 template<typename S>
-semigroup_type<S> operator%(S const& x, S const& y) {
+constexpr semigroup_type<S> operator%(S const& x, S const& y) {
     return Semigroup_t<S>::semigroup_op(x, y);
 }
 
-DEFINE_FUNCTION_2(1, semigroup_type<T0>, stimes, int, n, T0 const&, s,
+DEFINE_FUNCTION_2(1, constexpr semigroup_type<T0>, stimes, int, n, T0 const&, s,
     return Semigroup_t<T0>::stimes(n, s);)
 
 _FUNCPROG_END

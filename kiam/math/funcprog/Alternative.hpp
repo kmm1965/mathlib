@@ -74,14 +74,14 @@ using Alternative_t = Alternative<base_class_t<A> >;
     struct alt_op_result_type<ALT<T> >{ \
         using type = ALT<T>; \
     }; \
-    template<typename T> static ALT<T> empty(); \
-    template<typename T> static ALT<T> alt_op(ALT<T> const& op1, ALT<T> const& op2);
+    template<typename T> static constexpr ALT<T> empty(); \
+    template<typename T> static constexpr ALT<T> alt_op(ALT<T> const& op1, ALT<T> const& op2);
 
 template<class ALT>
 using alt_op_result_type = alternative_type<ALT, typename Alternative_t<ALT>::template alt_op_result_type_t<ALT> >;
 
 template<class ALT>
-alt_op_result_type<ALT> operator|(ALT const& op1, ALT const& op2) {
+constexpr alt_op_result_type<ALT> operator|(ALT const& op1, ALT const& op2) {
     return Alternative_t<ALT>::alt_op(op1, op2);
 }
 

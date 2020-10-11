@@ -53,8 +53,7 @@ private:
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>
-ParsecT<S, U, _M, A, try_unParser<S, U, _M, A, P> >
-_try_(ParsecT<S, U, _M, A, P> const& p) {
+constexpr auto _try_(ParsecT<S, U, _M, A, P> const& p) {
     return ParsecT<S, U, _M, A, try_unParser<S, U, _M, A, P> >(try_unParser<S, U, _M, A, P>(p));
 }
 

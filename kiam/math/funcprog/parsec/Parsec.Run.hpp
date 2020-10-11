@@ -49,9 +49,9 @@ private:
 };
 
 template<typename S, typename U, typename _M, typename A>
-ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >
+constexpr ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >
 mkPT(const typename mkPT_unParser<S, U, _M, A>::k_type &k){
-    return ParsecT<S, U, _M, A, mkPT_unParser<S, U, _M, A> >(mkPT_unParser<S, U, _M, A>(k));
+    return mkPT_unParser<S, U, _M, A>(k);
 }
 
 /*
@@ -72,8 +72,7 @@ runPT p u name s
                 Empty    r -> r
 */
 template<typename S, typename U, typename _M, typename A, class P>
-typename _M::template type<Either<ParseError, A> >
-runPT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s)
+constexpr auto runPT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s)
 {
     using Reply_t = Reply<S, U, A>;
     using Either_t = Either<ParseError, A>;
@@ -95,8 +94,7 @@ runP :: (Stream s Identity t)
 runP p u name s = runIdentity $ runPT p u name s
 */
 template<typename S, typename U, typename A, class P>
-Either<ParseError, A>
-runP(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
+constexpr auto runP(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runPT(p, u, name, s).run();
 }
 
@@ -113,8 +111,7 @@ runParserT :: (Stream s m t)
 runParserT = runPT
 */
 template<typename S, typename U, typename _M, typename A, class P>
-typename _M::template type<Either<ParseError, A> >
-runParserT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s){
+constexpr auto runParserT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runPT(p, u, name, s);
 }
 
@@ -136,8 +133,7 @@ runParser :: (Stream s Identity t)
 runParser = runP
 */
 template<typename S, typename U, typename A, class P>
-Either<ParseError, A>
-runParser(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
+constexpr auto runParser(Parsec<S, U, A, P> const& p, U const& u, SourceName const& name, S const& s){
     return runP(p, u, name, s);
 }
 
@@ -159,8 +155,7 @@ parse p = runP p ()
 */
 
 template<typename S, typename A, class P>
-Either<ParseError, A>
-parse(Parsec<S, None, A, P> const& p, SourceName const& name, S const& s){
+constexpr auto parse(Parsec<S, None, A, P> const& p, SourceName const& name, S const& s){
     return runP(p, None(), name, s);
 }
 

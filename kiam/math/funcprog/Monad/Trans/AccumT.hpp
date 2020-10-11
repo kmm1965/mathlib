@@ -48,7 +48,7 @@ accum :: (Monad m) => (w -> (a, w)) -> AccumT w m a
 accum f = AccumT $ \ w -> return (f w)
 */
 template<typename _M, typename W, typename A>
-AccumT<W, _M, A> accum(function_t<pair_t<A, W>(W const&)> const& f){
+constexpr AccumT<W, _M, A> accum(function_t<pair_t<A, W>(W const&)> const& f){
     return _([f](W const& w){ return Monad<_M>::mreturn(f(w)); });
 }
 
@@ -74,7 +74,7 @@ struct _AccumT
     look :: (Monoid w, Monad m) => AccumT w m w
     look = AccumT $ \ w -> return (w, mempty)
     */
-    static type<W> look(){
+    static constexpr type<W> look(){
         return _([](W const& w){
             return Monad<_M>::mreturn(pair_t<W, W>(w, Monoid_t<W>::template mempty<value_type_t<W> >()));
         });
@@ -96,7 +96,7 @@ struct _AccumT
     looks f = AccumT $ \ w -> return (f w, mempty)
     */
     template<typename A, typename... Args>
-    static type<remove_f0_t<function_t<A(Args...)> > > looks(function_t<A(W const&, Args...)> const& f){
+    static constexpr auto looks(function_t<A(W const&, Args...)> const& f){
         return _([f](W const& w){
             return Monad<_M>::mreturn(
                 pair_t<remove_f0_t<function_t<A(Args...)> >, W>(invoke_f0(f << w), Monoid_t<W>::template mempty<value_type_t<W> >()));
@@ -111,7 +111,7 @@ struct _AccumT
         return ((a, w), s')
     */
     template<typename S, typename A>
-    static Listen<W, _AccumT<S, _M>, A> liftListen(Listen<W, _M, pair_t<A, S> > const& listen){
+    static constexpr auto liftListen(Listen<W, _M, pair_t<A, S> > const& listen){
         return _([listen](AccumT<S, _M, A> const& m){
             return _([listen, m](S const& s){
                 return _do(p, m.run(s),
@@ -127,7 +127,7 @@ struct _AccumT
         return ((a, s'), f)
     */
     template<typename S, typename A>
-    static Pass<W, _AccumT<W, _M>, A> liftPass(Pass<W, _M, pair_t<A, S> > const& pass){
+    static constexpr auto liftPass(Pass<W, _M, pair_t<A, S> > const& pass){
         return _([pass](AccumT<S, _M, A> const& m){
             return _([pass, m](S const& s){
                 return pass(_do(p, m.run(s),
@@ -156,7 +156,7 @@ struct AccumT : _AccumT<W, _M>
     runAccumT :: AccumT w m a -> w -> m (a, w)
     runAccumT (AccumT f) = f
     */
-    return_type run(W const& w) const {
+    constexpr return_type run(W const& w) const {
         return func(w);
     }
 
@@ -170,7 +170,7 @@ struct AccumT : _AccumT<W, _M>
         ~(a, _) <- runAccumT m w
         return a
     */
-    M_type<A> eval(W const& w) const {
+    constexpr auto eval(W const& w) const {
         return _do(p, run(w), return Monad<_M>::mreturn(fst(p)););
     }
 
@@ -183,7 +183,7 @@ struct AccumT : _AccumT<W, _M>
         ~(_, w') <- runAccumT m w
         return w'
     */
-    M_type<W> exec(W const& w) const {
+    constexpr auto exec(W const& w) const {
         return _do(p, run(w), return Monad<_M>::mreturn(snd(p)););
     }
 
@@ -192,27 +192,23 @@ private:
 };
 
 template<typename W, typename _M, typename A>
-typename _M::template type<pair_t<A, W> >
-runAccumT(AccumT<W, _M, A> const& m, W const& w){
+constexpr auto runAccumT(AccumT<W, _M, A> const& m, W const& w){
     return m.run(w);
 }
 
 template<typename W, typename _M, typename A>
-function_t<typename _M::template type<pair_t<A, W> >(W const&)>
-_runAccumT(AccumT<W, _M, A> const& m){
-    return [m](W const& w){ return runAccumT(m, w); };
+constexpr auto _runAccumT(AccumT<W, _M, A> const& m){
+    return _([m](W const& w){ return runAccumT(m, w); });
 }
 
 template<typename W, typename _M, typename A>
-typename _M::template type<A>
-evalAccumT(AccumT<W, _M, A> const& m, W const& w){
+constexpr auto evalAccumT(AccumT<W, _M, A> const& m, W const& w){
     return m.eval(w);
 }
 
 template<typename W, typename _M, typename A>
-function_t<typename _M::template type<A>(W const&)>
-_evalAccumT(AccumT<W, _M, A> const& m){
-    return [m](W const& w){ return evalAccumT(m, w); };
+constexpr auto _evalAccumT(AccumT<W, _M, A> const& m){
+    return _([m](W const& w){ return evalAccumT(m, w); });
 }
 
 /*
@@ -226,15 +222,13 @@ execAccumT m w = do
     return w'
 */
 template<typename W, typename _M, typename A>
-typename _M::template type<W>
-execAccumT(AccumT<W, _M, A> const& m, W const& w){
+constexpr auto execAccumT(AccumT<W, _M, A> const& m, W const& w){
     return m.exec(w);
 }
 
 template<typename W, typename _M, typename A>
-function_t<typename _M::template type<W>(W const&)>
-_execAccumT(AccumT<W, _M, A> const& m){
-    return [m](W const& w){ return execAccumT(m, w); };
+constexpr auto _execAccumT(AccumT<W, _M, A> const& m){
+    return _([m](W const& w){ return execAccumT(m, w); });
 }
 
 /*
@@ -246,7 +240,7 @@ mapAccumT :: (m (a, w) -> n (b, w)) -> AccumT w m a -> AccumT w n b
 mapAccumT f m = AccumT (f . runAccumT m)
 */
 template<typename W, typename _M, typename A, typename NB, typename Arg>
-static typename std::enable_if<
+static constexpr typename std::enable_if<
     std::is_same<Arg, typename _M::template type<pair_t<A, W> > >::value &&
     is_pair<value_type_t<NB> >::value &&
     std::is_same<W, snd_type_t<value_type_t<NB> > >::value,
@@ -256,15 +250,15 @@ static typename std::enable_if<
 }
 
 template<typename W, typename _M, typename A, typename NB, typename Arg>
-static typename std::enable_if<
+static constexpr typename std::enable_if<
     std::is_same<Arg, typename _M::template type<pair_t<A, W> > >::value &&
     is_pair<value_type_t<NB> >::value &&
     std::is_same<W, snd_type_t<value_type_t<NB> > >::value,
     function_t<AccumT<W, base_class_t<NB>, fst_type_t<value_type_t<NB> > >(AccumT<W, _M, A> const&)>
 >::type _mapAccumT(function_t<NB(Arg const&)> const& f){
-    return [f](AccumT<W, _M, A> const& m){
+    return _([f](AccumT<W, _M, A> const& m){
         return mapAccumT(f, m);
-    };
+    });
 }
 
 // Accum
@@ -275,14 +269,13 @@ runAccum :: Accum w a -> w -> (a, w)
 runAccum m = runIdentity . runAccumT m
 */
 template<typename W, typename A>
-pair_t<A, W> runAccum(Accum<W, A> const& m, W const& w){
+constexpr auto runAccum(Accum<W, A> const& m, W const& w){
     return (_(runIdentity<pair_t<A, W> >) & _runAccumT(m))(w);
 }
 
 template<typename W, typename A>
-function_t<pair_t<A, W>(W const&)>
-_runAccum(Accum<W, A> const& m){
-    return [m](W const& w){ return runAccum(m, w); };
+constexpr auto _runAccum(Accum<W, A> const& m){
+    return _([m](W const& w){ return runAccum(m, w); });
 }
 
 /*
@@ -294,13 +287,13 @@ evalAccum :: (Monoid w) => Accum w a -> w -> a
 evalAccum m w = fst (runAccum m w)
 */
 template<typename W, typename A>
-A evalAccum(Accum<W, A> const& m, W const& w){
+constexpr auto evalAccum(Accum<W, A> const& m, W const& w){
     return fst(runAccum(m, w));
 }
 
 template<typename W, typename A>
-function_t<A(W const&)> _evalAccum(Accum<W, A> const& m){
-    return [m](W const& w){ return evalAccum(m, w); };
+constexpr auto _evalAccum(Accum<W, A> const& m){
+    return _([m](W const& w){ return evalAccum(m, w); });
 }
 /*
 -- | Extract the output from an accumulation computation.
@@ -310,13 +303,13 @@ execAccum :: Accum w a -> w -> w
 execAccum m w = snd (runAccum m w)
 */
 template<typename W, typename A>
-W execAccum(Accum<W, A> const& m, W const& w){
+constexpr auto execAccum(Accum<W, A> const& m, W const& w){
     return snd(runAccum(m, w));
 }
 
 template<typename W, typename A>
-function_t<W(W const&)> _execAccum(Accum<W, A> const& m){
-    return [m](W const& w){ return execAccum(m, w); };
+constexpr auto _execAccum(Accum<W, A> const& m){
+    return _([m](W const& w){ return execAccum(m, w); });
 }
 
 /*
@@ -328,14 +321,13 @@ mapAccum :: ((a, w) -> (b, w)) -> Accum w a -> Accum w b
 mapAccum f = mapAccumT (Identity . f . runIdentity)
 */
 template<typename W, typename A, typename B>
-Accum<W, B> mapAccum(function_t<pair_t<B, W>(pair_t<A, W> const&)> const& f, Accum<W, A> const& m){
+constexpr auto mapAccum(function_t<pair_t<B, W>(pair_t<A, W> const&)> const& f, Accum<W, A> const& m){
     return mapAccumT(_(Identity_<B>) & f & _(runIdentity<pair_t<A, W> >), m);
 }
 
 template<typename W, typename A, typename B>
-function_t<Accum<W, B>(Accum<W, A> const&)>
-_mapAccum(function_t<pair_t<B, W>(pair_t<A, W> const&)> const& f){
-    return [f](Accum<W, A> const& m){ return mapAccum(f, m); };
+constexpr auto _mapAccum(function_t<pair_t<B, W>(pair_t<A, W> const&)> const& f){
+    return _([f](Accum<W, A> const& m){ return mapAccum(f, m); });
 }
 
 // Functor
@@ -347,7 +339,7 @@ struct Functor<_AccumT<W, _M> >
 {
     // fmap f = mapAccumT $ fmap $ \ ~(a, w) -> (f a, w)
     template<typename A, typename Ret, typename Arg, typename... Args>
-    static typename std::enable_if<is_same_as<A, Arg>::value,
+    static constexpr typename std::enable_if<is_same_as<A, Arg>::value,
         AccumT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
     >::type fmap(function_t<Ret(Arg, Args...)> const& f, AccumT<W, _M, A> const& m){
         return mapAccumT(_fmap<typename _M::template type<pair_t<A, W> > >(_([f](pair_t<A, W> const& p){
@@ -367,7 +359,7 @@ struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
 
     // pure a  = AccumT $ const $ return (a, mempty)
     template<typename A>
-    static AccumT<W, _M, A> pure(A const& a){
+    static constexpr auto pure(A const& a){
         return _const_<W>(Monad<_M>::mreturn(pair_t<A, W>(a, Monoid_t<W>::template mempty<value_type_t<W> >())));
     }
 
@@ -382,8 +374,7 @@ struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
       return (f v, w' `mappend` w'')
     */
     template<typename Ret, typename Arg, typename... Args>
-    static AccumT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
-    apply(AccumT<W, _M, function_t<Ret(Arg, Args...)> > const& mf, AccumT<W, _M, fdecay<Arg> > const& m){
+    static constexpr auto apply(AccumT<W, _M, function_t<Ret(Arg, Args...)> > const& mf, AccumT<W, _M, fdecay<Arg> > const& m){
         return _([mf, m](W const& w){
             return _do2(pf, mf.run(w), pm, m.run(Monoid_t<W>::mappend(w, snd(pf))),
                 const function_t<Ret(Arg, Args...)> f = fst(pf);
@@ -411,7 +402,7 @@ struct Monad<_AccumT<W, _M> > : Applicative<_AccumT<W, _M> >
 
     // return a  = AccumT $ const $ return (a, mempty)
     template<typename A>
-    static AccumT<W, _M, A> mreturn(A const& a){
+    static constexpr auto mreturn(A const& a){
         return _const_<W>(Monad<_M>::mreturn(pair_t<A, W>(a, Monoid_t<W>::mempty())));
     }
 
@@ -420,8 +411,7 @@ struct Monad<_AccumT<W, _M> > : Applicative<_AccumT<W, _M> >
     //    ~(b, w'') <- runAccumT (k a) (w `mappend` w')
     //    return (b, w' `mappend` w'')
     template<typename Ret, typename Arg, typename... Args>
-    static remove_f0_t<function_t<AccumT<W, _M, Ret>(Args...)> >
-    mbind(AccumT<W, _M, fdecay<Arg> > const& m, function_t<AccumT<W, _M, Ret>(Arg, Args...)> const& f){
+    static constexpr auto mbind(AccumT<W, _M, fdecay<Arg> > const& m, function_t<AccumT<W, _M, Ret>(Arg, Args...)> const& f){
         return invoke_f0(_([m, f](Args... args){
             return _([m, f, args...](W const& w){
                 using pair_type = pair_t<fdecay<Arg>, W>;
@@ -462,7 +452,7 @@ struct MonadPlus<_AccumT<W, _M> > : Monad<_AccumT<W, _M> >
 
     // m `mplus` n = AccumT $ \ w -> runAccumT m w `mplus` runAccumT n w
     template<typename A>
-    static AccumT<W, _M, A> mplus(AccumT<W, _M, A> const& m, AccumT<W, _M, A> const& n){
+    static constexpr auto mplus(AccumT<W, _M, A> const& m, AccumT<W, _M, A> const& n){
         return _([m, n](W const& w){ return MonadPlus<_M>::mplus(m.run(w), n.run(w)); });
     }
 };
@@ -476,7 +466,7 @@ struct Alternative<_AccumT<W, _M> >
 {
     // empty   = AccumT $ const mzero
     template<typename A>
-    static AccumT<W, _M, A> empty(){
+    static constexpr auto empty(){
         return _const_<W>(MonadPlus<_M>::mzero());
     }
 
@@ -494,7 +484,7 @@ struct Alternative<_AccumT<W, _M> >
 
     // m <|> n = AccumT $ \ w -> runAccumT m w `mplus` runAccumT n w
     template<typename A>
-    static AccumT<W, _M, A> alt_op(AccumT<W, _M, A> const& m, AccumT<W, _M, A> const& n){
+    static constexpr auto alt_op(AccumT<W, _M, A> const& m, AccumT<W, _M, A> const& n){
         return _([m, n](W const& w){ return MonadPlus<_M>::mplus(m.run(w), n.run(w)); });
     }
 };
@@ -507,7 +497,7 @@ struct MonadTrans<_AccumT<W, _M> >
     //    a <- m
     //    return (a, mempty)
     template<typename MA>
-    static typename std::enable_if<std::is_same<_M, base_class_t<MA> >::value,
+    static constexpr typename std::enable_if<std::is_same<_M, base_class_t<MA> >::value,
         AccumT<W, _M, value_type_t<MA> >
     >::type lift(MA const& m){
         return _const_<W>(_do(a, m,
@@ -521,7 +511,7 @@ readerToAccumT :: (Functor m, Monoid w) => ReaderT w m a -> AccumT w m a
 readerToAccumT (ReaderT f) = AccumT $ \ w -> fmap (\ a -> (a, mempty)) (f w)
 */
 template<typename W, typename _M, typename A>
-AccumT<W, _M, A> readerToAccumT(ReaderT<W, _M, A> const& rdr){
+constexpr auto readerToAccumT(ReaderT<W, _M, A> const& rdr){
     return _([rdr](W const& w){
         return fmap(_([](A const& a){ return pair_t<A, W>(a, Monoid_t<W>::mempty()); }), rdr.run(w));
     });
@@ -533,7 +523,7 @@ writerToAccumT :: WriterT w m a -> AccumT w m a
 writerToAccumT (WriterT m) = AccumT $ const $ m
 */
 template<typename W, typename _M, typename A>
-AccumT<W, _M, A> writerToAccumT(WriterT<W, _M, A> const& wrt){
+constexpr auto writerToAccumT(WriterT<W, _M, A> const& wrt){
     return _const_<W>(wrt.run());
 }
 
@@ -545,7 +535,7 @@ accumToStateT (AccumT f) =
     StateT $ \ w -> fmap (\ ~(a, w') -> (a, w `mappend` w')) (f w)
 */
 template<typename S, typename _M, typename A>
-monoid_type<S, StateT<S, _M, A> > accumToStateT(AccumT<S, _M, A> const& acc){
+constexpr auto accumToStateT(AccumT<S, _M, A> const& acc){
     return _([acc](S const& w){
         return fmap(_([w](pair_t<A, S> const& p){ return pair_t<A, S>(fst(p), Monoid_t<S>::mappend(w, snd(p))); }), acc.run(w));
     });

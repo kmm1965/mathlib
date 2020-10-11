@@ -67,11 +67,11 @@ instance Eq Message where
     m1 == m2 = fromEnum m1 == fromEnum m2
 
 */
-inline bool operator==(Message const& l, Message const& r){
+inline constexpr bool operator==(Message const& l, Message const& r){
     return l.type == r.type;
 }
 
-inline bool operator!=(Message const& l, Message const& r){
+inline constexpr bool operator!=(Message const& l, Message const& r){
     return !(l == r);
 }
 
@@ -84,7 +84,7 @@ inline bool operator!=(Message const& l, Message const& r){
 instance Ord Message where
     compare msg1 msg2 = compare (fromEnum msg1) (fromEnum msg2)
 */
-inline bool operator<(Message const& l, Message const& r){
+inline constexpr bool operator<(Message const& l, Message const& r){
     return l.type < r.type;
 }
 
@@ -118,4 +118,3 @@ namespace std {
         return os << msg.type << ' ' << msg.msg;
     }
 }
-

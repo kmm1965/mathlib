@@ -58,8 +58,7 @@ struct tokenPrimEx_unParser
 
     // showToken nextpos(Just nextState) test
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
-        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
+    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
         return _do(r, Stream_t::uncons(s.input),
             if (!r)
@@ -84,8 +83,7 @@ private:
 };
 
 template<typename U, typename _M, typename A, typename T>
-ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >
-tokenPrimEx(
+constexpr auto tokenPrimEx(
     const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
     const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
     const typename tokenPrimEx_unParser<U, _M, A, T>::nextState_type &nextState,
@@ -123,8 +121,7 @@ tokenPrim showToken nextpos test = tokenPrimEx showToken nextpos Nothing test
 */
 
 template<typename U, typename _M, typename A, typename T>
-ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >
-tokenPrim(
+constexpr auto tokenPrim(
     const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
     const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
     const typename tokenPrimEx_unParser<U, _M, A, T>::test_type &test)
@@ -162,7 +159,7 @@ token showToken tokpos test = tokenPrim showToken nextpos test
                              Just (tok',_) -> tokpos tok'
 */
 template<typename U, typename _M, typename A, typename T>
-Parsec<List<T>, U, A, tokenPrimEx_unParser<U, Identity<T>, A, T> >
+constexpr Parsec<List<T>, U, A, tokenPrimEx_unParser<U, Identity<T>, A, T> >
 token(
     typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type const& showToken,
     function_t<SourcePos(const T&)> const& tokpos,
@@ -193,8 +190,7 @@ struct tokens_unParser
         showTokens(showTokens), nextposs(nextposs), tts(tts) {}
 
     template<typename B>
-    typename ParsecT_base_t::template return_type<B> run(State<S, U> const& s,
-        ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
+    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
         /*
         tokens _ _ []
@@ -303,8 +299,7 @@ tokens :: (Stream s m t, Eq t)
 tokens showTokens nextposs tts@(tok:toks)
 */
 template<typename S, typename U, typename _M, typename T>
-ParsecT<S, U, _M, List<T>, tokens_unParser<S, U, _M, T> >
-tokens(
+constexpr auto tokens(
     const typename tokens_unParser<S, U, _M, T>::showTokens_type &showTokens,
     const typename tokens_unParser<S, U, _M, T>::nextposs_type &nextposs,
     List<T> const& tts)
