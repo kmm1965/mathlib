@@ -52,7 +52,7 @@ using traverse_type = typename std::enable_if<
 #define TRAVERSE_TYPE_(T, AP, ARG) BOOST_IDENTITY_TYPE((traverse_type<T, AP, ARG>))
 #define TRAVERSE_TYPE(T, AP, ARG) typename TRAVERSE_TYPE_(T, AP, ARG)
 
-DEFINE_FUNCTION_2(3, constexpr TRAVERSE_TYPE(T0, T1, T2), traverse, function_t<T1(T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(3, TRAVERSE_TYPE(T0, T1, T2), traverse, function_t<T1(T2)> const&, f, T0 const&, x,
     return Traversable_t<T0>::traverse(f, x);)
 
 // sequenceA :: Applicative f => t (f a) -> f (t a)
@@ -77,7 +77,7 @@ using mapM_type = typename std::enable_if<
 #define MAPM_TYPE_(T, M, ARG) BOOST_IDENTITY_TYPE((mapM_type<T, M, ARG>))
 #define MAPM_TYPE(T, M, ARG) typename MAPM_TYPE_(T, M, ARG)
 
-DEFINE_FUNCTION_2(3, constexpr MAPM_TYPE(T0, T1, T2), mapM, function_t<T1(T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(3, MAPM_TYPE(T0, T1, T2), mapM, function_t<T1(T2)> const&, f, T0 const&, x,
     return traverse(f, x);)
 
 // sequence :: Monad m => t (m a) -> m (t a)

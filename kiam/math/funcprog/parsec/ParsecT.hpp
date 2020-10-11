@@ -35,7 +35,7 @@ struct parserBind_unParser;
 #define PARSERBIND_UNPARSER_(S, U, _M, A, PA, B, PB) BOOST_IDENTITY_TYPE((_PARSEC::parserBind_unParser<S, U, _M, A, PA, B, PB>))
 #define PARSERBIND_UNPARSER(S, U, _M, A, PA, B, PB) typename PARSERBIND_UNPARSER_(S, U, _M, A, PA, B, PB)
 
-DECLARE_FUNCTION_2(7, constexpr PARSECT(T0, T1, T2, T5, PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)),
+DECLARE_FUNCTION_2(7, PARSECT(T0, T1, T2, T5, PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)),
     parserBind, const PARSECT(T0, T1, T2, T3, T4)&, function_t<PARSECT(T0, T1, T2, T5, T6)(const T3&)> const&);
 
 template<typename S, typename U, typename _M, typename A>
@@ -50,7 +50,7 @@ struct parserPlus_unParser;
 #define PARSERPLUS_UNPARSER_(S, U, _M, A, PM, PN) BOOST_IDENTITY_TYPE((_PARSEC::parserPlus_unParser<S, U, _M, A, PM, PN>))
 #define PARSERPLUS_UNPARSER(S, U, _M, A, PM, PN) typename PARSERPLUS_UNPARSER_(S, U, _M, A, PM, PN)
 
-DECLARE_FUNCTION_2(6, constexpr PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
+DECLARE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
     parserPlus, PARSECT(T0, T1, T2, T3, T4) const&, PARSECT(T0, T1, T2, T3, T5) const&);
 
 template<typename S, typename U, typename _M>
@@ -93,8 +93,8 @@ struct ParsecT_base : _ParsecT<S, U, _M>
 #define PARSECT_BASE(S, U, _M, A) typename PARSECT_BASE_(S, U, _M, A)
 
 #define DECLARE_OK_ERR_TYPES() \
-    template<typename B> using ok_type = typename ParsecT_base_t::template ok_type<B>; \
-    template<typename B> using err_type = typename ParsecT_base_t::template err_type<B>
+    template<typename _B> using ok_type = typename ParsecT_base_t::template ok_type<_B>; \
+    template<typename _B> using err_type = typename ParsecT_base_t::template err_type<_B>
 
 template<typename S, typename U, typename _M, typename A, class P>
 struct ParsecT : ParsecT_base<S, U, _M, A>

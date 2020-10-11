@@ -37,7 +37,7 @@ constexpr semigroup_type<S> operator%(S const& x, S const& y) {
     return Semigroup_t<S>::semigroup_op(x, y);
 }
 
-DEFINE_FUNCTION_2(1, constexpr semigroup_type<T0>, stimes, int, n, T0 const&, s,
+DEFINE_FUNCTION_2(1, semigroup_type<T0>, stimes, int, n, T0 const&, s,
     return Semigroup_t<T0>::stimes(n, s);)
 
 _FUNCPROG_END

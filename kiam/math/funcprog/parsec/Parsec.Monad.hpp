@@ -153,7 +153,7 @@ private:
 };
 
 // parserBind::ParsecT s u m a -> (a->ParsecT s u m b)->ParsecT s u m b
-DEFINE_FUNCTION_2(7, constexpr PARSECT(T0, T1, T2, T5, PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)),
+DEFINE_FUNCTION_2(7, PARSECT(T0, T1, T2, T5, PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)),
     parserBind, const PARSECT(T0, T1, T2, T3, T4)&, m, function_t<PARSECT(T0, T1, T2, T5, T6)(T3 const&)> const&, k,
     return PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)(m, k);)
 
@@ -230,7 +230,7 @@ using parsec_liftM_type = typename Monad<parsec::_ParsecT<S, U, _M> >::template 
 #define PARSEC_LIFTM_TYPE_(S, U, _M, A, PA, B) BOOST_IDENTITY_TYPE((parsec_liftM_type<S, U, _M, A, PA, B>))
 #define PARSEC_LIFTM_TYPE(S, U, _M, A, PA, B) typename PARSEC_LIFTM_TYPE_(S, U, _M, A, PA, B)
 
-DEFINE_FUNCTION_2(6, constexpr PARSEC_LIFTM_TYPE(T0, T1, T2, T3, T4, T5), liftMM, function_t<T5(T3 const&)> const&, f,
+DEFINE_FUNCTION_2(6, PARSEC_LIFTM_TYPE(T0, T1, T2, T3, T4, T5), liftMM, function_t<T5(T3 const&)> const&, f,
     PARSECT(T0, T1, T2, T3, T4) const&, m,
     return _do(x, m, return (Monad<parsec::_ParsecT<T0, T1, T2> >::mreturn(f(x))););)
 

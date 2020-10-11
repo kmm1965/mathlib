@@ -89,6 +89,6 @@ using mplus_type = same_monad_plus_type<MP1, MP2, typename MonadPlus_t<MP1>::tem
 #define MPLUS_TYPE_(MP1, MP2) BOOST_IDENTITY_TYPE((mplus_type<MP1, MP2>))
 #define MPLUS_TYPE(MP1, MP2) typename MPLUS_TYPE_(MP1, MP2)
 
-DEFINE_FUNCTION_2(2, constexpr MPLUS_TYPE(T0, T1), mplus, T0 const&, x, T1 const&, y, return MonadPlus_t<T1>::mplus(x, y);)
+DEFINE_FUNCTION_2(2, MPLUS_TYPE(T0, T1), mplus, T0 const&, x, T1 const&, y, return MonadPlus_t<T1>::mplus(x, y);)
 
 _FUNCPROG_END

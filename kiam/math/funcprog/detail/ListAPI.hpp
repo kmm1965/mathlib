@@ -23,7 +23,7 @@ constexpr Maybe<PAIR_T(T, List<T>)> uncons(List<T> const& l) {
     return null(l) ? Nothing<PAIR_T(T, List<T>)>() : Just(std::make_pair(head(l), tail(l)));
 }
 
-DEFINE_FUNCTION_2(1, constexpr List<T0>, replicate, size_t, n, T0 const&, value,
+DEFINE_FUNCTION_2(1, List<T0>, replicate, size_t, n, T0 const&, value,
     return List<T0>(n, value);)
 
 /*
@@ -42,7 +42,7 @@ takeWhile p (x:xs)
             | p x       =  x : takeWhile p xs
             | otherwise =  []
 */
-DEFINE_FUNCTION_2(2, constexpr List<fdecay<T0> >, takeWhile, function_t<bool(T1)> const&, p, List<T0> const&, l,
+DEFINE_FUNCTION_2(2, List<fdecay<T0> >, takeWhile, function_t<bool(T1)> const&, p, List<T0> const&, l,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     if (null(l))
         return l;
@@ -66,7 +66,7 @@ dropWhile p xs@(x:xs')
             | p x       =  dropWhile p xs'
             | otherwise =  xs
 */
-DEFINE_FUNCTION_2(2, constexpr List<fdecay<T0> >, dropWhile, function_t<bool(T1)> const&, p, List<T0> const&, l,
+DEFINE_FUNCTION_2(2, List<fdecay<T0> >, dropWhile, function_t<bool(T1)> const&, p, List<T0> const&, l,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     if (null(l))
         return l;
@@ -76,7 +76,7 @@ DEFINE_FUNCTION_2(2, constexpr List<fdecay<T0> >, dropWhile, function_t<bool(T1)
     })
 
 // take
-DEFINE_FUNCTION_2(1, constexpr List<T0>, take, int, n, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, take, int, n, List<T0> const&, l,
     typename List<T0>::const_iterator it = std::cbegin(l);
     const typename List<T0>::const_iterator iend = std::cend(l);
     while (n > 0 && it != iend){
@@ -86,7 +86,7 @@ DEFINE_FUNCTION_2(1, constexpr List<T0>, take, int, n, List<T0> const&, l,
     return List<T0>(std::cbegin(l), it);)
 
 // drop
-DEFINE_FUNCTION_2(1, constexpr List<T0>, drop, int, n, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, drop, int, n, List<T0> const&, l,
     typename List<T0>::const_iterator it = std::cbegin(l);
     const typename List<T0>::const_iterator iend = std::cend(l);
     while (n > 0 && it != iend){
@@ -96,7 +96,7 @@ DEFINE_FUNCTION_2(1, constexpr List<T0>, drop, int, n, List<T0> const&, l,
     return List<T0>(it, iend);)
 
 // splitAt
-DEFINE_FUNCTION_2(1, constexpr PAIR_T(List<T0>, List<T0 >), splitAt, int, n, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, PAIR_T(List<T0>, List<T0 >), splitAt, int, n, List<T0> const&, l,
     const typename List<T0>::const_iterator ibegin = std::cbegin(l);
     const typename List<T0>::const_iterator iend = std::cend(l);
     typename List<T0>::const_iterator it = ibegin;
@@ -128,7 +128,7 @@ span p xs@(x:xs')
 template<typename T>
 using span_type = PAIR_T(List<fdecay<T> >, List<fdecay<T> >);
 
-DEFINE_FUNCTION_2(1, constexpr span_type<T0>, span, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
+DEFINE_FUNCTION_2(1, span_type<T0>, span, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
     if (null(l))
         return std::make_pair(l, l);
     else {
@@ -161,7 +161,7 @@ break p xs@(x:xs')
            | otherwise  =  let (ys,zs) = break p xs' in (x:ys,zs)
 #endif
 */
-DEFINE_FUNCTION_2(1, constexpr span_type<T0>, _break, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
+DEFINE_FUNCTION_2(1, span_type<T0>, _break, function_t<bool(T0)> const&, p, List<fdecay<T0> > const&, l,
     return span(_([p](T0 const& v){ return !p(v); }), l);)
 
 /*
@@ -212,7 +212,7 @@ constexpr function_t<Maybe<B>(List<pair_t<A, B> > const&)> _lookup(A const& key)
 concatMap               :: (a -> [b]) -> [a] -> [b]
 concatMap f             =  foldr ((++) . f) []
 */
-DEFINE_FUNCTION_2(2, constexpr List<T1>, concatMap, function_t<List<T1>(T0 const&)> const&, f, List<T0> const&, l,
+DEFINE_FUNCTION_2(2, List<T1>, concatMap, function_t<List<T1>(T0 const&)> const&, f, List<T0> const&, l,
     return foldr(_(concat2<T1>) & f, List<T1>(), l);)
 
 template<typename T>
@@ -245,7 +245,7 @@ inline String strconcat(List<String> const& l){
 // nubBy           :: (a -> a -> Bool) -> [a] -> [a]
 // nubBy eq []     =  []
 // nubBy eq (x:xs) =  x : nubBy eq (filter (\ y -> not (eq x y)) xs)
-DEFINE_FUNCTION_2(3, constexpr List<T0>, nubBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, l,
+DEFINE_FUNCTION_2(3, List<T0>, nubBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, l,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     static_assert(is_same_as<T0, T2>::value, "Should be the same");
     if (null(l))
@@ -255,13 +255,13 @@ DEFINE_FUNCTION_2(3, constexpr List<T0>, nubBy, function_t<bool(T1, T2)> const&,
 
 // delete :: (Eq a) => a -> [a] -> [a]
 // delete =  deleteBy (==)
-DEFINE_FUNCTION_2(1, constexpr List<T0>, _delete, T0 const&, x, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, _delete, T0 const&, x, List<T0> const&, l,
     return deleteBy(_(eq<T0>), x, l);)
 
 // deleteBy             :: (a -> a -> Bool) -> a -> [a] -> [a]
 // deleteBy _  _ []     = []
 // deleteBy eq x (y:ys) = if x `eq` y then ys else y : deleteBy eq x ys
-DEFINE_FUNCTION_3(3, constexpr List<T0>, deleteBy, function_t<bool(T1, T2)> const&, pred, T0 const&, x, List<T0> const&, l,
+DEFINE_FUNCTION_3(3, List<T0>, deleteBy, function_t<bool(T1, T2)> const&, pred, T0 const&, x, List<T0> const&, l,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     static_assert(is_same_as<T0, T2>::value, "Should be the same");
     if (null(l))
@@ -272,26 +272,26 @@ DEFINE_FUNCTION_3(3, constexpr List<T0>, deleteBy, function_t<bool(T1, T2)> cons
 
 // union                   :: (Eq a) => [a] -> [a] -> [a]
 // union                   = unionBy (==)
-DEFINE_FUNCTION_2(1, constexpr List<T0>, _union, List<T0> const&, xs, List<T0> const&, ys,
+DEFINE_FUNCTION_2(1, List<T0>, _union, List<T0> const&, xs, List<T0> const&, ys,
     return unionBy(_(eq<T0>), xs, ys);)
 
 // unionBy                 :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 // unionBy eq xs ys        =  xs ++ foldl (flip (deleteBy eq)) (nubBy eq ys) xs
-DEFINE_FUNCTION_3(3, constexpr List<T0>, unionBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, xs, List<T0> const&, ys,
+DEFINE_FUNCTION_3(3, List<T0>, unionBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, xs, List<T0> const&, ys,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     static_assert(is_same_as<T0, T2>::value, "Should be the same");
     return xs + foldl(_flip(_deleteBy<T0>(pred)), nubBy(pred, ys), xs);)
 
 // intersect               :: (Eq a) => [a] -> [a] -> [a]
 // intersect               =  intersectBy (==)
-DEFINE_FUNCTION_2(1, constexpr List<T0>, intersect, List<T0> const&, xs, List<T0> const&, ys,
+DEFINE_FUNCTION_2(1, List<T0>, intersect, List<T0> const&, xs, List<T0> const&, ys,
     return intersectBy(_(eq<T0>), xs, ys);)
 
 // intersectBy             :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 // intersectBy _  [] _     =  []
 // intersectBy _  _  []    =  []
 // intersectBy eq xs ys    =  [x | x <- xs, any (eq x) ys]
-DEFINE_FUNCTION_3(3, constexpr List<T0>, intersectBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, xs, List<T0> const&, ys,
+DEFINE_FUNCTION_3(3, List<T0>, intersectBy, function_t<bool(T1, T2)> const&, pred, List<T0> const&, xs, List<T0> const&, ys,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     static_assert(is_same_as<T0, T2>::value, "Should be the same");
     if(null(xs) || null(ys))
@@ -304,18 +304,18 @@ DEFINE_FUNCTION_3(3, constexpr List<T0>, intersectBy, function_t<bool(T1, T2)> c
 // prependToAll            :: a -> [a] -> [a]
 // prependToAll _   []     = []
 // prependToAll sep (x:xs) = sep : x : prependToAll sep xs
-DEFINE_FUNCTION_2(1, constexpr List<T0>, prependToAll, T0 const&, sep, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, prependToAll, T0 const&, sep, List<T0> const&, l,
     return null(l) ? l : sep >> (head(l) >> prependToAll(sep, tail(l)));)
 
 // intersperse             :: a -> [a] -> [a]
 // intersperse _   []      = []
 // intersperse sep (x:xs)  = x : prependToAll sep xs
-DEFINE_FUNCTION_2(1, constexpr List<T0>, intersperse, T0 const&, sep, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, intersperse, T0 const&, sep, List<T0> const&, l,
     return null(l) ? l : head(l) >> prependToAll(sep, tail(l));)
 
 // intercalate :: [a] -> [[a]] -> [a]
 // intercalate xs xss = concat (intersperse xs xss)
-DEFINE_FUNCTION_2(1, constexpr List<T0>, intercalate, List<T0> const&, xs, List<List<T0> > const&, xss,
+DEFINE_FUNCTION_2(1, List<T0>, intercalate, List<T0> const&, xs, List<List<T0> > const&, xss,
     return concat(intersperse(xs, xss));)
 
 // transpose               :: [[a]] -> [[a]]
@@ -338,20 +338,20 @@ constexpr List<List<T> > transpose(List<List<T> > const& l)
 
 // partition      :: (a -> Bool) -> [a] -> ([a],[a])
 // partition p xs = foldr (select p) ([],[]) xs
-DEFINE_FUNCTION_2(2, constexpr PAIR_T(List<T0>, List<T0>), partition, function_t<bool(T1)> const&, p, List<T0> const&, xs,
+DEFINE_FUNCTION_2(2, PAIR_T(List<T0>, List<T0>), partition, function_t<bool(T1)> const&, p, List<T0> const&, xs,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     return foldr(_select<T0>(p), PAIR_T(List<T0>, List<T0>)(), xs);)
 
 // select :: (a -> Bool) -> a -> ([a], [a]) -> ([a], [a])
 // select p x ~(ts,fs) | p x       = (x:ts,fs)
 //                     | otherwise = (ts, x:fs)
-DEFINE_FUNCTION_3(2, constexpr PAIR_T(List<T0>, List<T0>), select, function_t<bool(T1)> const&, p, T0 const&, x, const PAIR_T(List<T0>, List<T0>)&, s,
+DEFINE_FUNCTION_3(2, PAIR_T(List<T0>, List<T0>), select, function_t<bool(T1)> const&, p, T0 const&, x, const PAIR_T(List<T0>, List<T0>)&, s,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     return p(x) ? std::make_pair(x >> s.first, s.second) : std::make_pair(s.first, x >> s.second);)
 
 // insert :: Ord a => a -> [a] -> [a]
 // insert e ls = insertBy (compare) e ls
-DEFINE_FUNCTION_2(1, constexpr List<T0>, insert, T0 const&, e, List<T0> const&, ls,
+DEFINE_FUNCTION_2(1, List<T0>, insert, T0 const&, e, List<T0> const&, ls,
     return insertBy(_(compare<T0>), e, ls);)
 
 /*
@@ -362,7 +362,7 @@ insertBy cmp x ys@(y:ys')
      GT -> y : insertBy cmp x ys'
      _  -> x : ys
 */
-DEFINE_FUNCTION_3(3, constexpr List<T0>, insertBy, function_t<Ordering(T1, T2)> const&, cmp, T0 const&, x, List<T0> const&, ls,
+DEFINE_FUNCTION_3(3, List<T0>, insertBy, function_t<Ordering(T1, T2)> const&, cmp, T0 const&, x, List<T0> const&, ls,
     static_assert(is_same_as<T0, T1>::value, "Should be the same");
     static_assert(is_same_as<T0, T2>::value, "Should be the same");
     if (null(ls))

@@ -198,7 +198,7 @@ using liftM2_type = typename std::enable_if<
 #define LIFTM2_TYPE_(M1, M2, Ret, Arg1, Arg2) BOOST_IDENTITY_TYPE((liftM2_type<M1, M2, Ret, Arg1, Arg2>))
 #define LIFTM2_TYPE(M1, M2, Ret, Arg1, Arg2) typename LIFTM2_TYPE_(M1, M2, Ret, Arg1, Arg2)
 
-DECLARE_FUNCTION_3(5, constexpr LIFTM2_TYPE(T0, T1, T2, T3, T4), liftM2, function_t<T2(T3, T4)> const&, T0 const&, T1 const&);
+DECLARE_FUNCTION_3(5, LIFTM2_TYPE(T0, T1, T2, T3, T4), liftM2, function_t<T2(T3, T4)> const&, T0 const&, T1 const&);
 
 // liftM3 f m1 m2 m3 = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
 template<typename M1, typename M2, typename M3, typename Ret, typename Arg1, typename Arg2, typename Arg3>
@@ -212,7 +212,7 @@ using liftM3_type = typename std::enable_if<
 #define LIFTM3_TYPE_(M1, M2, M3, Ret, Arg1, Arg2, Arg3) BOOST_IDENTITY_TYPE((liftM3_type<M1, M2, M3, Ret, Arg1, Arg2, Arg3>))
 #define LIFTM3_TYPE(M1, M2, M3, Ret, Arg1, Arg2, Arg3) typename LIFTM3_TYPE_(M1, M2, M3, Ret, Arg1, Arg2, Arg3)
 
-DECLARE_FUNCTION_4(7, constexpr LIFTM3_TYPE(T0, T1, T2, T3, T4, T5, T6), liftM3, function_t<T3(T4, T5, T6)> const&, T0 const&, T1 const&, T2 const&);
+DECLARE_FUNCTION_4(7, LIFTM3_TYPE(T0, T1, T2, T3, T4, T5, T6), liftM3, function_t<T3(T4, T5, T6)> const&, T0 const&, T1 const&, T2 const&);
 
 // liftM4 f m1 m2 m3 m4 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
 template<typename M1, typename M2, typename M3, typename M4, typename Ret, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
@@ -228,7 +228,7 @@ using liftM4_type = typename std::enable_if<
 #define LIFTM4_TYPE_(M1, M2, M3, M4, Ret, Arg1, Arg2, Arg3, Arg4) BOOST_IDENTITY_TYPE((liftM4_type<M1, M2, M3, M4, Ret, Arg1, Arg2, Arg3, Arg4>))
 #define LIFTM4_TYPE(M1, M2, M3, M4, Ret, Arg1, Arg2, Arg3, Arg4) typename LIFTM4_TYPE_(M1, M2, M3, M4, Ret, Arg1, Arg2, Arg3, Arg4)
 
-DECLARE_FUNCTION_5(9, constexpr LIFTM4_TYPE(T0, T1, T2, T3, T4, T5, T6, T7, T8), liftM4,
+DECLARE_FUNCTION_5(9, LIFTM4_TYPE(T0, T1, T2, T3, T4, T5, T6, T7, T8), liftM4,
     function_t<T4(T5, T6, T7, T8)> const&, T0 const&, T1 const&, T2 const&, T3 const&);
 
 // liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
@@ -247,7 +247,7 @@ using liftM5_type = typename std::enable_if<
 #define LIFTM5_TYPE_(M1, M2, M3, M4, M5, Ret, Arg1, Arg2, Arg3, Arg4, Arg5) BOOST_IDENTITY_TYPE((liftM5_type<M1, M2, M3, M4, M5, Ret, Arg1, Arg2, Arg3, Arg4, Arg5>))
 #define LIFTM5_TYPE(M1, M2, M3, M4, M5, Ret, Arg1, Arg2, Arg3, Arg4, Arg5) typename LIFTM5_TYPE_(M1, M2, M3, M4, M5, Ret, Arg1, Arg2, Arg3, Arg4, Arg5)
 
-DECLARE_FUNCTION_6(11, constexpr LIFTM5_TYPE(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10), liftM5,
+DECLARE_FUNCTION_6(11, LIFTM5_TYPE(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10), liftM5,
     function_t<T5(T6, T7, T8, T9, T10)> const&, T0 const&, T1 const&, T2 const&, T3 const&, T4 const&);
 
 /*
@@ -271,7 +271,7 @@ using ap_type = typename std::enable_if<
 #define AP_TYPE_(MV, MF) BOOST_IDENTITY_TYPE((ap_type<MV, MF>))
 #define AP_TYPE(MV, MF) typename AP_TYPE_(MV, MF)
 
-DECLARE_FUNCTION_2(2, constexpr AP_TYPE(T0, T1), ap, T1 const&, T0 const&);
+DECLARE_FUNCTION_2(2, AP_TYPE(T0, T1), ap, T1 const&, T0 const&);
 
 template<typename MV, typename MF>
 constexpr ap_type<MV, MF> operator&(MF const& mf, MV const& mv){

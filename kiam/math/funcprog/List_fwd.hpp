@@ -32,9 +32,9 @@ template<typename T> constexpr T const& last(List<T> const&);
 template<typename T> constexpr List<T> init(List<T> const&);
 template<typename T> constexpr bool null(List<T> const&);
 template<typename T> constexpr int length(List<T> const&);
-DECLARE_FUNCTION_2(1, constexpr List<fdecay<T0> >, filter, function_t<bool(T0)> const&, List<fdecay<T0> > const&);
-DECLARE_FUNCTION_2(1, constexpr List<T0>, cons, T0 const& value, List<T0> const&);
-DECLARE_FUNCTION_2(1, constexpr List<T0>, concat2, List<T0> const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<fdecay<T0> >, filter, function_t<bool(T0)> const&, List<fdecay<T0> > const&);
+DECLARE_FUNCTION_2(1, List<T0>, cons, T0 const& value, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, concat2, List<T0> const&, List<T0> const&);
 template<typename T> constexpr List<T> sort(List<T> const&);
 
 // The concatenation of all the elements of a container of lists.
@@ -62,7 +62,7 @@ template<typename T> constexpr List<T> nub(List<T> const&);
 -- >>> nubBy (\x y -> mod x 3 == mod y 3) [1,2,4,5,6]
 -- [1,2,6]
 */
-DECLARE_FUNCTION_2(3, constexpr List<T0>, nubBy, function_t<bool(T1, T2)> const&, List<T0> const&);
+DECLARE_FUNCTION_2(3, List<T0>, nubBy, function_t<bool(T1, T2)> const&, List<T0> const&);
 
 /*
 -- | 'delete' @x@ removes the first occurrence of @x@ from its list argument.
@@ -74,7 +74,7 @@ DECLARE_FUNCTION_2(3, constexpr List<T0>, nubBy, function_t<bool(T1, T2)> const&
 -- It is a special case of 'deleteBy', which allows the programmer to
 -- supply their own equality test.
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, _delete, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, _delete, T0 const&, List<T0> const&);
 
 /*
 -- | The 'deleteBy' function behaves like 'delete', but takes a
@@ -93,7 +93,7 @@ deleteBy eq x (y:ys)    = if x `eq` y then ys else y : deleteBy eq x ys
 -- >>> deleteBy (<=) 4 [1..10]
 -- [1,2,3,5,6,7,8,9,10]
 */
-DECLARE_FUNCTION_3(3, constexpr List<T0>, deleteBy, function_t<bool(T1, T2)> const&, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_3(3, List<T0>, deleteBy, function_t<bool(T1, T2)> const&, T0 const&, List<T0> const&);
 
 /*
 -- | The 'union' function returns the list union of the two lists.
@@ -109,10 +109,10 @@ DECLARE_FUNCTION_3(3, constexpr List<T0>, deleteBy, function_t<bool(T1, T2)> con
 -- their own equality test.
 
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, _union, List<T0> const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, _union, List<T0> const&, List<T0> const&);
 
 // The 'unionBy' function is the non-overloaded version of 'union'.
-DECLARE_FUNCTION_3(3, constexpr List<T0>, unionBy, function_t<bool(T1, T2)> const&, List<T0> const&, List<T0> const&);
+DECLARE_FUNCTION_3(3, List<T0>, unionBy, function_t<bool(T1, T2)> const&, List<T0> const&, List<T0> const&);
 
 /*
 -- | The 'intersect' function takes the list intersection of two lists.
@@ -130,10 +130,10 @@ DECLARE_FUNCTION_3(3, constexpr List<T0>, unionBy, function_t<bool(T1, T2)> cons
 -- supply their own equality test. If the element is found in both the first
 -- and the second list, the element from the first list will be used.
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, intersect, List<T0> const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, intersect, List<T0> const&, List<T0> const&);
 
 // The 'intersectBy' function is the non-overloaded version of 'intersect'.
-DECLARE_FUNCTION_3(3, constexpr List<T0>, intersectBy, function_t<bool(T1, T2)> const&, List<T0> const&, List<T0> const&);
+DECLARE_FUNCTION_3(3, List<T0>, intersectBy, function_t<bool(T1, T2)> const&, List<T0> const&, List<T0> const&);
 
 /*
 -- Not exported:
@@ -141,7 +141,7 @@ DECLARE_FUNCTION_3(3, constexpr List<T0>, intersectBy, function_t<bool(T1, T2)> 
 -- as soon as possible to avoid space leaks. Experiments suggested that
 -- a separate top-level helper is more efficient than a local worker.
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, prependToAll, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, prependToAll, T0 const&, List<T0> const&);
 
 /*
 -- | The 'intersperse' function takes an element and a list and
@@ -151,7 +151,7 @@ DECLARE_FUNCTION_2(1, constexpr List<T0>, prependToAll, T0 const&, List<T0> cons
 -- >>> intersperse ',' "abcde"
 -- "a,b,c,d,e"
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, intersperse, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, intersperse, T0 const&, List<T0> const&);
 
 /*
 -- | 'intercalate' @xs xss@ is equivalent to @('concat' ('intersperse' xs xss))@.
@@ -161,7 +161,7 @@ DECLARE_FUNCTION_2(1, constexpr List<T0>, intersperse, T0 const&, List<T0> const
 -- >>> intercalate ", " ["Lorem", "ipsum", "dolor"]
 -- "Lorem, ipsum, dolor"
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, intercalate, List<T0> const&, List<List<T0> > const&);
+DECLARE_FUNCTION_2(1, List<T0>, intercalate, List<T0> const&, List<List<T0> > const&);
 
 /*
 -- | The 'transpose' function transposes the rows and columns of its argument.
@@ -187,8 +187,8 @@ template<typename T> constexpr List<List<T> > transpose(List<List<T> > const&);
 -- >>> partition (`elem` "aeiou") "Hello World!"
 -- ("eoo","Hll Wrld!")
 */
-DECLARE_FUNCTION_2(2, constexpr PAIR_T(List<T0>, List<T0>), partition, function_t<bool(T1)> const&, List<T0> const&);
-DECLARE_FUNCTION_3(2, constexpr PAIR_T(List<T0>, List<T0>), select, function_t<bool(T1)> const&, T0 const&, const PAIR_T(List<T0>, List<T0>)&);
+DECLARE_FUNCTION_2(2, PAIR_T(List<T0>, List<T0>), partition, function_t<bool(T1)> const&, List<T0> const&);
+DECLARE_FUNCTION_3(2, PAIR_T(List<T0>, List<T0>), select, function_t<bool(T1)> const&, T0 const&, const PAIR_T(List<T0>, List<T0>)&);
 
 /*
 -- | The 'insert' function takes an element and a list and inserts the
@@ -201,10 +201,10 @@ DECLARE_FUNCTION_3(2, constexpr PAIR_T(List<T0>, List<T0>), select, function_t<b
 -- >>> insert 4 [1,2,3,5,6,7]
 -- [1,2,3,4,5,6,7]
 */
-DECLARE_FUNCTION_2(1, constexpr List<T0>, insert, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_2(1, List<T0>, insert, T0 const&, List<T0> const&);
 
 // The non-overloaded version of 'insert'.
-DECLARE_FUNCTION_3(3, constexpr List<T0>, insertBy, function_t<Ordering(T1, T2)> const&, T0 const&, List<T0> const&);
+DECLARE_FUNCTION_3(3, List<T0>, insertBy, function_t<Ordering(T1, T2)> const&, T0 const&, List<T0> const&);
 
 _FUNCPROG_END
 

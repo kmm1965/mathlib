@@ -70,7 +70,7 @@ constexpr monad_type<M> throwError(A const& e){
     return MonadError_t<M>::template throwError<value_type_t<M> >(e);
 }
 
-DEFINE_FUNCTION_2(2, constexpr monad_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
+DEFINE_FUNCTION_2(2, monad_type<T0>, catchError, T0 const&, x, function_t<T0(T1 const&)>, f,
     return MonadError_t<T0>::catchError(x, f);)
 
 _FUNCPROG_END

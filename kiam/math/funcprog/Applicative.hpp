@@ -67,7 +67,7 @@ using apply_type = typename std::enable_if<
 #define _APPLY_TYPE(AP, AF) BOOST_IDENTITY_TYPE((apply_type<AP, AF>))
 #define APPLY_TYPE(AP, AF) typename _APPLY_TYPE(AP, AF)
 
-DEFINE_FUNCTION_2(2, constexpr APPLY_TYPE(T0, T1), apply, T1 const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, APPLY_TYPE(T0, T1), apply, T1 const&, f, T0 const&, v,
     return Applicative_t<T0>::apply(f, v);)
 
 template<class AP, class AF>
@@ -87,7 +87,7 @@ using liftA2_type = typename std::enable_if<
 #define LIFTA2_TYPE_(AY, AX, FT) BOOST_IDENTITY_TYPE((liftA2_type<AY, AX, FT>))
 #define LIFTA2_TYPE(AY, AX, FT) typename LIFTA2_TYPE_(AY, AX, FT)
 
-DEFINE_FUNCTION_3(3, constexpr LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, T1 const&, x, T0 const&, y,
+DEFINE_FUNCTION_3(3, LIFTA2_TYPE(T0, T1, T2), liftA2, function_t<T2> const&, f, T1 const&, x, T0 const&, y,
     return f / x * y;)
 
 // liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
@@ -104,7 +104,7 @@ using liftA3_type = typename std::enable_if<
 #define LIFTA3_TYPE_(AZ, AY, AX, FT) BOOST_IDENTITY_TYPE((liftA3_type<AZ, AY, AX, FT>))
 #define LIFTA3_TYPE(AZ, AY, AX, FT) typename LIFTA3_TYPE_(AZ, AY, AX, FT)
 
-DEFINE_FUNCTION_4(4, constexpr LIFTA3_TYPE(T0, T1, T2, T3), liftA3, function_t<T3> const&, f, T2 const&, x, T1 const&, y, T0 const&, z,
+DEFINE_FUNCTION_4(4, LIFTA3_TYPE(T0, T1, T2, T3), liftA3, function_t<T3> const&, f, T2 const&, x, T1 const&, y, T0 const&, z,
     return f / x * y * z;)
 
 /*

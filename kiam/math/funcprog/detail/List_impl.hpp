@@ -204,15 +204,15 @@ constexpr int length(List<T> const& l) {
     return (int)l.size();
 }
 
-DEFINE_FUNCTION_2(1, constexpr List<fdecay<T0> >, filter, function_t<bool(T0)> const&, pred, List<fdecay<T0> > const&, l,
+DEFINE_FUNCTION_2(1, List<fdecay<T0> >, filter, function_t<bool(T0)> const&, pred, List<fdecay<T0> > const&, l,
     List<fdecay<T0> > result;
     std::copy_if(std::cbegin(l), std::cend(l), std::back_inserter(result), pred);
     return result;)
 
-DEFINE_FUNCTION_2(1, constexpr List<T0>, cons, T0 const&, value, List<T0> const&, l,
+DEFINE_FUNCTION_2(1, List<T0>, cons, T0 const&, value, List<T0> const&, l,
     return value >> l;)
 
-DEFINE_FUNCTION_2(1, constexpr List<T0>, concat2, List<T0> const&, l1, List<T0> const&, l2,
+DEFINE_FUNCTION_2(1, List<T0>, concat2, List<T0> const&, l1, List<T0> const&, l2,
     return l1 + l2;)
 
 // List

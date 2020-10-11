@@ -25,7 +25,7 @@ private:
 #define PARSECMAP_UNPARSER_(S, U, _M, Ret, T, P) BOOST_IDENTITY_TYPE((_PARSEC::parsecMap_unParser<S, U, _M, Ret, T, P>))
 #define PARSECMAP_UNPARSER(S, U, _M, Ret, T, P) typename PARSECMAP_UNPARSER_(S, U, _M, Ret, T, P)
 
-DEFINE_FUNCTION_2(6, constexpr PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)), parsecMap,
+DEFINE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)), parsecMap,
     function_t<T3(T4)> const&, f, PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p,
     return PARSECT(T0, T1, T2, T3, PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5))(PARSECMAP_UNPARSER(T0, T1, T2, T3, fdecay<T4>, T5)(f, p));)
 
@@ -52,7 +52,7 @@ using parsec_fmap_type = parsec::ParsecT<S, U, _M, Ret, parsec::parsecMap_unPars
 #define PARSEC_FMAP_TYPE_(S, U, _M, Ret, Arg, P) BOOST_IDENTITY_TYPE((parsec_fmap_type<S, U, _M, Ret, Arg, P>))
 #define PARSEC_FMAP_TYPE(S, U, _M, Ret, Arg, P) typename PARSEC_FMAP_TYPE_(S, U, _M, Ret, Arg, P)
 
-DEFINE_FUNCTION_2(6, constexpr PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), fmap, function_t<T3(T4)> const&, f,
+DEFINE_FUNCTION_2(6, PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), fmap, function_t<T3(T4)> const&, f,
     PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (Functor<parsec::_ParsecT<T0, T1, T2> >::template fmap<T3, T4, T5>(f, p));)
 
 template<typename S, typename U, typename _M, typename Ret, typename Arg, typename P>
@@ -61,7 +61,7 @@ constexpr parsec_fmap_type<S, U, _M, Ret, Arg, P> operator/(function_t<Ret(Arg)>
 }
 
 // liftA == fmap
-DEFINE_FUNCTION_2(6, constexpr PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), liftM, function_t<T3(T4)> const&, f,
+DEFINE_FUNCTION_2(6, PARSEC_FMAP_TYPE(T0, T1, T2, T3, T4, T5), liftM, function_t<T3(T4)> const&, f,
     PARSECT(T0, T1, T2, fdecay<T4>, T5) const&, p, return (fmap<T0, T1, T2, T3, T4, T5>(f, p));)
 
 _FUNCPROG_END

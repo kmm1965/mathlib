@@ -71,7 +71,7 @@ struct Reply : variant_t<c_Ok<S, U, A>, c_Error>, _Reply<S, U>
 #define REPLY_(S, U, A) BOOST_IDENTITY_TYPE((_PARSEC::Reply<S, U, A>))
 #define REPLY(S, U, A) typename REPLY_(S, U, A)
 
-DEFINE_FUNCTION_3(3, constexpr REPLY(T0, T1, T2), __Ok, T2 const&, value, const STATE(T0, T1)&, state, ParseError const&, error,
+DEFINE_FUNCTION_3(3, REPLY(T0, T1, T2), __Ok, T2 const&, value, const STATE(T0, T1)&, state, ParseError const&, error,
     return OK(T0, T1, T2)(value, state, error);)
 
 template<typename S, typename U, typename A>

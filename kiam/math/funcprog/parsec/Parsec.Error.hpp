@@ -75,7 +75,7 @@ newErrorMessage :: Message -> SourcePos -> ParseError
 newErrorMessage msg pos
     = ParseError pos [msg]
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, newErrorMessage, Message const&, msg, SourcePos const&, pos,
+DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, newErrorMessage, Message const&, msg, SourcePos const&, pos,
     return ParseError(pos, List<Message>({ msg }));)
 
 /*
@@ -83,7 +83,7 @@ addErrorMessage :: Message -> ParseError -> ParseError
 addErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg:msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, addErrorMessage, Message const&, msg, ParseError const&, err,
+DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, addErrorMessage, Message const&, msg, ParseError const&, err,
     return ParseError(err.pos, msg >> err.msgs);)
 
 /*
@@ -91,7 +91,7 @@ setErrorPos :: SourcePos -> ParseError -> ParseError
 setErrorPos pos (ParseError _ msgs)
     = ParseError pos msgs
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, setErrorPos, SourcePos const&, pos, ParseError const&, err,
+DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorPos, SourcePos const&, pos, ParseError const&, err,
     return ParseError(pos, err.msgs);)
 
 /*
@@ -99,7 +99,7 @@ setErrorMessage :: Message -> ParseError -> ParseError
 setErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg : filter (msg /=) msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, setErrorMessage, Message const&, msg, ParseError const&, err,
+DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorMessage, Message const&, msg, ParseError const&, err,
     return ParseError(err.pos, msg >> filter(_neq(msg), err.msgs));)
 
 /*
@@ -115,7 +115,7 @@ mergeError e1@(ParseError pos1 msgs1) e2@(ParseError pos2 msgs2)
         GT -> e1
         LT -> e2
 */
-DEFINE_FUNCTION_2_NOTEMPL(ParseError, mergeError, ParseError const&, err1, ParseError const&, err2,
+DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, mergeError, ParseError const&, err1, ParseError const&, err2,
     return
         err2.msgs.empty() && !err1.msgs.empty() ? err1 :
         err1.msgs.empty() && !err2.msgs.empty() ? err2 :

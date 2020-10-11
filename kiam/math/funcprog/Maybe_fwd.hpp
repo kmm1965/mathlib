@@ -17,11 +17,11 @@ template<typename T> constexpr Maybe<fdecay<T> > Just(T const&);
 template<typename T> constexpr Maybe<T> Nothing();
 template<typename T> constexpr f0<Maybe<T> > _Nothing();
 
-DECLARE_FUNCTION_3(2, constexpr Maybe<T1>, maybe, T1 const&, function_t<T1(T0)> const&, Maybe<fdecay<T0> > const&);
+DECLARE_FUNCTION_3(2, Maybe<T1>, maybe, T1 const&, function_t<T1(T0)> const&, Maybe<fdecay<T0> > const&);
 template<typename T> constexpr bool isJust(Maybe<T> const&);
 template<typename T> constexpr bool isNothing(Maybe<T> const&);
 template<typename T> constexpr T fromJust(Maybe<T> const&);
-DECLARE_FUNCTION_2(1, constexpr T0, fromMaybe, T0 const&, Maybe<T0> const&);
+DECLARE_FUNCTION_2(1, T0, fromMaybe, T0 const&, Maybe<T0> const&);
 
 template<typename T0> constexpr T0 fromMaybe(f0<T0> const&, Maybe<T0> const&);
 

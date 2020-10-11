@@ -151,7 +151,7 @@ constexpr Maybe<A> MonadError<_Maybe>::catchError(Maybe<A> const& x, function_t<
 }
 
 // Maybe
-DEFINE_FUNCTION_3(2, constexpr Maybe<T1>, maybe, T1 const&, default_value, function_t<T1(T0)> const&, f, Maybe<fdecay<T0> > const&, v,
+DEFINE_FUNCTION_3(2, Maybe<T1>, maybe, T1 const&, default_value, function_t<T1(T0)> const&, f, Maybe<fdecay<T0> > const&, v,
     return Just(v ? f(v.value()) : default_value);)
 
 template<typename T>
@@ -172,10 +172,11 @@ T constexpr fromJust(Maybe<T> const& value)
     return value.value();
 }
 
-DEFINE_FUNCTION_2(1, constexpr T0, fromMaybe, T0 const&, default_value, Maybe<T0> const&, value,
+DEFINE_FUNCTION_2(1, T0, fromMaybe, T0 const&, default_value, Maybe<T0> const&, value,
     return value ? value.value() : default_value;)
 
-template<typename T0> constexpr T0 fromMaybe(f0<T0> const& f, Maybe<T0> const& value){
+template<typename T0>
+constexpr T0 fromMaybe(f0<T0> const& f, Maybe<T0> const& value){
     return value ? value.value() : *f;
 }
 

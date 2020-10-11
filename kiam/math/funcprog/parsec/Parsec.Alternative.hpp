@@ -70,7 +70,7 @@ private:
     const ParsecT<S, U, _M, A, PN> n;
 };
 
-DEFINE_FUNCTION_2(6, constexpr PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
+DEFINE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
     parserPlus, PARSECT(T0, T1, T2, T3, T4) const&, m, PARSECT(T0, T1, T2, T3, T5) const&, n,
     return PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5))(PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)(m, n));)
 

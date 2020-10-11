@@ -14,7 +14,7 @@ struct SourcePos
     const int line, column;
 };
 
-DEFINE_FUNCTION_3_NOTEMPL(SourcePos, newPos, SourceName const&, name, int, line, int, column,
+DEFINE_FUNCTION_3_NOTEMPL_NC(SourcePos, newPos, SourceName const&, name, int, line, int, column,
     return SourcePos(name, line, column);)
 
 inline SourcePos initialPos(SourceName const& name) {
@@ -22,23 +22,23 @@ inline SourcePos initialPos(SourceName const& name) {
 }
 
 // Increments the line number of a source position.
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, incSourceLine, SourcePos const&, pos, int, n,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, incSourceLine, SourcePos const&, pos, int, n,
     return SourcePos(pos.name, pos.line + n, pos.column);)
 
 // Increments the column number of a source position.
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, incSourceColumn, SourcePos const&, pos, int, n,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, incSourceColumn, SourcePos const&, pos, int, n,
     return SourcePos(pos.name, pos.line, pos.column + n);)
 
 // Set the name of the source.
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, setSourceName, SourcePos const&, pos, SourceName const&, name,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, setSourceName, SourcePos const&, pos, SourceName const&, name,
     return SourcePos(name, pos.line, pos.column);)
 
 // Set the line number of a source position.
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, setSourceLine, SourcePos const&, pos, int, n,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, setSourceLine, SourcePos const&, pos, int, n,
     return SourcePos(pos.name, n, pos.column);)
 
 // Set the column number of a source position.
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, setSourceColumn, SourcePos const&, pos, int, n,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, setSourceColumn, SourcePos const&, pos, int, n,
     return SourcePos(pos.name, pos.line, n);)
 
 /*
@@ -57,7 +57,7 @@ updatePosChar (SourcePos name line column) c
         _    -> SourcePos name line (column + 1)
 */
 
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, updatePosChar, SourcePos const&, pos, char, c,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, updatePosChar, SourcePos const&, pos, char, c,
     switch (c)
     {
     case '\n': return SourcePos(pos.name, pos.line + 1, 1);
@@ -75,7 +75,7 @@ updatePosString pos string
     = foldl updatePosChar pos string
 */
 
-DEFINE_FUNCTION_2_NOTEMPL(SourcePos, updatePosString, SourcePos const&, pos, const char*, s,
+DEFINE_FUNCTION_2_NOTEMPL_NC(SourcePos, updatePosString, SourcePos const&, pos, const char*, s,
     return foldl(_(updatePosChar), pos, List<char>(s));)
 
 /*

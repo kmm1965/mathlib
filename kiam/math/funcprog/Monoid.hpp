@@ -36,7 +36,7 @@ struct Monoid;
 template<typename T>
 using Monoid_t = Monoid<base_class_t<T> >;
 
-DEFINE_FUNCTION_2(1, constexpr monoid_type<T0>, mappend, T0 const&, x, T0 const&, y,
+DEFINE_FUNCTION_2(1, monoid_type<T0>, mappend, T0 const&, x, T0 const&, y,
     return Monoid_t<T0>::mappend(x, y);)
 
 /*

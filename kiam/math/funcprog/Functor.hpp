@@ -73,7 +73,7 @@ using fmap_type = typename std::enable_if<
 #define FMAP_TYPE(F, FT) typename FMAP_TYPE_(F, FT)
 
 // <$> fmap :: Functor f => (a -> b) -> f a -> f b
-DEFINE_FUNCTION_2(2, constexpr FMAP_TYPE(T0, T1), fmap, function_t<T1> const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), fmap, function_t<T1> const&, f, T0 const&, v,
     return Functor_t<T0>::fmap(f, v);)
 
 template<typename F, typename FT>
@@ -82,7 +82,7 @@ constexpr fmap_type<F, FT> operator/(function_t<FT> const& f, F const& v){
 }
 
 // liftA == fmap
-DEFINE_FUNCTION_2(2, constexpr FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(2, FMAP_TYPE(T0, T1), liftA, function_t<T1> const&, f, T0 const&, v,
     return fmap(f, v);)
 
 /*

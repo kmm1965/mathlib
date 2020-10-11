@@ -72,7 +72,7 @@ using foldMap_type = typename std::enable_if<
 #define FOLDMAP_TYPE_(F, M, Arg) BOOST_IDENTITY_TYPE((foldMap_type<F, M, Arg>))
 #define FOLDMAP_TYPE(F, M, Arg) typename FOLDMAP_TYPE_(F, M, Arg)
 
-DEFINE_FUNCTION_2(3, constexpr FOLDMAP_TYPE(T0, T1, T2), foldMap, function_t<T1(T2)> const&, f, T0 const&, v,
+DEFINE_FUNCTION_2(3, FOLDMAP_TYPE(T0, T1, T2), foldMap, function_t<T1(T2)> const&, f, T0 const&, v,
     return Foldable_t<T0>::foldMap(f, v);)
 
 /*
@@ -105,19 +105,19 @@ using foldlr_type = typename std::enable_if<
 template<typename FO>
 using fold1_type = foldable_type<FO, value_type_t<FO> >;
 
-DEFINE_FUNCTION_3(4, constexpr FOLDLR_TYPE(T0, T1, T2, T3), foldl, function_t<T3(T2, T1)> const&, f, T3 const&, z, T0 const&, x,
+DEFINE_FUNCTION_3(4, FOLDLR_TYPE(T0, T1, T2, T3), foldl, function_t<T3(T2, T1)> const&, f, T3 const&, z, T0 const&, x,
     return Foldable_t<T0>::foldl(f, z, x);)
 
 // foldl1 :: (a -> a -> a) -> t a -> a
-DEFINE_FUNCTION_2(4, constexpr fold1_type<T0>, foldl1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(4, fold1_type<T0>, foldl1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
     return Foldable_t<T0>::foldl1(f, x);)
 
 // foldr :: (a -> b -> b) -> b -> t a -> b
-DEFINE_FUNCTION_3(4, constexpr FOLDLR_TYPE(T0, T1, T2, T3), foldr, function_t<T3(T1, T2)> const&, f, T3 const&, z, T0 const&, x,
+DEFINE_FUNCTION_3(4, FOLDLR_TYPE(T0, T1, T2, T3), foldr, function_t<T3(T1, T2)> const&, f, T3 const&, z, T0 const&, x,
     return Foldable_t<T0>::foldr(f, z, x);)
 
 // foldr1 :: (a -> a -> a) -> t a -> a
-DEFINE_FUNCTION_2(4, constexpr fold1_type<T0>, foldr1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
+DEFINE_FUNCTION_2(4, fold1_type<T0>, foldr1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
     return Foldable_t<T0>::foldr1(f, x);)
 
 _FUNCPROG_END
