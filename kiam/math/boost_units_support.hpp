@@ -47,64 +47,64 @@ struct divides_result_type<Y, boost::units::quantity<Unit, Y> >
     > type;
 };
 
-template<class EO, class Unit, class Y>
+template<class GEXP, class Unit, class Y>
 typename std::enable_if<
-    boost::units::is_quantity<get_value_type_t<EO> >::value,
-    binary_scalar_evaluable_object1<EO,
+    boost::units::is_quantity<get_value_type_t<GEXP> >::value,
+    binary_scalar_grid_expression1<GEXP,
         generic_multiplies<
-            get_value_type_t<EO>,
+            get_value_type_t<GEXP>,
             boost::units::quantity<Unit, Y>,
-            typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
+            typename boost::units::multiply_typeof_helper<get_value_type_t<GEXP>, boost::units::quantity<Unit, Y> >::type
         >
     >
->::type operator*(const EOBJ(EO) &eobj, const boost::units::quantity<Unit, Y> &value)
+>::type operator*(GRID_EXPR(GEXP) const& gexp, boost::units::quantity<Unit, Y> const& value)
 {
     typedef generic_multiplies<
-        get_value_type_t<EO>,
+        get_value_type_t<GEXP>,
         boost::units::quantity<Unit, Y>,
-        typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
+        typename boost::units::multiply_typeof_helper<get_value_type_t<GEXP>, boost::units::quantity<Unit, Y> >::type
     > bin_op_type;
-    return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
+    return binary_scalar_grid_expression1<GEXP, bin_op_type>(gexp, bin_op_type(), value);
 }
 
-template<class EO, class Unit, class Y>
+template<class GEXP, class Unit, class Y>
 typename std::enable_if<
-    boost::units::is_quantity<get_value_type_t<EO> >::value,
-    binary_scalar_evaluable_object1<EO,
+    boost::units::is_quantity<get_value_type_t<GEXP> >::value,
+    binary_scalar_grid_expression1<GEXP,
         generic_divides<
-            get_value_type_t<EO>,
+            get_value_type_t<GEXP>,
             boost::units::quantity<Unit, Y>,
-            typename boost::units::divide_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
+            typename boost::units::divide_typeof_helper<get_value_type_t<GEXP>, boost::units::quantity<Unit, Y> >::type
         >
     >
->::type operator/(const EOBJ(EO) &eobj, const boost::units::quantity<Unit, Y> &value)
+>::type operator/(GRID_EXPR(GEXP) const& gexp, boost::units::quantity<Unit, Y> const& value)
 {
     typedef generic_divides<
-        get_value_type_t<EO>,
+        get_value_type_t<GEXP>,
         boost::units::quantity<Unit, Y>,
-        typename boost::units::divide_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
+        typename boost::units::divide_typeof_helper<get_value_type_t<GEXP>, boost::units::quantity<Unit, Y> >::type
     > bin_op_type;
-    return binary_scalar_evaluable_object1<EO, bin_op_type>(eobj, bin_op_type(), value);
+    return binary_scalar_grid_expression1<GEXP, bin_op_type>(gexp, bin_op_type(), value);
 }
 
-template<class EO, class Unit, class Y>
+template<class GEXP, class Unit, class Y>
 typename std::enable_if<
-    boost::units::is_quantity<get_value_type_t<EO> >::value,
-    binary_scalar_evaluable_object2<EO,
+    boost::units::is_quantity<get_value_type_t<GEXP> >::value,
+    binary_scalar_grid_expression2<GEXP,
         generic_multiplies<
             boost::units::quantity<Unit, Y>,
-            get_value_type_t<EO>,
-            typename boost::units::multiply_typeof_helper<boost::units::quantity<Unit, Y>, get_value_type_t<EO> >::type
+            get_value_type_t<GEXP>,
+            typename boost::units::multiply_typeof_helper<boost::units::quantity<Unit, Y>, get_value_type_t<GEXP> >::type
         >
     >
->::type operator*(const boost::units::quantity<Unit, Y>& value, const EOBJ(EO) &eobj)
+>::type operator*(boost::units::quantity<Unit, Y> const& value, GRID_EXPR(GEXP) const& gexp)
 {
     typedef generic_multiplies<
         boost::units::quantity<Unit, Y>,
-        get_value_type_t<EO>,
-        typename boost::units::multiply_typeof_helper<get_value_type_t<EO>, boost::units::quantity<Unit, Y> >::type
+        get_value_type_t<GEXP>,
+        typename boost::units::multiply_typeof_helper<get_value_type_t<GEXP>, boost::units::quantity<Unit, Y> >::type
     > bin_op_type;
-    return binary_scalar_evaluable_object2<EO, bin_op_type>(value, bin_op_type(), eobj);
+    return binary_scalar_grid_expression2<GEXP, bin_op_type>(value, bin_op_type(), gexp);
 }
 
 template<class Unit, class Y>

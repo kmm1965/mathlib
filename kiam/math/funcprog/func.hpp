@@ -5,20 +5,23 @@
 
 _FUNCPROG_BEGIN
 
-inline std::string _s(const char *s){
-    return s;
-}
-template<typename T>
+template<typename F>
 struct is_function : std::false_type {};
 
 template<typename FT>
 struct is_function<function_t<FT> > : std::true_type{};
+
+template<typename F>
+bool constexpr is_function_v = is_function<F>::value;
 
 template<typename T>
 struct is_function0 : std::false_type {};
 
 template<typename T>
 struct is_function0<function_t<T()> > : std::true_type{};
+
+template<typename F>
+bool constexpr is_function0_v = is_function0<F>::value;
 
 // Function composition
 
@@ -33,10 +36,10 @@ Ret invoke_f0(f0<Ret> const& f) {
 }
 
 template<typename RetG, typename RetF, typename ArgF, typename... ArgsF, typename ArgG, typename... ArgsG>
-typename std::enable_if<
-    is_same_as<ArgG, function_t<RetF(ArgsF...)> >::value,
+std::enable_if_t<
+    is_same_as_v<ArgG, function_t<RetF(ArgsF...)> >,
     function_t<RetG(ArgF, ArgsG...)>
->::type operator&(function_t<RetG(ArgG, ArgsG...)> const& g, function_t<RetF(ArgF, ArgsF...)> const& f){
+> operator&(function_t<RetG(ArgG, ArgsG...)> const& g, function_t<RetF(ArgF, ArgsF...)> const& f){
     return [g, f](ArgF argF, ArgsG... argsG) { return g(invoke_f0(f << argF), argsG...); };
 }
 
@@ -94,5 +97,3 @@ template<typename T1, typename T2, typename T3>
 wostream& operator<<(wostream &os, _FUNCPROG::f0<tuple<T1, T2, T3> > const& f);
 
 } // namespace std
-
-#include "define_function.h"

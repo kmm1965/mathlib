@@ -13,7 +13,7 @@ protected: // protect from direct construction
 };
 
 template<class E>
-constexpr std::ostream &operator<<(std::ostream &o, const expression<E> &e) {
+constexpr std::ostream &operator<<(std::ostream &o, expression<E> const& e){
     return o << e().to_string();
 }
 

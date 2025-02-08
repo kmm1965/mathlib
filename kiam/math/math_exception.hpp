@@ -2,6 +2,8 @@
 
 #include "math_def.h"
 
+#include <sstream>
+
 _KIAM_MATH_BEGIN
 
 class math_exception : public std::runtime_error

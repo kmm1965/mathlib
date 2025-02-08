@@ -51,43 +51,39 @@ struct tokenPrimEx_unParser
     using nextState_type = Maybe<next_state_function_type>;
     using test_type = function_t<Maybe<A>(const T&)>;
 
-    DECLARE_OK_ERR_TYPES();
-
     tokenPrimEx_unParser(const showToken_type &showToken, const nextpos_type &nextpos, const nextState_type &nextState, const test_type &test) :
-        showToken(showToken), nextpos(nextpos), nextState(nextState), test(test) {}
+        showToken(showToken), nextpos(nextpos), nextState(nextState), test(test){}
 
-    // showToken nextpos(Just nextState) test
-    template<typename B>
-    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
-    {
+    IMPLEMENT_UNPARSER_RUN(
         return _do(r, Stream_t::uncons(s.input),
-            if (!r)
+            if(!r)
                 return eerr(unexpectError("", s.pos));
             pair_type const& p = r.value();
             T const& c = p.first;
             List<T> const& cs = p.second;
             Maybe<A> const ma = test(c);
-            if (!ma)
+            if(!ma)
                 return eerr(unexpectError(showToken(c), s.pos));
             A const& x = ma.value();
             SourcePos const newpos = nextpos(s.pos, c, cs);
             State_t const newstate(cs, newpos, nextState ? nextState.value()(s.pos, c, cs, s.user) : s.user);
-            return cok(x, newstate, newErrorUnknown(newpos)););
-    }
+            return cok(x, newstate, newErrorUnknown(newpos));
+        );
+    )
 
 private:
-    const showToken_type showToken;
-    const nextpos_type nextpos;
-    const nextState_type nextState;
-    const test_type test;
+    showToken_type const showToken;
+    nextpos_type const nextpos;
+    nextState_type const nextState;
+    test_type const test;
 };
 
 template<typename U, typename _M, typename A, typename T>
 constexpr auto tokenPrimEx(
-    const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
-    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
-    const typename tokenPrimEx_unParser<U, _M, A, T>::nextState_type &nextState,
-    const typename tokenPrimEx_unParser<U, _M, A, T>::test_type &test)
+    typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type const& showToken,
+    typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type const& nextpos,
+    typename tokenPrimEx_unParser<U, _M, A, T>::nextState_type const& nextState,
+    typename tokenPrimEx_unParser<U, _M, A, T>::test_type const& test)
 {
     return ParsecT<List<T>, U, _M, A, tokenPrimEx_unParser<U, _M, A, T> >(
         tokenPrimEx_unParser<U, _M, A, T>(showToken, nextpos, nextState, test));
@@ -122,9 +118,9 @@ tokenPrim showToken nextpos test = tokenPrimEx showToken nextpos Nothing test
 
 template<typename U, typename _M, typename A, typename T>
 constexpr auto tokenPrim(
-    const typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type &showToken,
-    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type &nextpos,
-    const typename tokenPrimEx_unParser<U, _M, A, T>::test_type &test)
+    typename tokenPrimEx_unParser<U, _M, A, T>::showToken_type const& showToken,
+    typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type const& nextpos,
+    typename tokenPrimEx_unParser<U, _M, A, T>::test_type const& test)
 {
     return tokenPrimEx<U, _M, A, T>(showToken, nextpos, Nothing<typename tokenPrimEx_unParser<U, _M, A, T>::next_state_function_type>(), test);
 }
@@ -166,12 +162,10 @@ token(
     typename tokenPrimEx_unParser<U, _M, A, T>::test_type const& test)
 {
     using S = Stream<_Identity, T>;
-    const typename tokenPrimEx_unParser<U, _M, A, T>::nextpos_type nextpos =
-        [tokpos](SourcePos const&, T const& tok, typename S::stream_type const& ts)
-    {
-        const Maybe<typename S::pair_type> r = uncons(ts).run();
+    auto const nextpos = _([tokpos](SourcePos const&, T const& tok, typename S::stream_type const& ts)    {
+        auto const r = uncons(ts).run();
         return tokpos(r ? r.value().first : tok);
-    };
+    });
     return tokenPrim<U, _M, A, T>(showToken, nextpos, test);
 }
 
@@ -187,7 +181,7 @@ struct tokens_unParser
     DECLARE_OK_ERR_TYPES();
 
     tokens_unParser(showTokens_type const& showTokens, nextposs_type const& nextposs, List<T> const& tts) :
-        showTokens(showTokens), nextposs(nextposs), tts(tts) {}
+        showTokens(showTokens), nextposs(nextposs), tts(tts){}
 
     template<typename B>
     constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
@@ -224,28 +218,26 @@ struct tokens_unParser
                         | tok == x  -> walk toks xs
                         | otherwise -> eerr $ errExpect x
         */
-        if (null(tts))
+        if(null(tts))
             return eok(tts, s, unknownError(s));
         //errEof = (setErrorMessage (Expect (showTokens tts))
         //    (newErrorMessage (SysUnExpect "") pos))
-        const f0<ParseError> errEof = [this, &s]() {
+        auto const errEof = _([this, &s](){
             return setErrorMessage(Message(Expect, showTokens(tts)), newErrorMessage(Message(SysUnExpect, ""), s.pos));
-        };
+        });
         //errExpect x = (setErrorMessage (Expect (showTokens tts))
         //    (newErrorMessage (SysUnExpect (showTokens [x])) pos))
-        const function_t<ParseError(const T&)> errExpect = [this, &s](T const& x) {
+        auto const errExpect = _([this, &s](T const& x){
             return setErrorMessage(Message(Expect, showTokens(tts)), newErrorMessage(Message(SysUnExpect, showTokens(List<T>({ x }))), s.pos));
-        };
+        });
         //ok rs = let pos' = nextposs pos tts
         //            s' = State rs pos' u
         //        in cok tts s' (newErrorUnknown pos')
-        const function_t<typename ParsecT_base_t::template return_type<B>(S const& rs)> ok =
-            [this, &s, &cok](S const& rs)
-        {
+        auto const ok = _([this, &s, &cok](S const& rs){
             const SourcePos pos_ = nextposs(s.pos, tts);
             const State<S, U> s_(rs, pos_, s.user);
             return cok(tts, s_, newErrorUnknown(pos_));
-        };
+        });
         /*
                 walk []     rs = ok rs
                 walk (t:ts) rs = do
@@ -255,15 +247,15 @@ struct tokens_unParser
                     Just (x,xs) | t == x    -> walk ts xs
                                 | otherwise -> cerr $ errExpect x
         */
-        const function_t<typename ParsecT_base_t::template return_type<B>(List<T> const&, S const&)> walk =
+        function_t<typename ParsecT_base_t::template return_type<B>(List<T> const&, S const&)> const walk = 
             [&ok, &cerr, &errEof, &errExpect, &walk](List<T> const& l, S const& rs)
         {
-            if (null(l))
+            if(null(l))
                 return ok(rs);
             T const& t = head(l);
             const List<T> ts = tail(l);
             const Maybe<pair_t<T, List<T> > > sr = uncons(rs);
-            if (!sr) return cerr(errEof());
+            if(!sr) return cerr(errEof());
             auto const& [x, xs] = sr.value();
             return t == x ? walk(ts, xs) : cerr(errExpect(x));
         };
@@ -277,9 +269,9 @@ struct tokens_unParser
                         | otherwise -> eerr $ errExpect x
         */
         T const& tok = head(tts);
-        const List<T> toks = tail(tts);
-        const Maybe<pair_t<T, List<T> > > sr = uncons(s.input);
-        if (!sr) return eerr(errEof());
+        auto const toks = tail(tts);
+        auto const sr = uncons(s.input);
+        if(!sr) return eerr(errEof());
         auto const& [x, xs] = sr.value();
         return tok == x ? walk(toks, xs) : eerr(errExpect(x));
     }

@@ -8,7 +8,7 @@ _SYMDIFF_BEGIN
 template<class E, size_t N>
 struct grad_closure
 {
-    constexpr grad_closure(const expression<E> &expr, std::array<sd_any, N> &result) :
+    constexpr grad_closure(expression<E> const& expr, std::array<sd_any, N> &result) :
         expr(expr()), result(result){}
 
     template<unsigned I>
@@ -17,12 +17,12 @@ struct grad_closure
     }
 
 private:
-    const E &expr;
+    E const& expr;
     std::array<sd_any, N> &result;
 };
 
 template<size_t N, class E>
-constexpr std::array<sd_any, N> grad(const expression<E> &expr)
+constexpr std::array<sd_any, N> grad(expression<E> const& expr)
 {
     std::array<sd_any, N> result;
     grad_closure<E, N> closure(expr, result);
@@ -33,7 +33,7 @@ constexpr std::array<sd_any, N> grad(const expression<E> &expr)
 template<class E, size_t N, class E2>
 struct mul_expr_grad_closure
 {
-    constexpr mul_expr_grad_closure(const expression<E2> &expr, const std::array<sd_any, N> &vgrad, std::array<sd_any, N> &result) :
+    constexpr mul_expr_grad_closure(expression<E2> const& expr, std::array<sd_any, N> const& vgrad, std::array<sd_any, N> &result) :
         expr(expr()), vgrad(vgrad), result(result) {}
 
     template<unsigned I>
@@ -42,13 +42,13 @@ struct mul_expr_grad_closure
     }
 
 private:
-    const E2 &expr;
-    const std::array<sd_any, N> &vgrad;
+    E2 const& expr;
+    std::array<sd_any, N> const& vgrad;
     std::array<sd_any, N> &result;
 };
 
 template<class E, size_t N, class E2>
-constexpr std::array<sd_any, N> mult(const expression<E2> &expr, const std::array<sd_any, N> &vgrad)
+constexpr std::array<sd_any, N> mult(expression<E2> const& expr, std::array<sd_any, N> const& vgrad)
 {
     std::array<sd_any, N> result;
     mul_expr_grad_closure<E, N, E2> closure(expr, vgrad, result);
@@ -59,8 +59,8 @@ constexpr std::array<sd_any, N> mult(const expression<E2> &expr, const std::arra
 template<class E, typename T, size_t N>
 struct eval_grad_closure
 {
-    constexpr eval_grad_closure(const std::array<sd_any, N> &gradx,
-        const val_array<T, N> &x, val_array<T, N> &result) :
+    constexpr eval_grad_closure(std::array<sd_any, N> const& gradx,
+        val_array<T, N> const& x, val_array<T, N> &result) :
         gradx(gradx), x(x), result(result){}
 
     template<unsigned I>
@@ -69,13 +69,13 @@ struct eval_grad_closure
     }
 
 private:
-    const std::array<sd_any, N> &gradx;
-    const val_array<T, N> &x;
+    std::array<sd_any, N> const& gradx;
+    val_array<T, N> const& x;
     val_array<T, N> &result;
 };
 
 template<class E, typename T, size_t N>
-constexpr val_array<T, N> eval_grad(const std::array<sd_any, N> &gradx, const val_array<T, N> &x)
+constexpr val_array<T, N> eval_grad(std::array<sd_any, N> const& gradx, val_array<T, N> const& x)
 {
     val_array<T, N> result;
     eval_grad_closure<E, T, N> closure(gradx, x, result);

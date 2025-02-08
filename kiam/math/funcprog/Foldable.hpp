@@ -1,123 +1,86 @@
 #pragma once
 
-#include "Monoid.hpp"
+#include "fwd/Foldable_fwd.hpp"
 
 _FUNCPROG_BEGIN
 
-template<class _F>
-struct _is_foldable : std::false_type {};
+template<typename _F>
+struct _Foldable // Default implementation of some functions
+{
+    // Combine the elements of a structure using a monoid.
+    // fold :: Monoid m => t m -> m
+    template<typename M>
+    constexpr monoid_type<M> fold(typeof_t<_F, M> const& x);
 
-template<class F>
-using is_foldable = _is_foldable<base_class_t<F> >;
+    // Map each element of the structure to a monoid, and combine the results.
+    // foldMap :: Monoid m => (a -> m) -> t a -> m
+    template<typename M, typename Arg>
+    static constexpr monoid_type<M> foldMap(function_t<M(Arg)> const& f, typeof_dt<_F, Arg> const& x);
 
-template<class F, typename T = F>
-using foldable_type = typename std::enable_if<is_foldable<F>::value, T>::type;
+    // List of elements of a structure, from left to right.
+    // toList :: t a -> [a]
+    template<typename A>
+    static constexpr List<A> toList(typeof_t<_F, A> const& t);
 
-// requires foldl, foldl1, foldr, foldr1
-template<typename F>
-struct Foldable;
+    // Test whether the structure is empty. The default implementation is
+    // optimized for structures that are similar to cons-lists, because there
+    // is no general way to do better.
+    // null :: t a -> Bool
+    template<typename A>
+    static constexpr bool null(typeof_t<_F, A> const& x);
 
-template<typename T>
-using Foldable_t = Foldable<base_class_t<T> >;
+    // Returns the size/length of a finite structure as an 'Int'.  The
+    // default implementation is optimized for structures that are similar to
+    // cons-lists, because there is no general way to do better.
+    // length :: t a -> Int
+    template<typename A>
+    static constexpr int length(typeof_t<_F, A> const& x);
 
-#define IMPLEMENT_FOLDABLE(_F) \
-    template<> struct _is_foldable<_F> : std::true_type {}
+    // Does the element occur in the structure?
+    // elem :: Eq a => a -> t a -> Bool
+    template<typename A>
+    static constexpr bool elem(A const& a, typeof_t<_F, A> const& f);
+
+    // The largest element of a non-empty structure.
+    // maximum :: forall a . Ord a => t a -> a
+    template<typename A>
+    static constexpr A maximum(typeof_t<_F, A> const& f);
+
+    // The least element of a non-empty structure.
+    // minimum :: forall a . Ord a => t a -> a
+    template<typename A>
+    static constexpr A minimum(typeof_t<_F, A> const& f);
+
+    // The 'sum' function computes the sum of the numbers of a structure.
+    // sum :: Num a => t a -> a
+    template<typename A>
+    static constexpr A sum(typeof_t<_F, A> const& f);
+
+    // The 'product' function computes the product of the numbers of a structure.
+    // product :: Num a => t a -> a
+    template<typename A>
+    static constexpr A product(typeof_t<_F, A> const& f);
+};
 
 #define DECLARE_FOLDABLE_CLASS(F) \
-    /* foldMap :: Monoid m => (a -> m) -> t a -> m */ \
-    template<typename M, typename Arg> \
-    static constexpr monoid_type<M> foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x); \
-    \
     /* foldl :: (b -> a -> b) -> b -> t a -> b */ \
     template<typename Ret, typename A, typename B> \
-    static constexpr typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret> \
     foldl(function_t<Ret(B, A)> const& f, Ret const& z, F<fdecay<A> > const& x); \
     \
     /* foldl1 :: (a -> a -> a) -> t a -> a */ \
     template<typename A, typename Arg1, typename Arg2> \
-    static constexpr typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A> \
     foldl1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
     \
     /* foldr :: (a -> b -> b) -> b -> t a -> b */ \
     template<typename Ret, typename A, typename B> \
-    static constexpr typename std::enable_if<is_same_as<Ret, B>::value, Ret>::type \
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret> \
     foldr(function_t<Ret(A, B)> const& f, Ret const& z, F<fdecay<A> > const& x); \
     \
     /* foldr1 :: (a -> a -> a) -> t a -> a */ \
     template<typename A, typename Arg1, typename Arg2> \
-    static constexpr typename std::enable_if<is_same_as<A, Arg1>::value && is_same_as<A, Arg2>::value, A>::type \
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A> \
     foldr1(function_t<A(Arg1, Arg2)> const& f, F<A> const& x); \
-
-// foldMap f = foldr (mappend . f) mempty
-#define DEFAULT_FOLDMAP_IMPL(F, _F) \
-    template<typename M, typename Arg> \
-    constexpr monoid_type<M> Foldable<_F>::foldMap(function_t<M(Arg)> const& f, F<fdecay<Arg> > const& x){ \
-        return foldr(_(mappend<M>) & f, Monoid_t<M>::template mempty<value_type_t<M> >(), x); \
-    }
-
-/*
--- | Map each element of the structure to a monoid,
--- and combine the results.
-foldMap :: Monoid m => (a -> m) -> t a -> m
-{-# INLINE foldMap #-}
--- This INLINE allows more list functions to fuse. See Trac #9848.
-foldMap f = foldr (mappend . f) mempty
-*/
-template<typename F, typename M, typename Arg>
-using foldMap_type = typename std::enable_if<
-    is_foldable<F>::value && is_monoid<M>::value && is_same_as<value_type_t<F>, Arg>::value,
-    M
->::type;
-
-#define FOLDMAP_TYPE_(F, M, Arg) BOOST_IDENTITY_TYPE((foldMap_type<F, M, Arg>))
-#define FOLDMAP_TYPE(F, M, Arg) typename FOLDMAP_TYPE_(F, M, Arg)
-
-DEFINE_FUNCTION_2(3, FOLDMAP_TYPE(T0, T1, T2), foldMap, function_t<T1(T2)> const&, f, T0 const&, v,
-    return Foldable_t<T0>::foldMap(f, v);)
-
-/*
--- | Combine the elements of a structure using a monoid.
-fold :: Monoid m => t m -> m
-fold = foldMap id
-*/
-template<typename F>
-using fold_type = typename std::enable_if<
-    is_foldable<F>::value && is_monoid<value_type_t<F> >::value,
-    value_type_t<F>
->::type;
-
-// fold :: Monoid m => t m -> m
-// fold = foldMap id
-template<typename T>
-constexpr fold_type<T> fold(T const& v) {
-    return foldMap(_(id<value_type_t<T> >), v);
-}
-
-template<typename FO, typename A, typename B, typename Ret>
-using foldlr_type = typename std::enable_if<
-    is_foldable<FO>::value && is_same_as<value_type_t<FO>, A>::value && is_same_as<Ret, B>::value,
-    Ret
->::type;
-
-#define FOLDLR_TYPE_(FO, A, B, Ret) BOOST_IDENTITY_TYPE((foldlr_type<FO, A, B, Ret>))
-#define FOLDLR_TYPE(FO, A, B, Ret) typename FOLDLR_TYPE_(FO, A, B, Ret)
-
-template<typename FO>
-using fold1_type = foldable_type<FO, value_type_t<FO> >;
-
-DEFINE_FUNCTION_3(4, FOLDLR_TYPE(T0, T1, T2, T3), foldl, function_t<T3(T2, T1)> const&, f, T3 const&, z, T0 const&, x,
-    return Foldable_t<T0>::foldl(f, z, x);)
-
-// foldl1 :: (a -> a -> a) -> t a -> a
-DEFINE_FUNCTION_2(4, fold1_type<T0>, foldl1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
-    return Foldable_t<T0>::foldl1(f, x);)
-
-// foldr :: (a -> b -> b) -> b -> t a -> b
-DEFINE_FUNCTION_3(4, FOLDLR_TYPE(T0, T1, T2, T3), foldr, function_t<T3(T1, T2)> const&, f, T3 const&, z, T0 const&, x,
-    return Foldable_t<T0>::foldr(f, z, x);)
-
-// foldr1 :: (a -> a -> a) -> t a -> a
-DEFINE_FUNCTION_2(4, fold1_type<T0>, foldr1, function_t<T3(T1, T2)> const&, f, T0 const&, x,
-    return Foldable_t<T0>::foldr1(f, x);)
 
 _FUNCPROG_END

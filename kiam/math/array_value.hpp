@@ -16,8 +16,8 @@ struct array_value
     typedef T value_type;
     typedef value_type *pointer;
     typedef const value_type *const_pointer;
-    typedef value_type &reference;
-    typedef const value_type &const_reference;
+    typedef value_type& reference;
+    typedef value_type const& const_reference;
     typedef pointer iterator;
     typedef const_pointer const_iterator;
     static const size_t array_size = N;
@@ -58,7 +58,7 @@ struct array_value
     }
 
     __DEVICE __HOST
-    CONSTEXPR array_value& operator=(const value_type &value)
+    CONSTEXPR array_value& operator=(value_type const& value)
     {
         math_fill_n(m_values, array_size, value);
         return *this;
@@ -109,14 +109,14 @@ struct array_value
     }
 
     __DEVICE __HOST
-    CONSTEXPR array_value& operator*=(const value_type &rhs)
+    CONSTEXPR array_value& operator*=(value_type const& rhs)
     {
         math_transform_n(m_values, array_size, m_values, [&rhs](value_type const& x) { return x * rhs; });
         return *this;
     }
 
     __DEVICE __HOST
-    CONSTEXPR array_value& operator/=(const value_type &rhs)
+    CONSTEXPR array_value& operator/=(value_type const& rhs)
     {
         math_transform_n(m_values, array_size, m_values, [&rhs](value_type const& x) { return x / rhs; });
         return *this;
@@ -232,14 +232,14 @@ CONSTEXPR array_value<T, N> operator/(const array_value<T, N> &a, const T &y)
     return result;
 }
 
-// Скалярное произведение
+// РЎРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T, size_t N>
 __DEVICE __HOST
 CONSTEXPR T operator&(const array_value<T, N> &x, const array_value<T, N> &y){
     return math_inner_product(x.data(), x.data() + N, y.data(), T());
 }
 
-// Покомпонентное произведение
+// РџРѕРєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T, size_t N>
 __DEVICE __HOST
 CONSTEXPR array_value<T, N> operator^(const array_value<T, N> &x, const array_value<T, N> &y)

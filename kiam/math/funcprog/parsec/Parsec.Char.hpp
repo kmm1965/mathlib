@@ -68,7 +68,7 @@ char :: (Stream s m Char) => Char -> ParsecT s u m Char
 char c              = satisfy (==c)  <?> show [c]
 */
 template<typename U, typename _M>
-constexpr auto _char(char c){
+constexpr auto char_(char c){
     return satisfy<U, _M>(_([c](char c1){ return c1 == c; })) & (std::string("\"") + c + '"');
 }
 
@@ -114,7 +114,7 @@ newline             = char '\n'             <?> "lf new-line"
 */
 template<typename U, typename _M>
 constexpr auto newline(){
-    return _char<U, _M>('\n') & std::string("lf new-line");
+    return char_<U, _M>('\n') & std::string("lf new-line");
 }
 
 /*
@@ -126,7 +126,7 @@ crlf                = char '\r' *> char '\n' <?> "crlf new-line"
 */
 template<typename U, typename _M>
 constexpr auto crlf(){
-    return (_char<U, _M>('\r') *= _char<U, _M>('\n')) & std::string("crlf new-line");
+    return (char_<U, _M>('\r') *= char_<U, _M>('\n')) & std::string("crlf new-line");
 }
 
 /*
@@ -152,7 +152,7 @@ tab                 = char '\t'             <?> "tab"
 */
 template<typename U, typename _M>
 constexpr auto tab(){
-    return _char<U, _M>('\t') & std::string("tab");
+    return char_<U, _M>('\t') & std::string("tab");
 }
 
 /*

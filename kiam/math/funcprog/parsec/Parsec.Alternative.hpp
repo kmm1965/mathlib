@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ParsecT.hpp"
+
 _PARSEC_BEGIN
 
 /*
@@ -66,13 +68,15 @@ struct parserPlus_unParser
     }
 
 private:
-    const ParsecT<S, U, _M, A, PM> m;
-    const ParsecT<S, U, _M, A, PN> n;
+    ParsecT<S, U, _M, A, PM> const m;
+    ParsecT<S, U, _M, A, PN> const n;
 };
 
-DEFINE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)),
-    parserPlus, PARSECT(T0, T1, T2, T3, T4) const&, m, PARSECT(T0, T1, T2, T3, T5) const&, n,
-    return PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5))(PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)(m, n));)
+FUNCTION_TEMPLATE(6) constexpr PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)) parserPlus(
+    PARSECT(T0, T1, T2, T3, T4) const& m, PARSECT(T0, T1, T2, T3, T5) const& n)
+{
+    return PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5))(PARSERPLUS_UNPARSER(T0, T1, T2, T3, T4, T5)(m, n));
+}
 
 _PARSEC_END
 
@@ -107,17 +111,6 @@ struct Alternative<parsec::_ParsecT<S, U, _M> >
         return parsec::parserZero<S, U, _M, A>();
     }
     
-    template<typename T, typename P>
-    struct alt_op_result_type;
-
-    template<typename T, typename P>
-    using alt_op_result_type_t = typename alt_op_result_type<T, P>::type;
-
-    template<typename A, typename P, typename P2>
-    struct alt_op_result_type<parsec::ParsecT<S, U, _M, A, P2>, P> {
-        typedef parsec::ParsecT<S, U, _M, A, parsec::parserPlus_unParser<S, U, _M, A, P, P2> > type;
-    };
-
     template<typename A, typename P, typename P2>
     static constexpr auto alt_op(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
         return parsec::parserPlus<S, U, _M, A, P, P2>(op1, op2);
@@ -125,7 +118,7 @@ struct Alternative<parsec::_ParsecT<S, U, _M> >
 };
 
 template<typename S, typename U, typename _M, typename A, typename P, typename P2>
-constexpr auto operator|(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2){
+constexpr auto operator|(parsec::ParsecT<S, U, _M, A, P> const& op1, parsec::ParsecT<S, U, _M, A, P2> const& op2) {
     return Alternative<parsec::_ParsecT<S, U, _M> >::alt_op(op1, op2);
 }
 

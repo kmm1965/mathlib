@@ -36,7 +36,7 @@ struct parserBind_unParser;
 #define PARSERBIND_UNPARSER(S, U, _M, A, PA, B, PB) typename PARSERBIND_UNPARSER_(S, U, _M, A, PA, B, PB)
 
 DECLARE_FUNCTION_2(7, PARSECT(T0, T1, T2, T5, PARSERBIND_UNPARSER(T0, T1, T2, T3, T4, T5, T6)),
-    parserBind, const PARSECT(T0, T1, T2, T3, T4)&, function_t<PARSECT(T0, T1, T2, T5, T6)(const T3&)> const&);
+    parserBind, PARSECT(T0, T1, T2, T3, T4) const&, function_t<PARSECT(T0, T1, T2, T5, T6)(const T3&)> const&);
 
 template<typename S, typename U, typename _M, typename A>
 struct parserZero_unParser;
@@ -56,12 +56,9 @@ DECLARE_FUNCTION_2(6, PARSECT(T0, T1, T2, T3, PARSERPLUS_UNPARSER(T0, T1, T2, T3
 template<typename S, typename U, typename _M>
 struct _ParsecT
 {
-    static_assert(_is_monad<_M>::value, "_M should be a monad");
+    static_assert(_is_monad_v<_M>, "_M should be a monad");
     using base_class = _ParsecT;
     
-    template<typename A>
-    using type = ParsecT<S, U, _M, A, parserReturn_unParser<S, U, _M, A> >;
-
     template<typename B>
     using return_type = typename _M::template type<B>;
 };
@@ -73,7 +70,7 @@ template<typename S, typename U>
 struct __ParsecT
 {
     template<typename _M>
-    using mt_type = _ParsecT<S, U, _M>;
+    using base_type = _ParsecT<S, U, _M>;
 };
 
 template<typename S, typename U, typename _M, typename A>
@@ -170,7 +167,7 @@ using Parser = Parsec<String, None, A, P>;
 #define IMPLEMENT_UNPARSER_RUN(impl) \
     DECLARE_OK_ERR_TYPES(); \
     template<typename B> \
-    constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const \
+    constexpr auto run(_PARSEC::State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const \
     { impl }
 
 /*
@@ -195,7 +192,7 @@ struct unexpected_unParser
 
     unexpected_unParser(std::string const& msg) : msg(msg){}
 
-    IMPLEMENT_UNPARSER_RUN(return eerr(newErrorMessage(Message(UnExpect, msg), s.pos));)
+    IMPLEMENT_UNPARSER_RUN(return eerr(newErrorMessage(Message(UnExpect, msg), statePos(s)));)
 
 private:
     std::string msg;
@@ -231,3 +228,6 @@ _FUNCPROG_END
 #include "Parsec.Label.hpp"
 #include "Parsec.Char.hpp"
 #include "Parsec.Combinator.hpp"
+#include "Parsec.MonadTrans.hpp"
+#include "Parsec.MonadReader.hpp"
+#include "Parsec.Semigroup.hpp"

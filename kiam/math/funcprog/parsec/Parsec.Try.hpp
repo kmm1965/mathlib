@@ -44,16 +44,16 @@ struct try_unParser
 {
     using ParsecT_base_t = ParsecT_base<S, U, _M, A>;
 
-    try_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p) {}
+    try_unParser(ParsecT<S, U, _M, A, P> const& p) : p(p){}
 
     IMPLEMENT_UNPARSER_RUN(return p.template run<B>(s, cok, eerr, eok, eerr);)
 
 private:
-    const ParsecT<S, U, _M, A, P> p;
+    ParsecT<S, U, _M, A, P> const p;
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>
-constexpr auto _try_(ParsecT<S, U, _M, A, P> const& p) {
+constexpr auto try_(ParsecT<S, U, _M, A, P> const& p){
     return ParsecT<S, U, _M, A, try_unParser<S, U, _M, A, P> >(try_unParser<S, U, _M, A, P>(p));
 }
 

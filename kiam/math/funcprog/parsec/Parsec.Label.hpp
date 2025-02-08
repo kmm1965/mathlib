@@ -32,22 +32,18 @@ struct labels_unParser
     template<typename B>
     constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
-        const function_t<ParseError(ParseError const&, List<std::string> const&)> setExpectErrors =
-            [](ParseError const& err, List<std::string> const& msgs)
-        {
+        auto const setExpectErrors = _([](ParseError const& err, List<std::string> const& msgs){
             const int lmsgs = length(msgs);
             if (lmsgs == 0) return setErrorMessage(Message(Expect, ""), err);
             else if (lmsgs == 1) return setErrorMessage(Message(Expect, msgs.front()), err);
             else return foldr(_([](std::string const& msg_, ParseError const& err_){
-                return addErrorMessage(Message(Expect, msg_), err_); }),
+                    return addErrorMessage(Message(Expect, msg_), err_); }),
                 setErrorMessage(Message(Expect, head(msgs)), err), tail(msgs));
-        };
-        /*
-            let eok' x s' error = eok x s' $ if errorIsUnknown error
-                  then error
-                  else setExpectErrors error msgs
-            eerr' err = eerr $ setExpectErrors err msgs
-        */
+        });
+        //let eok' x s' error = eok x s' $ if errorIsUnknown error
+        //        then error
+        //        else setExpectErrors error msgs
+        //eerr' err = eerr $ setExpectErrors err msgs
         ok_type<B> const eok_ = [this, &eok, &setExpectErrors](A const& x, State<S, U> const& s_, ParseError const& error){
             return eok(x, s_, errorIsUnknown(error) ? error : setExpectErrors(error, msgs));
         };
@@ -58,8 +54,8 @@ struct labels_unParser
     }
 
 private:
-    const ParsecT<S, U, _M, A, P> p;
-    const List<std::string> msgs;
+    ParsecT<S, U, _M, A, P> const p;
+    List<std::string> const msgs;
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>

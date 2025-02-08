@@ -3,6 +3,8 @@
 #include "Parsec.Pos.hpp"
 #include "Parsec.Message.hpp"
 #include "../List.hpp"
+#include "../fwd/List_fwd.hpp"
+#include "../detail/map.hpp"
 
 _PARSEC_BEGIN
 
@@ -21,8 +23,8 @@ struct ParseError
 {
     ParseError(SourcePos const& pos, List<Message> const& msgs = List<Message>()) : pos(pos), msgs(msgs){}
 
-    const SourcePos pos;
-    const List<Message> msgs;
+    SourcePos const pos;
+    List<Message> const msgs;
 };
 
 /*
@@ -33,7 +35,7 @@ errorPos (ParseError pos _msgs)
     = pos
 
 */
-SourcePos errorPos(ParseError const& err) {
+SourcePos errorPos(ParseError const& err){
     return err.pos;
 }
 
@@ -44,7 +46,7 @@ errorMessages :: ParseError -> [Message]
 errorMessages (ParseError _pos msgs)
     = sort msgs
 */
-inline List<Message> errorMessages(ParseError const& err) {
+inline List<Message> errorMessages(ParseError const& err){
     return sort(err.msgs);
 }
 
@@ -54,7 +56,7 @@ errorIsUnknown (ParseError _pos msgs)
     = null msgs
 
 */
-inline constexpr bool errorIsUnknown(ParseError const& err) {
+inline constexpr bool errorIsUnknown(ParseError const& err){
     return null(err.msgs);
 }
 
@@ -66,7 +68,7 @@ newErrorUnknown pos
     = ParseError pos []
 
 */
-inline ParseError newErrorUnknown(SourcePos const& pos) {
+inline ParseError newErrorUnknown(SourcePos const& pos){
     return ParseError(pos);
 }
 
@@ -75,32 +77,40 @@ newErrorMessage :: Message -> SourcePos -> ParseError
 newErrorMessage msg pos
     = ParseError pos [msg]
 */
-DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, newErrorMessage, Message const&, msg, SourcePos const&, pos,
-    return ParseError(pos, List<Message>({ msg }));)
+DECLARE_FUNCTION_2_NOTEMPL_NC(ParseError, newErrorMessage, Message const&, SourcePos const&)
+inline ParseError newErrorMessage(Message const& msg, SourcePos const& pos) {
+    return ParseError(pos, List(msg));
+}
 
 /*
 addErrorMessage :: Message -> ParseError -> ParseError
 addErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg:msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, addErrorMessage, Message const&, msg, ParseError const&, err,
-    return ParseError(err.pos, msg >> err.msgs);)
+DECLARE_FUNCTION_2_NOTEMPL_NC(ParseError, addErrorMessage, Message const&, ParseError const&)
+inline ParseError addErrorMessage(Message const& msg, ParseError const& err) {
+    return ParseError(err.pos, msg >> err.msgs);
+}
 
 /*
 setErrorPos :: SourcePos -> ParseError -> ParseError
 setErrorPos pos (ParseError _ msgs)
     = ParseError pos msgs
 */
-DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorPos, SourcePos const&, pos, ParseError const&, err,
-    return ParseError(pos, err.msgs);)
+DECLARE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorPos, SourcePos const&, ParseError const&)
+inline ParseError setErrorPos(SourcePos const& pos, ParseError const& err) {
+    return ParseError(pos, err.msgs);
+}
 
 /*
 setErrorMessage :: Message -> ParseError -> ParseError
 setErrorMessage msg (ParseError pos msgs)
     = ParseError pos (msg : filter (msg /=) msgs)
 */
-DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorMessage, Message const&, msg, ParseError const&, err,
-    return ParseError(err.pos, msg >> filter(_neq(msg), err.msgs));)
+DECLARE_FUNCTION_2_NOTEMPL_NC(ParseError, setErrorMessage, Message const&, ParseError const&)
+inline ParseError setErrorMessage(Message const& msg, ParseError const& err) {
+    return ParseError(err.pos, msg >> filter(_neq(msg), err.msgs));
+}
 
 /*
 mergeError :: ParseError -> ParseError -> ParseError
@@ -115,12 +125,14 @@ mergeError e1@(ParseError pos1 msgs1) e2@(ParseError pos2 msgs2)
         GT -> e1
         LT -> e2
 */
-DEFINE_FUNCTION_2_NOTEMPL_NC(ParseError, mergeError, ParseError const&, err1, ParseError const&, err2,
+DECLARE_FUNCTION_2_NOTEMPL_NC(ParseError, mergeError, ParseError const&, ParseError const&)
+inline ParseError mergeError(ParseError const& err1, ParseError const& err2) {
     return
         err2.msgs.empty() && !err1.msgs.empty() ? err1 :
         err1.msgs.empty() && !err2.msgs.empty() ? err2 :
         err1.pos == err2.pos ? ParseError(err1.pos, err1.msgs + err2.msgs) :
-        err1.pos < err2.pos ? err2 : err1;)
+        err1.pos < err2.pos ? err2 : err1;
+}
 
 /*
 instance Eq ParseError where
@@ -136,31 +148,29 @@ inline bool operator==(ParseError const& l, ParseError const& r)
     return l.pos == r.pos && messageStrs(l) == messageStrs(r);
 }
 
-inline bool operator!=(ParseError const& l, ParseError const& r) {
+inline bool operator!=(ParseError const& l, ParseError const& r){
     return !(l == r);
 }
 
 inline _FUNCPROG::String showErrorMessages(const char *msgOr, const char *msgUnknown, const char *msgExpecting,
     const char *msgUnExpected, const char *msgEndOfInput, List<Message> const& msgs)
 {
-    /*
-        | null msgs = msgUnknown
-        | otherwise = concat $ map ("\n"++) $ clean $
-                     [showSysUnExpect,showUnExpect,showExpect,showMessages]
-    */
+    // | null msgs = msgUnknown
+    // | otherwise = concat $ map ("\n"++) $ clean $
+    //      [showSysUnExpect,showUnExpect,showExpect,showMessages]
     if (null(msgs))
         return msgUnknown;
     // helpers
     // clean = nub . filter (not . null)
     const function_t<List<_FUNCPROG::String>(List<_FUNCPROG::String> const&)> clean =
-        [](List<_FUNCPROG::String> const& l) {
+        [](List<_FUNCPROG::String> const& l){
             return nub(filter(not_(_(sempty)), l));
         };
     // separate   _ []     = ""
     // separate   _ [m]    = m
     // separate sep (m:ms) = m ++ sep ++ separate sep ms
     const function_t<_FUNCPROG::String(const char*, List<_FUNCPROG::String> const&)> separate =
-        [&separate](const char *sep, List<_FUNCPROG::String> const& ms) {
+        [&separate](const char *sep, List<_FUNCPROG::String> const& ms){
             return null(ms) ? "" :
                 length(ms) == 1 ? head(ms) :
                 String(head(ms) + sep + separate(sep, tail(ms)));
@@ -168,7 +178,7 @@ inline _FUNCPROG::String showErrorMessages(const char *msgOr, const char *msgUnk
 
     // commaSep = separate ", " . clean
     const function_t<_FUNCPROG::String(List<_FUNCPROG::String> const&)> commaSep =
-        [&clean, &separate](List<_FUNCPROG::String> const& ms) {
+        [&clean, &separate](List<_FUNCPROG::String> const& ms){
             return separate(", ", clean(ms));
         };
     
@@ -176,17 +186,15 @@ inline _FUNCPROG::String showErrorMessages(const char *msgOr, const char *msgUnk
     // commasOr [m] = m
     // commasOr ms  = commaSep (init ms) ++ " " ++ msgOr ++ " " ++ last ms
     const function_t<_FUNCPROG::String(List<_FUNCPROG::String> const&)> commasOr =
-        [&commaSep, &msgOr](List<_FUNCPROG::String> const& ms) {
+        [&commaSep, &msgOr](List<_FUNCPROG::String> const& ms){
             return null(ms) ? "" :
                 length(ms) == 1 ? head(ms) : String(commaSep(init(ms)) + ' ' + msgOr + ' ' + last(ms));
         };
 
-/*
-showMany pre msgs3 = case clean (map messageString msgs3) of
-                    [] -> ""
-                    ms | null pre  -> commasOr ms
-                       | otherwise -> pre ++ " " ++ commasOr ms
-*/
+    //showMany pre msgs3 = case clean (map messageString msgs3) of
+    //    [] -> ""
+    //    ms | null pre  -> commasOr ms
+    //       | otherwise -> pre ++ " " ++ commasOr ms
     const function_t<_FUNCPROG::String(const char*, List<Message> const&)> showMany =
         [&clean, &commasOr](const char *pre, List<Message> const& msgs3)
         {
@@ -200,9 +208,9 @@ showMany pre msgs3 = case clean (map messageString msgs3) of
     (unExpect,msgs2)    = span ((UnExpect    "") ==) msgs1
     (expect,messages)   = span ((Expect      "") ==) msgs2
 */
-    const auto [sysUnExpect, msgs1] = span(_eq<Message>(Message(SysUnExpect, "")), msgs);
-    const auto [unExpect, msgs2] = span(_eq<Message>(Message(UnExpect, "")), msgs1);
-    const auto [expect, messages] = span(_eq<Message>(Message(Expect, "")), msgs2);
+    auto const [sysUnExpect, msgs1] = span(_eq<Message>(Message(SysUnExpect, "")), msgs);
+    auto const [unExpect, msgs2] = span(_eq<Message>(Message(UnExpect, "")), msgs1);
+    auto const [expect, messages] = span(_eq<Message>(Message(Expect, "")), msgs2);
 /*
       showExpect      = showMany msgExpecting expect
       showUnExpect    = showMany msgUnExpected unExpect
@@ -231,20 +239,20 @@ showMany pre msgs3 = case clean (map messageString msgs3) of
 // unknownError :: State s u -> ParseError
 // unknownError state        = newErrorUnknown (statePos state)
 template<typename S, typename U>
-constexpr ParseError unknownError(State<S, U> const& state) {
-    return newErrorUnknown(state.pos);
+constexpr ParseError unknownError(State<S, U> const& state){
+    return newErrorUnknown(statePos(state));
 }
 
 // unexpectError::String->SourcePos->ParseError
 // unexpectError msg pos = newErrorMessage(SysUnExpect msg) pos
-ParseError unexpectError(_FUNCPROG::String const& msg, SourcePos const& pos) {
+ParseError unexpectError(_FUNCPROG::String const& msg, SourcePos const& pos){
     return newErrorMessage(Message(SysUnExpect, msg), pos);
 }
 
 _PARSEC_END
 
 namespace std {
-    inline ostream& operator<<(ostream& os, _PARSEC::ParseError const& err) {
+    inline ostream& operator<<(ostream& os, _PARSEC::ParseError const& err){
         return os << err.pos << ':' << _PARSEC::showErrorMessages("or", "unknown parse error", "expecting", "unexpected", "end of input", _PARSEC::errorMessages(err));
     }
 }

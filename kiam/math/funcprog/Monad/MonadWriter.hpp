@@ -34,8 +34,8 @@ struct _MonadWriter
     template<typename T>
     using type = typename _M::template type<T>;
 
-    static_assert(is_monoid<W>::value, "Should be a Monoid");
-    static_assert(_is_monad<_M>::value, "Should be a Monad");
+    static_assert(is_monoid_v<W>, "Should be a Monoid");
+    static_assert(_is_monad_v<_M>, "Should be a Monad");
 
 /*
     -- | @'writer' (a,w)@ embeds a simple writer action.
@@ -45,7 +45,7 @@ struct _MonadWriter
       return a
 */
     template<typename A>
-    static type<A> writer(pair_t<A, W> const& p) {
+    static constexpr type<A> writer(pair_t<A, W> const& p) {
         return MW::tell(snd(p)) >> Monad<_M>::mreturn(fst(p));
     }
 /*
@@ -53,7 +53,7 @@ struct _MonadWriter
     tell   :: w -> m ()
     tell w = writer ((),w)
 */
-    static type<None> tell(W const& w) {
+    static constexpr type<None> tell(W const& w) {
         return MW::writer(pair_t<None, W>(None(), w));
     }
 /*
@@ -79,16 +79,18 @@ listens f m = do
     return (a, f w)
 */
 template<typename W, class M, typename B>
-using listens_type = typename std::enable_if<
-    is_monoid<W>::value && is_monad<M>::value,
+using listens_type = std::enable_if_t<
+    is_monoid_v<W> && is_monad_v<M>,
     typename M::template type<pair_t<value_type_t<M>, B> >
->::type;
+>;
 
 #define LISTENS_TYPE_(W, M, B) BOOST_IDENTITY_TYPE((listens_type<W, M, B>))
 #define LISTENS_TYPE(W, M, B) typename LISTENS_TYPE_(W, M, B)
 
-DEFINE_FUNCTION_2(3, LISTENS_TYPE(T0, T1, T2), listens, function_t<T2(T0 const&)> const&, f, T1 const&, m,
-    return _do(p, MONADWRITER_T_(T0, T1)::listen(m), return Monad_t<T1>::mreturn(pair_t<value_type_t<T1>, T2>(fst(p), f(snd(p)))););)
+DECLARE_FUNCTION_2(3, LISTENS_TYPE(T0, T1, T2), listens, function_t<T2(T0 const&)> const&, T1 const&)
+FUNCTION_TEMPLATE(3) constexpr LISTENS_TYPE(T0, T1, T2) listens(function_t<T2(T0 const&)> const& f, T1 const& m) {
+    return _do(p, MONADWRITER_T_(T0, T1)::listen(m), return Monad_t<T1>::mreturn(pair_t<value_type_t<T1>, T2>(fst(p), f(snd(p)))););
+}
 
 /*
 -- | @'censor' f m@ is an action that executes the action @m@ and
@@ -102,14 +104,16 @@ censor f m = pass $ do
     return (a, f)
 */
 template<typename W, class M>
-using censor_type = typename std::enable_if<is_monoid<W>::value && is_monad<M>::value, M>::type;
+using censor_type = std::enable_if_t<is_monoid_v<W> && is_monad_v<M>, M>;
 
 #define CENSOR_TYPE_(W, M) BOOST_IDENTITY_TYPE((censor_type<W, M>))
 #define CENSOR_TYPE(W, M) typename CENSOR_TYPE_(W, M)
 
-DEFINE_FUNCTION_2(2, CENSOR_TYPE(T0, T1), censor, function_t<T0(T0 const&)> const&, f, T1 const&, m,
+DECLARE_FUNCTION_2(2, CENSOR_TYPE(T0, T1), censor, function_t<T0(T0 const&)> const&, T1 const&)
+FUNCTION_TEMPLATE(2) constexpr CENSOR_TYPE(T0, T1) censor(function_t<T0(T0 const&)> const& f, T1 const& m) {
     return MONADWRITER_T_(T0, T1)::pass(
         _do(a, m, return Monad_t<T1>::mreturn(PAIR_T(value_type_t<T1>, function_t<T0(T0 const&)>)(a, f));)
-    );)
+    );
+}
 
 _FUNCPROG_END

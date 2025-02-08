@@ -56,13 +56,13 @@ template<typename W>
 struct __AccumT
 {
     template<typename _M>
-    using mt_type = _AccumT<W, _M>;
+    using base_type = _AccumT<W, _M>;
 };
 
 template<typename W, typename _M>
-struct _AccumT
+struct _AccumT : __AccumT<W>
 {
-    static_assert(_is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad_v<_M>, "Should be a monad");
 
     using base_class = _AccumT;
 
@@ -76,7 +76,7 @@ struct _AccumT
     */
     static constexpr type<W> look(){
         return _([](W const& w){
-            return Monad<_M>::mreturn(pair_t<W, W>(w, Monoid_t<W>::template mempty<value_type_t<W> >()));
+            return Monad<_M>::mreturn(make_pair_t(w, W::mempty()));
         });
     }
 
@@ -85,7 +85,7 @@ struct _AccumT
     add :: (Monad m) => w -> AccumT w m ()
     add w = accum $ const ((), w)
     */
-    static type<None> add(W const& w){
+    static constexpr type<None> add(W const& w){
         return accum<_M>(
             _const_<W>(pair_t<None, W>(None(), w)));
     }
@@ -99,7 +99,7 @@ struct _AccumT
     static constexpr auto looks(function_t<A(W const&, Args...)> const& f){
         return _([f](W const& w){
             return Monad<_M>::mreturn(
-                pair_t<remove_f0_t<function_t<A(Args...)> >, W>(invoke_f0(f << w), Monoid_t<W>::template mempty<value_type_t<W> >()));
+                pair_t<remove_f0_t<function_t<A(Args...)> >, W>(invoke_f0(f << w), W::mempty()));
         });
     }
 
@@ -240,22 +240,22 @@ mapAccumT :: (m (a, w) -> n (b, w)) -> AccumT w m a -> AccumT w n b
 mapAccumT f m = AccumT (f . runAccumT m)
 */
 template<typename W, typename _M, typename A, typename NB, typename Arg>
-static constexpr typename std::enable_if<
-    std::is_same<Arg, typename _M::template type<pair_t<A, W> > >::value &&
-    is_pair<value_type_t<NB> >::value &&
-    std::is_same<W, snd_type_t<value_type_t<NB> > >::value,
+static constexpr std::enable_if_t<
+    std::is_same_v<Arg, typename _M::template type<pair_t<A, W> > > &&
+    is_pair_v<value_type_t<NB> > &&
+    std::is_same_v<W, snd_type_t<value_type_t<NB> > >,
     AccumT<W, base_class_t<NB>, fst_type_t<value_type_t<NB> > >
->::type mapAccumT(function_t<NB(Arg const&)> const& f, AccumT<W, _M, A> const& m){
+> mapAccumT(function_t<NB(Arg const&)> const& f, AccumT<W, _M, A> const& m){
     return f & _runAccumT(m);
 }
 
 template<typename W, typename _M, typename A, typename NB, typename Arg>
-static constexpr typename std::enable_if<
-    std::is_same<Arg, typename _M::template type<pair_t<A, W> > >::value &&
-    is_pair<value_type_t<NB> >::value &&
-    std::is_same<W, snd_type_t<value_type_t<NB> > >::value,
+static constexpr std::enable_if_t<
+    std::is_same_v<Arg, typename _M::template type<pair_t<A, W> > > &&
+    is_pair_v<value_type_t<NB> > &&
+    std::is_same_v<W, snd_type_t<value_type_t<NB> > >,
     function_t<AccumT<W, base_class_t<NB>, fst_type_t<value_type_t<NB> > >(AccumT<W, _M, A> const&)>
->::type _mapAccumT(function_t<NB(Arg const&)> const& f){
+> _mapAccumT(function_t<NB(Arg const&)> const& f){
     return _([f](AccumT<W, _M, A> const& m){
         return mapAccumT(f, m);
     });
@@ -334,14 +334,17 @@ constexpr auto _mapAccum(function_t<pair_t<B, W>(pair_t<A, W> const&)> const& f)
 template<typename W, typename _M>
 struct _is_functor<_AccumT<W, _M> > : _is_functor<_M> {};
 
+template<typename W, typename _M, typename A>
+struct is_functor<AccumT<W, _M, A> > : _is_functor<_M> {};
+
 template<typename W, typename _M>
-struct Functor<_AccumT<W, _M> >
+struct Functor<_AccumT<W, _M> > : _Functor<_AccumT<W, _M> >
 {
     // fmap f = mapAccumT $ fmap $ \ ~(a, w) -> (f a, w)
-    template<typename A, typename Ret, typename Arg, typename... Args>
-    static constexpr typename std::enable_if<is_same_as<A, Arg>::value,
-        AccumT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
-    >::type fmap(function_t<Ret(Arg, Args...)> const& f, AccumT<W, _M, A> const& m){
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr AccumT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
+    fmap(function_t<Ret(Arg, Args...)> const& f, AccumT<W, _M, fdecay<Arg> > const& m){
+        using A = fdecay<Arg>;
         return mapAccumT(_fmap<typename _M::template type<pair_t<A, W> > >(_([f](pair_t<A, W> const& p){
             return pair_t<remove_f0_t<function_t<Ret(Args...)> >, W>(invoke_f0(f << fst(p)), snd(p));
         })), m);
@@ -350,17 +353,20 @@ struct Functor<_AccumT<W, _M> >
 
 // Applicative
 template<typename W, class _M>
-struct _is_applicative<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
+struct _is_applicative<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> > {};
+
+template<typename W, class _M, typename A>
+struct is_applicative<AccumT<W, _M, A> > : std::integral_constant<bool, is_monoid_v<W> > {};
 
 template<typename W, typename _M>
-struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
+struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >, _Applicative<_AccumT<W, _M> >
 {
     using super = Functor<_AccumT<W, _M> >;
 
     // pure a  = AccumT $ const $ return (a, mempty)
     template<typename A>
     static constexpr auto pure(A const& a){
-        return _const_<W>(Monad<_M>::mreturn(pair_t<A, W>(a, Monoid_t<W>::template mempty<value_type_t<W> >())));
+        return _const_<W>(Applicative<_M>::pure(make_pair_t(a, W::mempty())));
     }
 
     /*
@@ -374,7 +380,8 @@ struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
       return (f v, w' `mappend` w'')
     */
     template<typename Ret, typename Arg, typename... Args>
-    static constexpr auto apply(AccumT<W, _M, function_t<Ret(Arg, Args...)> > const& mf, AccumT<W, _M, fdecay<Arg> > const& m){
+    static constexpr AccumT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
+    apply(AccumT<W, _M, function_t<Ret(Arg, Args...)> > const& mf, AccumT<W, _M, fdecay<Arg> > const& m){
         return _([mf, m](W const& w){
             return _do2(pf, mf.run(w), pm, m.run(Monoid_t<W>::mappend(w, snd(pf))),
                 const function_t<Ret(Arg, Args...)> f = fst(pf);
@@ -387,7 +394,10 @@ struct Applicative<_AccumT<W, _M> > : Functor<_AccumT<W, _M> >
 
 // Monad
 template<typename W, class _M>
-struct _is_monad<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value> {};
+struct _is_monad<_AccumT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> > {};
+
+template<typename W, class _M, typename A>
+struct is_monad<AccumT<W, _M, A> > : std::integral_constant<bool, is_monoid_v<W> > {};
 
 template<typename T>
 struct is_accum_monad : std::false_type {};
@@ -396,14 +406,14 @@ template<typename W, typename _M, typename A>
 struct is_accum_monad<AccumT<W, _M, A> > : std::true_type {};
 
 template<typename W, typename _M>
-struct Monad<_AccumT<W, _M> > : Applicative<_AccumT<W, _M> >
+struct Monad<_AccumT<W, _M> > : Applicative<_AccumT<W, _M> >, _Monad<_AccumT<W, _M> >
 {
     using super = Applicative<_AccumT<W, _M> >;
 
     // return a  = AccumT $ const $ return (a, mempty)
     template<typename A>
-    static constexpr auto mreturn(A const& a){
-        return _const_<W>(Monad<_M>::mreturn(pair_t<A, W>(a, Monoid_t<W>::mempty())));
+    static constexpr AccumT<W, _M, A> mreturn(A const& a){
+        return _const_<W>(Monad<_M>::mreturn(make_pair_t(a, W::mempty())));
     }
 
     // m >>= k  = AccumT $ \ w -> do
@@ -411,7 +421,8 @@ struct Monad<_AccumT<W, _M> > : Applicative<_AccumT<W, _M> >
     //    ~(b, w'') <- runAccumT (k a) (w `mappend` w')
     //    return (b, w' `mappend` w'')
     template<typename Ret, typename Arg, typename... Args>
-    static constexpr auto mbind(AccumT<W, _M, fdecay<Arg> > const& m, function_t<AccumT<W, _M, Ret>(Arg, Args...)> const& f){
+    static constexpr remove_f0_t<function_t<AccumT<W, _M, Ret>(Args...)> >
+    mbind(AccumT<W, _M, fdecay<Arg> > const& m, function_t<AccumT<W, _M, Ret>(Arg, Args...)> const& f){
         return invoke_f0(_([m, f](Args... args){
             return _([m, f, args...](W const& w){
                 using pair_type = pair_t<fdecay<Arg>, W>;
@@ -428,27 +439,15 @@ template<typename W, typename _M>
 struct _is_monad_plus<_AccumT<W, _M> > : _is_monad_plus<_M> {};
 
 template<typename W, typename _M>
-struct MonadPlus<_AccumT<W, _M> > : Monad<_AccumT<W, _M> >
+struct MonadPlus<_AccumT<W, _M> > : Monad<_AccumT<W, _M> >, _MonadPlus<_AccumT<W, _M> >
 {
     using super = Monad<_AccumT<W, _M> >;
 
     // mzero = AccumT $ const mzero
     template<typename A>
-    static AccumT<W, _M, A> mzero(){
+    static constexpr AccumT<W, _M, A> mzero(){
         return _const_<W>(MonadPlus<_M>::mzero());
     }
-
-    template<typename T>
-    struct mplus_result_type;
-
-    template<typename T>
-    using mplus_result_type_t = typename mplus_result_type<T>::type;
-
-    template<typename A>
-    struct mplus_result_type<AccumT<W, _M, A> >
-    {
-        using type = AccumT<W, _M, A>;
-    };
 
     // m `mplus` n = AccumT $ \ w -> runAccumT m w `mplus` runAccumT n w
     template<typename A>
@@ -462,25 +461,13 @@ template<typename W, typename _M>
 struct _is_alternative<_AccumT<W, _M> > : _is_monad_plus<_M> {};
 
 template<typename W, typename _M>
-struct Alternative<_AccumT<W, _M> >
+struct Alternative<_AccumT<W, _M> > : _Alternative<_AccumT<W, _M> >
 {
     // empty   = AccumT $ const mzero
     template<typename A>
     static constexpr auto empty(){
         return _const_<W>(MonadPlus<_M>::mzero());
     }
-
-    template<typename T>
-    struct alt_op_result_type;
-
-    template<typename T>
-    using alt_op_result_type_t = typename alt_op_result_type<T>::type;
-
-    template<typename A>
-    struct alt_op_result_type<AccumT<W, _M, A> >
-    {
-        using type = AccumT<W, _M, A>;
-    };
 
     // m <|> n = AccumT $ \ w -> runAccumT m w `mplus` runAccumT n w
     template<typename A>
@@ -490,18 +477,16 @@ struct Alternative<_AccumT<W, _M> >
 };
 
 // MonadTrans
-template<typename W, typename _M>
-struct MonadTrans<_AccumT<W, _M> >
+template<typename W>
+struct MonadTrans<__AccumT<W> >
 {
     // lift m = AccumT $ const $ do
     //    a <- m
     //    return (a, mempty)
-    template<typename MA>
-    static constexpr typename std::enable_if<std::is_same<_M, base_class_t<MA> >::value,
-        AccumT<W, _M, value_type_t<MA> >
-    >::type lift(MA const& m){
+    template<typename M>
+    static constexpr monad_type<M, AccumT<W, base_class_t<M>, value_type_t<M> > > lift(M const& m){
         return _const_<W>(_do(a, m,
-            return Monad<_M>::mreturn(pair_t<value_type_t<MA>, W>(a, Monoid_t<W>::mempty()));));
+            return Monad_t<M>::mreturn(pair_t<value_type_t<M>, W>(a, Monoid_t<W>::mempty()));));
     }
 };
 

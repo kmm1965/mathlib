@@ -38,7 +38,7 @@ struct reduce_g1_struct
         typedef std::forward_iterator_tag iterator_category;
         typedef size_t difference_type;
         typedef const value_type *const_pointer;
-        typedef const value_type &const_reference;
+        typedef value_type const& const_reference;
         typedef const_pointer pointer;
         typedef const_reference reference;
 
@@ -163,36 +163,36 @@ V reduce_n(const T *data, size_t n, size_t stride, V init, BO1 bin_op1, BO2 bin_
 }
 
 template<typename T, typename V, class BO1, class BO2>
-V reduce_vector(const math_vector<T> &v, V init, BO1 bin_op1, BO2 bin_op2, boost::basic_thread_pool &pool, unsigned thread_count, math_vector<V> &result){
+V reduce_vector(math_vector<T> const& v, V init, BO1 bin_op1, BO2 bin_op2, boost::basic_thread_pool &pool, unsigned thread_count, math_vector<V> &result){
     return reduce_n(v.data_pointer(), v.size(), init, bin_op1, bin_op2, pool, thread_count, result);
 }
 
 template<typename T, typename V, class BO>
-V reduce_vector(const math_vector<T> &v, V init, BO bin_op, boost::basic_thread_pool &pool, unsigned thread_count, math_vector<V> &result){
+V reduce_vector(math_vector<T> const& v, V init, BO bin_op, boost::basic_thread_pool &pool, unsigned thread_count, math_vector<V> &result){
     return reduce_n(v.data_pointer(), v.size(), init, bin_op, bin_op, pool, thread_count, result);
 }
 
 template<typename T, typename V, class BO1, class BO2>
-V reduce_vector(const math_vector<T> &v, V init, BO1 bin_op1, BO2 bin_op2, boost::basic_thread_pool &pool, unsigned thread_count)
+V reduce_vector(math_vector<T> const& v, V init, BO1 bin_op1, BO2 bin_op2, boost::basic_thread_pool &pool, unsigned thread_count)
 {
     math_vector<V> result;
     return reduce_n(v.data_pointer(), v.size(), init, bin_op1, bin_op2, pool, thread_count, result);
 }
 
 template<typename T, typename V, class BO>
-V reduce_vector(const math_vector<T> &v, V init, BO bin_op, boost::basic_thread_pool &pool, unsigned thread_count){
+V reduce_vector(math_vector<T> const& v, V init, BO bin_op, boost::basic_thread_pool &pool, unsigned thread_count){
     return reduce_vector(v, init, bin_op, bin_op, pool, thread_count);
 }
 
 template<typename T, typename V, class BO>
-V reduce_vector(const math_vector<T> &v, V init, BO bin_op, math_vector<V> &result)
+V reduce_vector(math_vector<T> const& v, V init, BO bin_op, math_vector<V> &result)
 {
     boost::basic_thread_pool pool;
     return reduce_vector(v, init, bin_op, bin_op, pool, boost::thread::hardware_concurrency(), result);
 }
 
 template<typename T, typename V, class BO>
-V reduce_vector(const math_vector<T> &v, V init, BO bin_op)
+V reduce_vector(math_vector<T> const& v, V init, BO bin_op)
 {
     math_vector<V> result;
     return reduce_vector(v, init, bin_op, result);

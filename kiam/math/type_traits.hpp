@@ -190,7 +190,7 @@ struct divides_result_type<T, std::complex<T> >
 
 #endif  // __CUDACC__
 
-typedef typename std::make_signed<size_t>::type isize_t;
+typedef typename std::make_signed<size_t>::type ssize_t;
 
 template<typename T>
 struct is_dimensionless : std::true_type {};

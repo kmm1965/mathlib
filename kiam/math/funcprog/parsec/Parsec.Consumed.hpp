@@ -57,13 +57,13 @@ struct Consumed : variant_t<c_Consumed<A>, c_Empty<A> >, _Consumed
     Consumed(const c_Consumed<A> &value) : super(value) {}
     Consumed(const c_Empty<A> &value) : super(value) {}
 
-    constexpr const c_Consumed<A>& consumed() const
+    constexpr c_Consumed<A> const& consumed() const
     {
         assert(super::index() == Consumed_);
         return super::template get<c_Consumed<A> >();
     }
 
-    constexpr const c_Empty<A>& empty() const
+    constexpr c_Empty<A> const& empty() const
     {
         assert(super::index() == Empty_);
         return super::template get<c_Empty<A> >();
@@ -85,10 +85,10 @@ _PARSEC_END
 _FUNCPROG_BEGIN
 
 // Functor
-IMPLEMENT_FUNCTOR(parsec::_Consumed);
+IMPLEMENT_FUNCTOR(parsec::_Consumed, parsec::Consumed);
 
 template<>
-struct Functor<parsec::_Consumed>
+struct Functor<parsec::_Consumed> : _Functor<parsec::_Consumed>
 {
     DECLARE_FUNCTOR_CLASS(parsec::Consumed)
 };
@@ -97,8 +97,8 @@ struct Functor<parsec::_Consumed>
 //    fmap f (Consumed x) = Consumed (f x)
 //    fmap f (Empty x)    = Empty (f x)
 template<typename Ret, typename Arg, typename... Args>
-parsec::Consumed<remove_f0_t<function_t<Ret(Args...)> > >
-constexpr Functor<parsec::_Consumed>::fmap(function_t<Ret(Arg, Args...)> const& f, parsec::Consumed<fdecay<Arg> > const& v) {
+constexpr parsec::Consumed<remove_f0_t<function_t<Ret(Args...)> > >
+Functor<parsec::_Consumed>::fmap(function_t<Ret(Arg, Args...)> const& f, parsec::Consumed<fdecay<Arg> > const& v) {
     using Ret_type = remove_f0_t<function_t<Ret(Args...)> >;
     return parsec::Consumed<Ret_type>(v.index() == parsec::Consumed_ ?
         parsec::c_Consumed<Ret_type>(f << v.consumed().value) :

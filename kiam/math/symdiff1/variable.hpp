@@ -14,7 +14,7 @@ struct variable : expression<variable>
     }
 
     template<typename T>
-    T operator()(const T &x) const {
+    T operator()(T const& x) const {
         return x;
     }
 

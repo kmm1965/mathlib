@@ -7,14 +7,14 @@ _SYMDIFF1_BEGIN
 template<class E>
 struct tan_expression : expression<tan_expression<E> >
 {
-    typedef typename div_expression_type<
+    typedef div_expression_t<
         typename E::diff_type,
         mul_expression<cos_expression<E>, cos_expression<E> >
-    >::type diff_type;
+    > diff_type;
 
-    constexpr tan_expression(const expression<E> &e) : e(e()){}
+    constexpr tan_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     constexpr diff_type diff() const
     {
@@ -23,7 +23,7 @@ struct tan_expression : expression<tan_expression<E> >
     }
 
     template<typename T>
-    constexpr T operator()(const T &x) const {
+    constexpr T operator()(T const& x) const {
         return std::tan(e(x));
     }
 
@@ -32,11 +32,11 @@ struct tan_expression : expression<tan_expression<E> >
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr tan_expression<E> tan(const expression<E>& e){
+constexpr tan_expression<E> tan(expression<E> const& e){
     return tan_expression<E>(e);
 }
 

@@ -17,7 +17,7 @@ struct int_constant : expression<int_constant<N> >
     }
 
     template<typename T>
-    constexpr int operator()(const T &x) const {
+    constexpr int operator()(T const& x) const {
         return value;
     }
 
@@ -37,11 +37,17 @@ struct is_int_constant<int_constant<N> > :
     std::true_type{};
 
 template<class E>
+constexpr bool is_int_constant_v = is_int_constant<E>::value;
+
+template<class E>
 struct int_constant_value :
     std::integral_constant<int, 0>{};
 
 template<int N>
 struct int_constant_value<int_constant<N> > :
     std::integral_constant<int, N>{};
+
+template<class E>
+constexpr int int_constant_val = int_constant_value<E>::value;
 
 _SYMDIFF1_END

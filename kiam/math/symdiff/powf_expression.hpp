@@ -12,18 +12,18 @@ struct powf_expression : expression<powf_expression<E> >
 
     template<unsigned M>
     struct diff_type {
-        typedef typename mul_expression_type<
+        typedef mul_expression_t<
             mul_expression<
                 scalar<double>,
                 powf_expression<E>
             >,
             typename E::template diff_type<M>::type
-        >::type type;
+        > type;
     };
 
-    constexpr powf_expression(const expression<E>& e, double pow) : e(e()), pow_(pow) {}
+    constexpr powf_expression(expression<E> const& e, double pow) : e(e()), pow_(pow) {}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
     constexpr double pow() const { return pow_; }
 
     template<unsigned M>
@@ -32,17 +32,17 @@ struct powf_expression : expression<powf_expression<E> >
     }
 
     template<typename T, size_t _Size>
-    constexpr T operator()(const std::array<T, _Size> &vars) const {
+    constexpr T operator()(std::array<T, _Size> const& vars) const {
         return _KIAM_MATH::pow_(e(vars), pow_);
     }
 
 private:
-    const E e;
-    const double pow_;
+    E const e;
+    double const pow_;
 };
 
 template<class E>
-constexpr powf_expression<E> powf(const expression<E>& e, double pow) {
+constexpr powf_expression<E> powf(expression<E> const& e, double pow) {
     return powf_expression<E>(e, pow);
 }
 

@@ -2,10 +2,11 @@
 
 #include "math_def.h"
 
+#include <boost/compute/algorithm/iota.hpp>
+
 _KIAM_MATH_BEGIN
 
 template<typename T> inline
-__device__ __host__
 void math_swap(T &x, T &y)
 {
     T t = x;
@@ -13,7 +14,7 @@ void math_swap(T &x, T &y)
     y = t;
 }
 
-template<class _T, _Ty> inline
+template<class _T, class _Ty> inline
 void math_fill(_T *_First, _T *_Last, const _Ty& _Val)
 {
     for (; _First != _Last; ++_First)
@@ -22,7 +23,7 @@ void math_fill(_T *_First, _T *_Last, const _Ty& _Val)
 
 template<class _T, class _Ty> inline
 void math_fill_n(_T *_First, size_t n, const _Ty& _Val){
-    math_fill(_First, _Firsty + n, _Val);
+    math_fill(_First, _First + n, _Val);
 }
 
 template<class _InT, class _OutT> inline
@@ -39,7 +40,7 @@ _OutT math_copy_n(const _InT *_First, size_t n, _OutT *_Dest){
 }
 
 template<class _InT, class _Ty, class _Fn2> inline
-_Ty math_accumulate(const _InT *_First, const _InT *_Last, _Ty _Val, _Fn2 _Func)
+_Ty math_reduce(const _InT *_First, const _InT *_Last, _Ty _Val, _Fn2 _Func)
 {
     for (; _First != _Last; ++_First)
         _Val = _Func(_Val, *_First);
@@ -47,8 +48,8 @@ _Ty math_accumulate(const _InT *_First, const _InT *_Last, _Ty _Val, _Fn2 _Func)
 }
 
 template<class _InT, class _Ty, class _Fn2> inline
-_Ty math_accumulate_n(const _InT *_First, size_t n, _Ty _Val, _Fn2 _Func){
-    return math_accumulate(_First, _First + n, _Val, _Func);
+_Ty math_reduce_n(const _InT *_First, size_t n, _Ty _Val, _Fn2 _Func){
+    return math_reduce(_First, _First + n, _Val, _Func);
 }
 
 template<class _InT, class _OutT, class _Fn1> inline
@@ -61,7 +62,7 @@ _OutT math_transform(const _InT *_First, const _InT *_Last, _OutT *_Dest, _Fn1 _
 
 template<class _InT, class _OutT, class _Fn1> inline
 _OutT math_transform_n(const _InT *_First, size_t n, _OutT *_Dest, _Fn1 _Func){
-    return math_transform(_InT _First, _First + n, _Dest, _Func);
+    return math_transform(_First, _First + n, _Dest, _Func);
 }
 
 template<class _InT1, class _InT2, class _OutT, class _Fn2> inline
@@ -75,6 +76,28 @@ _OutT math_transform(const _InT1 *_First1, const _InT1 *_Last1, const _InT2 *_Fi
 template<class _InT1, class _InT2, class _OutT, class _Fn2> inline
 _OutT math_transform_n(const _InT1 *_First1, size_t n, const _InT2 *_First2, _OutT *_Dest, _Fn2 _Func){
     return math_transform(_First1, _First1 + n, _First2, _Dest, _Func);
+}
+
+template<class _InIt, class _OutIt, class _Fn1>
+_OutIt device_transform(_InIt _First, _InIt _Last, _OutIt _Dest, _Fn1 _Func){
+    OpenCLSynchronize sync;
+    return boost::compute::transform(_First, _Last, _Dest, _Func);
+}
+
+template<class _InIt, class _OutIt, class _Fn1>
+_OutIt device_transform_n(_InIt _First, size_t n, _OutIt _Dest, _Fn1 _Func){
+    return device_transform(_First, _First + n, _Dest, _Func);
+}
+
+template<class _InIt1, class _InIt2, class _OutIt, class _Fn2>
+_OutIt device_transform(_InIt1 _First1, _InIt1 _Last1, _InIt2 _First2, _OutIt _Dest, _Fn2 _Func, boost::compute::command_queue &queue = boost::compute::system::default_queue()){
+    OpenCLSynchronize sync;
+    return boost::compute::transform(_First1, _Last1, _First2, _Dest, _Func, queue);
+}
+
+template<class _InIt1, class _InIt2, class _OutIt, class _Fn2>
+_OutIt device_transform_n(_InIt1 _First1, size_t n, _InIt2 _First2, _OutIt _Dest, _Fn2 _Func, boost::compute::command_queue& queue = boost::compute::system::default_queue()){
+    return device_transform(_First1, _First1 + n, _First2, _Dest, _Func, queue);
 }
 
 template<class _InT1, class _InT2, class _Ty, class _Fn21, class _Fn22> inline
@@ -92,12 +115,34 @@ _Ty math_inner_product_n(const _InT1 *_First1, size_t n, const _InT2 *_First2, _
 
 template<class _InT1, class _InT2, class _Ty> inline
 _Ty math_inner_product(const _InT1 *_First1, const _InT1 *_Last1, const _InT2 *_First2, _Ty _Val){
-    return math_inner_product(_First1, _Last1, _First2, _Val, boost::compute::plus<T>(), boost::compute::multiplies<T>());
+    return math_inner_product(_First1, _Last1, _First2, _Val, boost::compute::plus<_Ty>(), boost::compute::multiplies<_Ty>());
 }
 
 template<class _InT1, class _InT2, class _Ty> inline
 _Ty math_inner_product_n(const _InT1 *_First1, size_t n, const _InT2 *_First2, _Ty _Val){
     return math_inner_product(_First1, _First1 + n, _First2, _Val);
+}
+
+template <class _FwdIt>
+void math_sequence(_FwdIt _First, _FwdIt _Last){
+    size_t i = 0;
+    for(; _First != _Last; ++_First, ++i)
+        *_First = i;
+}
+
+template <class _FwdIt>
+void math_sequence_n(_FwdIt _First, size_t n){
+    math_sequence(_First, _First + n);
+}
+
+template <class _FwdIt>
+void device_sequence(_FwdIt _First, _FwdIt _Last, boost::compute::command_queue &queue = boost::compute::system::default_queue()){
+    boost::compute::iota(_First, _Last, 0, queue);
+}
+
+template <class _FwdIt>
+void device_sequence_n(_FwdIt _First, size_t n, boost::compute::command_queue& queue = boost::compute::system::default_queue()){
+    device_sequence(_First, _First + n, queue);
 }
 
 _KIAM_MATH_END

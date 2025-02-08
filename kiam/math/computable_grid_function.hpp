@@ -46,12 +46,12 @@ struct math_computable_grid_function_proxy
 
     template<typename CONTEXT>
     __DEVICE
-    value_type operator()(size_t i, const context<tag_type, CONTEXT> &context) const {
+    value_type operator()(size_t i, context<CONTEXT> const& context) const {
         return f_proxy[i];
     }
 
 private:
-    const typename F::proxy_type f_proxy;
+    typename F::proxy_type const f_proxy;
 };
 
 _KIAM_MATH_END

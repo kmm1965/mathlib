@@ -11,13 +11,13 @@ struct abs_expression : expression<abs_expression<E> >
     template<unsigned M>
     struct diff_type
     {
-        typedef typename mul_expression_type<
+        typedef mul_expression_t<
             sign_expression<E>,
             typename E::template diff_type<M>::type
-        >::type type;
+        > type;
     };
 
-    constexpr abs_expression(const expression<E> &e) : e(e()){}
+    constexpr abs_expression(expression<E> const& e) : e(e()){}
 
     template<unsigned M>
     constexpr typename diff_type<M>::type diff() const {
@@ -25,16 +25,16 @@ struct abs_expression : expression<abs_expression<E> >
     }
 
     template<typename T>
-    constexpr T operator()(const T &x) const {
+    constexpr T operator()(T const& x) const {
         return std::abs(e(x));
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr abs_expression<E> abs(const expression<E>& e) {
+constexpr abs_expression<E> abs(expression<E> const& e) {
     return abs_expression<E>(e);
 }
 

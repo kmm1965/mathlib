@@ -3,13 +3,7 @@
 #include "math_def.h"
 
 #ifndef __CUDACC__
-
-#ifdef DONT_USE_CXX_11
-#include <boost/array.hpp>
-#else
 #include <array>
-#endif
-
 #endif  // __CUDACC__
 
 _KIAM_MATH_BEGIN
@@ -20,14 +14,26 @@ template<typename T, size_t N>
 struct math_array
 {
     typedef T value_type;
-    typedef value_type &reference;
-    typedef const value_type &const_reference;
-    typedef T *iterator;
-    typedef const T *const_iterator;
+    typedef value_type& reference;
+    typedef value_type const& const_reference;
+    typedef T *pointer;
+    typedef const T *const_pointer;
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
 
     __device__ __host__
     size_t size() const {
         return N;
+    }
+
+    __device__ __host__
+    pointer data(){
+        return m_data;
+    }
+
+    __device__ __host__
+    const_pointer data() const {
+        return m_data;
     }
 
     __device__ __host__
@@ -80,11 +86,7 @@ struct math_array
 #else   // __CUDACC__
 
 template<typename T, size_t N>
-#ifdef DONT_USE_CXX_11
-struct math_array : boost::array<T, N>{};
-#else
 using math_array = std::array<T, N>;
-#endif
 
 #endif  // __CUDACC__
 

@@ -42,7 +42,7 @@ state :: (Monad m)
 state f = StateT (return . f)
 */
 template<typename _M, typename S, typename A>
-StateT<S, _M, A> state(function_t<pair_t<A, S>(S const&)> const& f) {
+constexpr StateT<S, _M, A> state(function_t<pair_t<A, S>(S const&)> const& f){
     return _(Monad<_M>::template mreturn<pair_t<A, S> >) & f;
 }
 
@@ -50,13 +50,13 @@ template<typename S>
 struct __StateT
 {
     template<typename _M>
-    using mt_type = _StateT<S, _M>;
+    using base_type = _StateT<S, _M>;
 };
 
 template<typename S, typename _M>
 struct _StateT
 {
-    static_assert(_is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad_v<_M>, "Should be a monad");
 
     using base_class = _StateT;
 
@@ -72,8 +72,8 @@ struct _StateT
     get :: (Monad m) => StateT s m s
     get = state $ \ s -> (s, s)
     */
-    static type<S> get() {
-        return state<_M>(_([](state_type const& s) {
+    static constexpr type<S> get(){
+        return state<_M>(_([](state_type const& s){
             return pair_t<state_type, state_type>(s, s);
         }));
     }
@@ -83,8 +83,8 @@ struct _StateT
     put :: (Monad m) => s -> StateT s m ()
     put s = state $ \ _ -> ((), s)
     */
-    static type<None> put(state_type const& s) {
-        return state<_M>(_([s](state_type const&) {
+    static constexpr type<None> put(state_type const& s){
+        return state<_M>(_([s](state_type const&){
             return pair_t<None, state_type>(None(), s);
         }));
     }
@@ -98,9 +98,9 @@ struct _StateT
     modify f = state $ \ s -> ((), f s)
     */
     template<typename SArg>
-    static typename std::enable_if<is_same_as<S, SArg>::value, type<None> >::type
-    modify(function_t<S(SArg)> const& f) {
-        return state<_M>(_([f](state_type const& s) {
+    static constexpr std::enable_if_t<is_same_as_v<S, SArg>, type<None> >
+    modify(function_t<S(SArg)> const& f){
+        return state<_M>(_([f](state_type const& s){
             return pair_t<None, state_type>(None(), f(s));
         }));
     }
@@ -114,8 +114,9 @@ struct _StateT
     gets f = state $ \ s -> (f s, s)
     */
     template<typename A, typename... Args>
-    static type<remove_f0_t<function_t<A(Args...)> > > gets(function_t<A(S const&, Args...)> const& f) {
-        return state<_M>([f](S const& s) {
+    static constexpr type<remove_f0_t<function_t<A(Args...)> > >
+    gets(function_t<A(S const&, Args...)> const& f){
+        return state<_M>([f](S const& s){
             return pair_t<A, S>(invoke_f0(f << s), s);
         });
     }
@@ -128,9 +129,10 @@ struct _StateT
         return ((a, w), s')
     */
     template<typename W, typename A>
-    static Listen<W, _StateT<S, _M>, A> liftListen(Listen<W, _M, pair_t<A, S> > const& listen) {
-        return _([listen](StateT<S, _M, A> const& m) {
-            return _([listen, m](S const& s) {
+    static constexpr Listen<W, _StateT<S, _M>, A>
+    liftListen(Listen<W, _M, pair_t<A, S> > const& listen){
+        return _([listen](StateT<S, _M, A> const& m){
+            return _([listen, m](S const& s){
                 return _do(p, m.run(s),
                     return Monad<_M>::mreturn(pair_t<pair_t<A, W>, S>(pair_t<A, W>(fst(fst(p)), snd(p)), snd(fst(p)))););
             });
@@ -144,9 +146,10 @@ struct _StateT
         return ((a, s'), f)
     */
     template<typename W, typename A>
-    static Pass<W, _StateT<S, _M>, A> liftPass(Pass<W, _M, pair_t<A, S> > const& pass){
-        return _([pass](StateT<S, _M, A> const& m) {
-            return _([pass, m](S const& s) {
+    static constexpr Pass<W, _StateT<S, _M>, A>
+    liftPass(Pass<W, _M, pair_t<A, S> > const& pass){
+        return _([pass](StateT<S, _M, A> const& m){
+            return _([pass, m](S const& s){
                 return pass(_do(p, m.run(s),
                     return Monad<_M>::mreturn(pair_t<pair_t<A, W>, S>(pair_t<A, W>(fst(fst(p)), snd(p)), snd(fst(p))));));
             });
@@ -154,7 +157,7 @@ struct _StateT
     }
 
     template<typename SArg>
-    static typename std::enable_if<is_same_as<S, SArg>::value, type<None> >::type
+    static constexpr std::enable_if_t<is_same_as_v<S, SArg>, type<None> >
     while_(function_t<bool(SArg)> const& test, type<None> const& body){
         return _do(s, get(),
             return test(s) ? modify(_execState(body)) >> while_(test, body) : Monad<_StateT>::mreturn(None()););
@@ -176,10 +179,10 @@ struct StateT : _StateT<S, _M>
     using return_type = M_type<result_type>;
     using function_type = function_t<return_type(state_type const&)>;
 
-    StateT(function_type const& func) : func(func) {}
-    StateT(function_t<return_type(state_type)> const& f) : func([f](state_type const& state) { return f(state); }) {}
+    StateT(function_type const& func) : func(func){}
+    StateT(function_t<return_type(state_type)> const& f) : func([f](state_type const& state){ return f(state); }){}
 
-    return_type run(state_type const& s) const {
+    constexpr return_type run(state_type const& s) const {
         return func(s);
     }
 
@@ -193,7 +196,7 @@ struct StateT : _StateT<S, _M>
         ~(a, _) <- runStateT m s
         return a
     */
-    M_type<A> eval(state_type const& s) const {
+    constexpr M_type<A> eval(state_type const& s) const {
         return _do(p, run(s), return Monad<_M>::mreturn(fst(p)););
     }
 
@@ -207,7 +210,7 @@ struct StateT : _StateT<S, _M>
         ~(_, s') <- runStateT m s
         return s'
     */
-    M_type<S> exec(state_type const& s) const {
+    constexpr M_type<S> exec(state_type const& s) const {
         return _do(p, run(s), return Monad<_M>::mreturn(snd(p)););
     }
 
@@ -216,27 +219,27 @@ private:
 };
 
 template<typename S, typename _M, typename A>
-typename _M::template type<pair_t<A, S> >
-runStateT(StateT<S, _M, A> const& m, S const& s) {
+constexpr typename _M::template type<pair_t<A, S> >
+runStateT(StateT<S, _M, A> const& m, S const& s){
     return m.run(s);
 }
 
 template<typename S, typename _M, typename A>
-function_t<typename _M::template type<pair_t<A, S> >(S const&)>
-_runStateT(StateT<S, _M, A> const& m) {
-    return [m](S const& s) { return runStateT(m, s); };
+constexpr function_t<typename _M::template type<pair_t<A, S> >(S const&)>
+_runStateT(StateT<S, _M, A> const& m){
+    return [m](S const& s){ return runStateT(m, s); };
 }
 
 template<typename S, typename _M, typename A>
-typename _M::template type<A>
-evalStateT(StateT<S, _M, A> const& m, S const& s) {
+constexpr typename _M::template type<A>
+evalStateT(StateT<S, _M, A> const& m, S const& s){
     return m.eval(s);
 }
 
 template<typename S, typename _M, typename A>
-function_t<typename _M::template type<A>(S const&)>
-_evalStateT(StateT<S, _M, A> const& m) {
-    return [m](S const& s) { return evalStateT(m, s); };
+constexpr function_t<typename _M::template type<A>(S const&)>
+_evalStateT(StateT<S, _M, A> const& m){
+    return [m](S const& s){ return evalStateT(m, s); };
 }
 
 /*
@@ -250,15 +253,15 @@ execStateT m s = do
     return s'
 */
 template<typename S, typename _M, typename A>
-typename _M::template type<S>
-execStateT(StateT<S, _M, A> const& m, S const& s) {
+constexpr typename _M::template type<S>
+execStateT(StateT<S, _M, A> const& m, S const& s){
     return m.exec(s);
 }
 
 template<typename S, typename _M, typename A>
-function_t<typename _M::template type<S>(S const&)>
-_execStateT(StateT<S, _M, A> const& m) {
-    return [m](S const& s) { return execStateT(m, s); };
+constexpr function_t<typename _M::template type<S>(S const&)>
+_execStateT(StateT<S, _M, A> const& m){
+    return [m](S const& s){ return execStateT(m, s); };
 }
 
 /*
@@ -270,23 +273,23 @@ mapStateT :: (m (a, s) -> n (b, s)) -> StateT s m a -> StateT s n b
 mapStateT f m = StateT $ f . runStateT m
 */
 template<typename S, typename _M, typename A, typename NB, typename Arg>
-static typename std::enable_if<
-    std::is_same<Arg, typename _M::template type<pair_t<A, S> > >::value &&
-    is_pair<value_type_t<NB> >::value &&
-    std::is_same<S, snd_type_t<value_type_t<NB> > >::value,
+static constexpr std::enable_if_t<
+    std::is_same_v<Arg, typename _M::template type<pair_t<A, S> > > &&
+    is_pair_v<value_type_t<NB> > &&
+    std::is_same_v<S, snd_type_t<value_type_t<NB> > >,
     StateT<S, base_class_t<NB>, fst_type_t<value_type_t<NB> > >
->::type mapStateT(function_t<NB(Arg const&)> const& f, StateT<S, _M, A> const& m) {
+> mapStateT(function_t<NB(Arg const&)> const& f, StateT<S, _M, A> const& m){
     return f & _runStateT(m);
 }
 
 template<typename S, typename _M, typename A, typename NB, typename Arg>
-static typename std::enable_if<
-    std::is_same<Arg, typename _M::template type<pair_t<A, S> > >::value &&
-    is_pair<value_type_t<NB> >::value &&
-    std::is_same<S, snd_type_t<value_type_t<NB> > >::value,
+static constexpr std::enable_if_t<
+    std::is_same_v<Arg, typename _M::template type<pair_t<A, S> > > &&
+    is_pair_v<value_type_t<NB> > &&
+    std::is_same_v<S, snd_type_t<value_type_t<NB> > >,
     function_t<StateT<S, base_class_t<NB>, fst_type_t<value_type_t<NB> > >(StateT<S, _M, A> const&)>
->::type _mapStateT(function_t<NB(Arg const&)> const& f) {
-    return [f](StateT<S, _M, A> const& m) {
+> _mapStateT(function_t<NB(Arg const&)> const& f){
+    return [f](StateT<S, _M, A> const& m){
         return mapStateT(f, m);
     };
 }
@@ -300,16 +303,16 @@ withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f m = StateT $ runStateT m . f
 */
 template<typename S, typename _M, typename SArg, typename A>
-typename std::enable_if<is_same_as<S, SArg>::value, StateT<S, _M, A> >::type
-withStateT(function_t<S(SArg)> const& f, StateT<S, _M, A> const& m) {
+constexpr std::enable_if_t<is_same_as_v<S, SArg>, StateT<S, _M, A> >
+withStateT(function_t<S(SArg)> const& f, StateT<S, _M, A> const& m){
     return _runStateT(m) & f;
 }
 
 template<typename S, typename _M, typename SArg, typename A>
-typename std::enable_if<is_same_as<S, SArg>::value,
+constexpr std::enable_if_t<is_same_as_v<S, SArg>,
     function_t<StateT<S, _M, A>(StateT<fdecay<SArg>, _M, A> const&)>
->::type _withStateT(function_t<S(SArg)> const& f) {
-    return [f](StateT<S, _M, A> const& m) { return withStateT(f, m); };
+> _withStateT(function_t<S(SArg)> const& f){
+    return [f](StateT<S, _M, A> const& m){ return withStateT(f, m); };
 }
 
 // State
@@ -322,14 +325,14 @@ runState :: State s a   -- ^state-passing computation to execute
 runState m = runIdentity . runStateT m
 */
 template<typename S, typename A>
-pair_t<A, S> runState(State<S, A> const& m, S const& s) {
+constexpr pair_t<A, S> runState(State<S, A> const& m, S const& s){
     return (_(runIdentity<pair_t<A, S> >) & _runStateT(m))(s);
 }
 
 template<typename S, typename A>
-function_t<pair_t<A, S>(S const&)>
-_runState(State<S, A> const& m) {
-    return [m](S const& s) { return runState(m, s); };
+constexpr function_t<pair_t<A, S>(S const&)>
+_runState(State<S, A> const& m){
+    return [m](S const& s){ return runState(m, s); };
 }
 
 /*
@@ -343,13 +346,13 @@ evalState :: State s a  -- ^state-passing computation to execute
 evalState m s = fst (runState m s)
 */
 template<typename S, typename A>
-A evalState(State<S, A> const& m, S const& s) {
+constexpr A evalState(State<S, A> const& m, S const& s){
     return fst(runState(m, s));
 }
 
 template<typename S, typename A>
-function_t<A(S const&)> _evalState(State<S, A> const& m) {
-    return [m](S const& s) { return evalState(m, s); };
+constexpr function_t<A(S const&)> _evalState(State<S, A> const& m){
+    return [m](S const& s){ return evalState(m, s); };
 }
 /*
 -- | Evaluate a state computation with the given initial state
@@ -362,13 +365,13 @@ execState :: State s a  -- ^state-passing computation to execute
 execState m s = snd (runState m s)
 */
 template<typename S, typename A>
-S execState(State<S, A> const& m, S const& s) {
+constexpr S execState(State<S, A> const& m, S const& s){
     return snd(runState(m, s));
 }
 
 template<typename S, typename A>
-function_t<S(S const&)> _execState(State<S, A> const& m) {
-    return [m](S const& s) { return execState(m, s); };
+constexpr function_t<S(S const&)> _execState(State<S, A> const& m){
+    return [m](S const& s){ return execState(m, s); };
 }
 
 /*
@@ -380,14 +383,14 @@ mapState :: ((a, s) -> (b, s)) -> State s a -> State s b
 mapState f = mapStateT (Identity . f . runIdentity)
 */
 template<typename S, typename A, typename B>
-State<S, B> mapState(function_t<pair_t<B, S>(pair_t<A, S> const&)> const& f, State<S, A> const& m) {
+constexpr State<S, B> mapState(function_t<pair_t<B, S>(pair_t<A, S> const&)> const& f, State<S, A> const& m){
     return mapStateT(_(Identity_<B>) & f & _(runIdentity<pair_t<A, S> >), m);
 }
 
 template<typename S, typename A, typename B>
-function_t<State<S, B>(State<S, A> const&)>
-_mapState(function_t<pair_t<B, S>(pair_t<A, S> const&)> const& f) {
-    return [f](State<S, A> const& m) { return mapState(f, m); };
+constexpr function_t<State<S, B>(State<S, A> const&)>
+_mapState(function_t<pair_t<B, S>(pair_t<A, S> const&)> const& f){
+    return [f](State<S, A> const& m){ return mapState(f, m); };
 }
 
 /*
@@ -399,34 +402,37 @@ withState :: (s -> s) -> State s a -> State s a
 withState = withStateT
 */
 template<typename S, typename SArg, typename A>
-typename std::enable_if<is_same_as<S, SArg>::value, State<S, A> >::type
-withState(function_t<S(SArg)> const& f, State<S, A> const& m) {
+constexpr std::enable_if_t<is_same_as_v<S, SArg>, State<S, A> >
+withState(function_t<S(SArg)> const& f, State<S, A> const& m){
     return withStateT(f, m);
 }
 
 template<typename S, typename SArg, typename A>
-typename std::enable_if<
-    is_same_as<S, SArg>::value,
+std::enable_if_t<
+    is_same_as_v<S, SArg>,
     function_t<State<S, A>(State<S, A> const&)>
->::type _withState(function_t<S(SArg)> const& f) {
-    return [f](State<S, A> const& m) { return withState(f, m); };
+> _withState(function_t<S(SArg)> const& f){
+    return [f](State<S, A> const& m){ return withState(f, m); };
 }
 
 // Functor
 template<typename S, typename _M>
 struct _is_functor<_StateT<S, _M> > : _is_functor<_M> {};
 
+template<typename S, typename _M, typename A>
+struct is_functor<StateT<S, _M, A> > : _is_functor<_M> {};
+
 template<typename S, typename _M>
-struct Functor<_StateT<S, _M> >
+struct Functor<_StateT<S, _M> > : _Functor<_StateT<S, _M> >
 {
     // fmap f m = StateT $ \ s ->
     //   fmap (\ ~(a, s') -> (f a, s')) $ runStateT m s
     template<typename A, typename Ret, typename Arg, typename... Args>
-    static typename std::enable_if<is_same_as<A, Arg>::value,
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg>,
         StateT<S, _M, remove_f0_t<function_t<Ret(Args...)> > >
-    >::type fmap(function_t<Ret(Arg, Args...)> const& f, StateT<S, _M, A> const& m) {
-        return _([f, m](S const& s) {
-            return _([f](pair_t<A, S> const& p) {
+    > fmap(function_t<Ret(Arg, Args...)> const& f, StateT<S, _M, A> const& m){
+        return _([f, m](S const& s){
+            return _([f](pair_t<A, S> const& p){
                 return pair_t<remove_f0_t<function_t<Ret(Args...)> >, S>(
                     invoke_f0(f << fst(p)), snd(p));
             }) / m.run(s);
@@ -438,15 +444,18 @@ struct Functor<_StateT<S, _M> >
 template<typename S, typename _M>
 struct _is_applicative<_StateT<S, _M> > : _is_applicative<_M> {};
 
+template<typename S, typename _M, typename A>
+struct is_applicative<StateT<S, _M, A> > : _is_applicative<_M> {};
+
 template<typename S, typename _M>
-struct Applicative<_StateT<S, _M> > : Functor<_StateT<S, _M> >
+struct Applicative<_StateT<S, _M> > : Functor<_StateT<S, _M> >, _Applicative<_StateT<S, _M> >
 {
     using super = Functor<_StateT<S, _M> >;
 
     // pure a = StateT $ \ s -> return (a, s)
     template<typename A>
-    static StateT<S, _M, A> pure(A const& a) {
-        return _([a](S const& s) { return Monad<_M>::mreturn(pair_t<A, S>(a, s)); });
+    static constexpr StateT<S, _M, A> pure(A const& a){
+        return _([a](S const& s){ return Applicative<_M>::pure(make_pair_t(a, s)); });
     }
 
     /*
@@ -456,12 +465,12 @@ struct Applicative<_StateT<S, _M> > : Functor<_StateT<S, _M> >
         return (f x, s'')
     */
     template<typename Ret, typename Arg, typename... Args>
-    static StateT<S, _M, remove_f0_t<function_t<Ret(Args...)> > >
-    apply(StateT<S, _M, function_t<Ret(Arg, Args...)> > const& mf, StateT<S, _M, fdecay<Arg> > const& m) {
-        return _([mf, m](S const& s) {
+    static constexpr StateT<S, _M, remove_f0_t<function_t<Ret(Args...)> > >
+    apply(StateT<S, _M, function_t<Ret(Arg, Args...)> > const& mf, StateT<S, _M, fdecay<Arg> > const& m){
+        return _([mf, m](S const& s){
             return _do2(pf, mf.run(s), pm, m.run(snd(pf)),
                 const function_t<Ret(Arg, Args...)> f = fst(pf);
-                return Monad<_M>::mreturn(
+                return Applicative<_M>::pure(
                     pair_t<remove_f0_t<function_t<Ret(Args...)> >, S>(invoke_f0(f << fst(pm)), snd(pm)));
             );
         });
@@ -470,14 +479,16 @@ struct Applicative<_StateT<S, _M> > : Functor<_StateT<S, _M> >
 
 // m *> k = m >>= \_ -> k
 template<typename S, typename _M, typename A, typename B>
-StateT<S, _M, B>
-operator*=(StateT<S, _M, A> const& a, StateT<S, _M, B> const& b) {
-    return a >>= _([b](pair_t<A, S> const&) { return b; });
+constexpr StateT<S, _M, B> operator*=(StateT<S, _M, A> const& a, StateT<S, _M, B> const& b){
+    return a >>= _([b](pair_t<A, S> const&){ return b; });
 }
 
 // Monad
 template<typename S, typename _M>
 struct _is_monad<_StateT<S, _M> > : _is_monad<_M> {};
+
+template<typename S, typename _M, typename A>
+struct is_monad<StateT<S, _M, A> > : _is_monad<_M> {};
 
 template<typename T>
 struct is_state_monad : std::false_type {};
@@ -486,13 +497,13 @@ template<typename S, typename _M, typename A>
 struct is_state_monad<StateT<S, _M, A> > : std::true_type {};
 
 template<typename S, typename _M>
-struct Monad<_StateT<S, _M> > : Applicative<_StateT<S, _M> >
+struct Monad<_StateT<S, _M> > : Applicative<_StateT<S, _M> >, _Monad<_StateT<S, _M> >
 {
     using super = Applicative<_StateT<S, _M> >;
 
     // pure a = StateT $ \ s -> return (a, s)
     template<typename A>
-    static StateT<S, _M, A> mreturn(A const& a) {
+    static constexpr StateT<S, _M, A> mreturn(A const& a){
         return super::pure(a);
     }
 
@@ -500,12 +511,12 @@ struct Monad<_StateT<S, _M> > : Applicative<_StateT<S, _M> >
     //    ~(a, s') <- runStateT m s
     //    runStateT (k a) s'
     template<typename A, typename Ret, typename Arg, typename... Args>
-    static typename std::enable_if<
-        is_same_as<A, Arg>::value,
+    static constexpr std::enable_if_t<
+        is_same_as_v<A, Arg>,
         remove_f0_t<function_t<StateT<S, _M, Ret>(Args...)> >
-    >::type mbind(StateT<S, _M, A> const& m, function_t<StateT<S, _M, Ret>(Arg, Args...)> const& f) {
-        return invoke_f0(_([m, f](Args... args) {
-            return _([m, f, args...](S const& s) {
+    > mbind(StateT<S, _M, A> const& m, function_t<StateT<S, _M, Ret>(Arg, Args...)> const& f){
+        return invoke_f0(_([m, f](Args... args){
+            return _([m, f, args...](S const& s){
                 return _do(p, m.run(s), return f(fst(p), args...).run(snd(p)););
             });
         }));
@@ -517,32 +528,20 @@ template<typename S, typename _M>
 struct _is_monad_plus<_StateT<S, _M> > : _is_monad_plus<_M> {};
 
 template<typename S, typename _M>
-struct MonadPlus<_StateT<S, _M> > : Monad<_StateT<S, _M> >
+struct MonadPlus<_StateT<S, _M> > : Monad<_StateT<S, _M> >, _MonadPlus<_StateT<S, _M> >
 {
     using super = Monad<_StateT<S, _M> >;
 
     // mzero = StateT $ \ _ -> mzero
     template<typename A>
-    static StateT<S, _M, A> mzero() {
-        return _([](S const&) { return MonadPlus<_M>::mzero(); });
+    static constexpr StateT<S, _M, A> mzero(){
+        return _([](S const&){ return MonadPlus<_M>::mzero(); });
     }
-
-    template<typename T>
-    struct mplus_result_type;
-
-    template<typename T>
-    using mplus_result_type_t = typename mplus_result_type<T>::type;
-
-    template<typename A>
-    struct mplus_result_type<StateT<S, _M, A> >
-    {
-        using type = StateT<S, _M, A>;
-    };
 
     // StateT m `mplus` StateT n = StateT $ \ s -> m s `mplus` n s
     template<typename A>
-    static StateT<S, _M, A> mplus(StateT<S, _M, A> const& m, StateT<S, _M, A> const& n) {
-        return _([m, n](S const& s) { return MonadPlus<_M>::mplus(m.run(s), n.run(s)); });
+    static constexpr StateT<S, _M, A> mplus(StateT<S, _M, A> const& m, StateT<S, _M, A> const& n){
+        return _([m, n](S const& s){ return MonadPlus<_M>::mplus(m.run(s), n.run(s)); });
     }
 };
 
@@ -551,47 +550,33 @@ template<typename S, typename _M>
 struct _is_alternative<_StateT<S, _M> > : _is_monad_plus<_M> {};
 
 template<typename S, typename _M>
-struct Alternative<_StateT<S, _M> >
+struct Alternative<_StateT<S, _M> > : _Alternative<_StateT<S, _M> >
 {
     // empty = StateT $ \ _ -> mzero
     template<typename A>
-    static StateT<S, _M, A> empty() {
-        return _([](S const&) { return MonadPlus<_M>::mzero(); });
+    static constexpr StateT<S, _M, A> empty(){
+        return _([](S const&){ return MonadPlus<_M>::mzero(); });
     }
-
-    template<typename T>
-    struct alt_op_result_type;
-
-    template<typename T>
-    using alt_op_result_type_t = typename alt_op_result_type<T>::type;
-
-    template<typename A>
-    struct alt_op_result_type<StateT<S, _M, A> >
-    {
-        using type = StateT<S, _M, A>;
-    };
 
     // StateT m <|> StateT n = StateT $ \ s -> m s `mplus` n s
     template<typename A>
-    static StateT<S, _M, A> alt_op(StateT<S, _M, A> const& m, StateT<S, _M, A> const& n) {
-        return _([m, n](S const& s) { return MonadPlus<_M>::mplus(m.run(s), n.run(s)); });
+    static constexpr StateT<S, _M, A> alt_op(StateT<S, _M, A> const& m, StateT<S, _M, A> const& n){
+        return _([m, n](S const& s){ return MonadPlus<_M>::mplus(m.run(s), n.run(s)); });
     }
 };
 
 // MonadTrans
-template<typename S, typename _M>
-struct MonadTrans<_StateT<S, _M> >
+template<typename S>
+struct MonadTrans<__StateT<S> >
 {
     // lift m = StateT $ \ s -> do
     //   a <- m
     //   return (a, s)
-    template<typename MA>
-    static typename std::enable_if<std::is_same<_M, base_class_t<MA> >::value,
-        StateT<S, _M, value_type_t<MA> >
-    >::type lift(MA const& m) {
-        return _([m](S const& s) {
+    template<typename M>
+    static constexpr monad_type<M, StateT<S, base_class_t<M>, value_type_t<M> > > lift(M const& m){
+        return _([m](S const& s){
             return _do(a, m,
-                return Monad<_M>::mreturn(pair_t<value_type_t<MA>, S>(a, s)););
+                return Monad_t<M>::mreturn(pair_t<value_type_t<M>, S>(a, s)););
         });
     }
 };
@@ -604,15 +589,15 @@ struct MonadState<S, _StateT<S, _M> > : _MonadState<S, _StateT<S, _M>, MonadStat
     using super = _MonadState<S, base_class, MonadState<S, base_class> >;
 
     template<typename A>
-    static StateT<S, _M, A> state(function_t<pair_t<A, S>(S const&)> const& f) {
+    static constexpr StateT<S, _M, A> state(function_t<pair_t<A, S>(S const&)> const& f){
         return base_class::state(f);
     }
 
-    static StateT<S, _M, S>  get() {
+    static constexpr StateT<S, _M, S>  get(){
         return base_class::get();
     }
 
-    static StateT<S, _M, None> put(S const& s) {
+    static constexpr StateT<S, _M, None> put(S const& s){
         return base_class::put(s);
     }
 };

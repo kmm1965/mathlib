@@ -10,21 +10,21 @@ struct cos_expression;
 template<class E>
 struct sin_expression : expression<sin_expression<E> >
 {
-    typedef typename mul_expression_type<
+    typedef mul_expression_t<
         cos_expression<E>,
         typename E::diff_type
-    >::type diff_type;
+    > diff_type;
 
-    constexpr sin_expression(const expression<E> &e) : e(e()){}
+    constexpr sin_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     constexpr diff_type diff() const {
         return cos(e) * e.diff();
     }
 
     template<typename T>
-    constexpr T operator()(const T &x) const {
+    constexpr T operator()(T const& x) const {
         return std::sin(e(x));
     }
 
@@ -33,11 +33,11 @@ struct sin_expression : expression<sin_expression<E> >
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr sin_expression<E> sin(const expression<E>& e){
+constexpr sin_expression<E> sin(expression<E> const& e){
     return sin_expression<E>(e);
 }
 

@@ -38,3 +38,7 @@
 #endif
 
 #define BOOST_PP_ENUM_print_data(z, n, data) data
+
+#define IMPLEMENT_DEFAULT_COPY_CONSRUCTOR(T) \
+	T(T const&) = default; \
+	T& operator=(T const&) = delete

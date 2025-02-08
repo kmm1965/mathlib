@@ -12,8 +12,8 @@ struct vector_value
 {
     typedef vector_value type;
     typedef T value_type;
-    typedef value_type &reference;
-    typedef const value_type &const_reference;
+    typedef value_type& reference;
+    typedef value_type const& const_reference;
     typedef value_type *pointer;
     typedef const value_type *const_pointer;
     typedef pointer iterator;
@@ -23,7 +23,7 @@ struct vector_value
     CONSTEXPR vector_value() : m_value_x(value_type()), m_value_y(value_type()), m_value_z(value_type()){}
 
     __DEVICE __HOST
-    CONSTEXPR vector_value(const value_type &x, const value_type &y, const value_type &z) : m_value_x(x), m_value_y(y), m_value_z(z){}
+    CONSTEXPR vector_value(value_type const& x, value_type const& y, value_type const& z) : m_value_x(x), m_value_y(y), m_value_z(z){}
 
     __DEVICE __HOST
     CONSTEXPR vector_value(const vector_value &rhs) : m_value_x(rhs.value_x()), m_value_y(rhs.value_y()), m_value_z(rhs.value_z()){}
@@ -38,7 +38,7 @@ struct vector_value
     }
 
     __DEVICE __HOST
-    void set(const value_type &x, const value_type &y, const value_type &z)
+    void set(value_type const& x, value_type const& y, value_type const& z)
     {
         m_value_x = x;
         m_value_y = y;
@@ -64,13 +64,13 @@ struct vector_value
     reference value_z(){ return m_value_z; }
 
     __DEVICE __HOST
-    void value_x(const value_type &value){ m_value_x = value; }
+    void value_x(value_type const& value){ m_value_x = value; }
 
     __DEVICE __HOST
-    void value_y(const value_type &value){ m_value_y = value; }
+    void value_y(value_type const& value){ m_value_y = value; }
 
     __DEVICE __HOST
-    void value_z(const value_type &value){ m_value_z = value; }
+    void value_z(value_type const& value){ m_value_z = value; }
 
     __DEVICE __HOST
     CONSTEXPR unsigned size() const {
@@ -157,7 +157,7 @@ struct vector_value
     }
 
     __DEVICE __HOST
-    vector_value& operator*=(const value_type &rhs)
+    vector_value& operator*=(value_type const& rhs)
     {
         m_value_x *= rhs;
         m_value_y *= rhs;
@@ -166,7 +166,7 @@ struct vector_value
     }
 
     __DEVICE __HOST
-    vector_value& operator/=(const value_type &rhs)
+    vector_value& operator/=(value_type const& rhs)
     {
         m_value_x /= rhs;
         m_value_y /= rhs;
@@ -265,14 +265,14 @@ CONSTEXPR vector_value<T> operator/(const vector_value<T> &x, T y){
     return vector_value<T>(x.value_x() / y, x.value_y() / y, x.value_z() / y);
 }
 
-// Покомпонентное деление
+// РџРѕРєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ РґРµР»РµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR vector_value<T> operator/(const vector_value<T> &x, const vector_value<T> &y){
     return vector_value<T>(x.value_x() / y.value_x(), x.value_y() / y.value_y(), x.value_z() / y.value_z());
 }
 
-// Векторное произведение
+// Р’РµРєС‚РѕСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR vector_value<T> operator*(const vector_value<T> &x, const vector_value<T> &y)
@@ -283,14 +283,14 @@ CONSTEXPR vector_value<T> operator*(const vector_value<T> &x, const vector_value
         x.value_x() * y.value_y() - x.value_y() * y.value_x());
 }
 
-// Скалярное произведение
+// РЎРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR T operator&(const vector_value<T> &x, const vector_value<T> &y){
     return x.value_x() * y.value_x() + x.value_y() * y.value_y() + x.value_z() * y.value_z();
 }
 
-// Покомпонентное произведение
+// РџРѕРєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR vector_value<T> operator^(const vector_value<T> &x, const vector_value<T> &y){
@@ -326,6 +326,6 @@ CONSTEXPR T sum_abs(const vector_value<T> &x){
     return func::abs(x.value_x()) + func::abs(x.value_y()) + func::abs(x.value_z());
 }
 
-}   // namespace func
+} // namespace func
 
 _KIAM_MATH_END

@@ -32,7 +32,7 @@ using MonadState_t = MonadState<S, base_class_t<T> >;
 template<typename S, typename _M, typename MS>
 struct _MonadState
 {
-    static_assert(_is_monad<_M>::value, "Should be a Monad");
+    static_assert(_is_monad_v<_M>, "Should be a Monad");
 
     template<typename T>
     using type = typename _M::template type<T>;
@@ -47,7 +47,7 @@ struct _MonadState
       return a
     */
     template<typename A>
-    static type<A> state(function_t<pair_t<A, S>(S const&)> const& f)
+    static constexpr type<A> state(function_t<pair_t<A, S>(S const&)> const& f)
     {
         using pair_type = pair_t<A, S>;
         return _do(s, MS::get(),
@@ -61,7 +61,7 @@ struct _MonadState
     get :: m s
     get = state (\s -> (s, s))
     */
-    static type<S> get() {
+    static constexpr type<S> get() {
         return state<S>(_([](S const& s) { return pair_t<S, S>(s, s); }));
     }
 
@@ -70,7 +70,7 @@ struct _MonadState
     put :: s -> m ()
     put s = state (\_ -> ((), s))
     */
-    static type<None> put(S const& s) {
+    static constexpr type<None> put(S const& s) {
         return state<None>(_([s](S const&) { return pair_t<None, S>(None(), s); }));
     }
 
@@ -89,7 +89,7 @@ struct _MonadState
     modify :: MonadState s m => (s -> s) -> m ()
     modify f = state (\s -> ((), f s))
     */
-    static type<None> modify(function_t<S(S const&)> const& f) {
+    static constexpr type<None> modify(function_t<S(S const&)> const& f) {
         return state<None>(_([f](S const& s) { return pair_t<None, S>(None(), f(s)); }));
     }
 
@@ -102,7 +102,7 @@ struct _MonadState
         return (f s)
     */
     template<typename A>
-    static type<A> gets(function_t<A(S const&)> const& f) {
+    static constexpr type<A> gets(function_t<A(S const&)> const& f) {
         return _do(s, MS::get(), return Monad<_M>::mreturn(f(s)););
     }
 };

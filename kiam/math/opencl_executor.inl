@@ -12,17 +12,18 @@ static const char szHeader[] =
 "namespace kiam { namespace math {\n"
 "}}";
 
-template<class Callback>
-void opencl_exec_callback(Callback& callback, size_t size)
+template<typename TAG>
+template<class Closure>
+void opencl_executor<TAG>::operator()(size_t size, Closure const& closure) const
 {
     namespace compute = ::boost::compute;
-    const std::string Callback_type_name = ::boost::core::demangle(typeid(Callback).name());
-    //std::cout << "Hello from opencl_exec_callback, callback class=" << Callback_type_name << std::endl;
+    const std::string Closure_type_name = ::boost::core::demangle(typeid(Closure).name());
+    //std::cout << "Hello from opencl_exec_closure, closure class=" << Closure_type_name << std::endl;
     std::ostringstream ss;
-    ss << szHeader << std::endl << "__kernel void opencl_kernel(" << Callback_type_name << " callback){" << std::endl
-        << "uint i = get_global_id(0); if(i < " << size << ") callback[i]; }";
+    ss << szHeader << std::endl << "__kernel void opencl_kernel(" << Closure_type_name << " closure){" << std::endl
+        << "uint i = get_global_id(0); if(i < " << size << ") closure(i); }";
     compute::kernel kernel = compute::kernel::create_with_source(ss.str(), "opencl_kernel", compute::system::default_context());
-    kernel.set_arg(0, sizeof(callback), &callback);
+    kernel.set_arg(0, sizeof(closure), &closure);
     const size_t
         r = size % BLOCK_SIZE,
         global_work_size = size + (r == 0 ? 0 : BLOCK_SIZE - r);

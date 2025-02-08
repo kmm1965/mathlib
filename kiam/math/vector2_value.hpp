@@ -12,8 +12,8 @@ struct vector2_value
 {
     typedef vector2_value type;
     typedef T value_type;
-    typedef value_type &reference;
-    typedef const value_type &const_reference;
+    typedef value_type& reference;
+    typedef value_type const& const_reference;
     typedef value_type *pointer;
     typedef const value_type *const_pointer;
     typedef pointer iterator;
@@ -37,7 +37,7 @@ struct vector2_value
     }
 
     __DEVICE __HOST
-    void set(const value_type &x, const value_type &y)
+    void set(value_type const& x, value_type const& y)
     {
         m_value_x = x;
         m_value_y = y;
@@ -232,21 +232,21 @@ CONSTEXPR vector2_value<T> operator/(const vector2_value<T>& x, T y){
     return vector2_value<T>(x.value_x() / y, x.value_y() / y);
 }
 
-// Покомпонентное деление
+// РџРѕРєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ РґРµР»РµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR vector2_value<T> operator/(const vector2_value<T> &x, const vector2_value<T> &y){
     return vector2_value<T>(x.value_x() / y.value_x(), x.value_y() / y.value_y());
 }
 
-// Скалярное произведение
+// РЎРєР°Р»СЏСЂРЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR T operator&(const vector2_value<T>& x, const vector2_value<T>& y){
     return x.value_x() * y.value_x() + x.value_y() * y.value_y();
 }
 
-// Покомпонентное произведение
+// РџРѕРєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ РїСЂРѕРёР·РІРµРґРµРЅРёРµ
 template<class T>
 __DEVICE __HOST
 CONSTEXPR vector2_value<T> operator^(const vector2_value<T>& x, const vector2_value<T>& y){
@@ -261,7 +261,7 @@ CONSTEXPR T operator*(const vector2_value<T>& x, const vector2_value<T>& y){
     return x.value_x() * y.value_y() - x.value_y() * y.value_x();
 }
 
-// Площадь треугольника, построенного на векторах x и y
+// РџР»РѕС‰Р°РґСЊ С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°, РїРѕСЃС‚СЂРѕРµРЅРЅРѕРіРѕ РЅР° РІРµРєС‚РѕСЂР°С… x Рё y
 template<class T>
 __DEVICE __HOST
 CONSTEXPR T area_2D(const vector2_value<T>& x, const vector2_value<T>& y){
@@ -294,6 +294,6 @@ CONSTEXPR T sum_abs(const vector2_value<T>& x){
     return math_abs(x.value_x()) + math_abs(x.value_y());
 }
 
-}   // namespace func
+} // namespace func
 
 _KIAM_MATH_END

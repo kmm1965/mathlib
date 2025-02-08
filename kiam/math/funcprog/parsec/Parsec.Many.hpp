@@ -5,12 +5,11 @@ _PARSEC_BEGIN
 // manyErr :: a
 // manyErr = error "Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string."
 template<typename S, typename U, typename _M, typename A, typename B>
-constexpr function_t<typename ParsecT_base<S, U, _M, A>::template return_type<B>(A const&, State<S, U> const&, ParseError const&)>
-manyErr(){
-    return [](A const&, State<S, U> const&, ParseError const&){
+constexpr auto manyErr(){
+    return _([](A const&, State<S, U> const&, ParseError const&){
         throw parse_error("Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string.");
         return *(typename ParsecT_base<S, U, _M, A>::template return_type<B>*) nullptr;
-    };
+    });
 }
 
 /*
@@ -40,8 +39,8 @@ struct manyAccum_unParser
     template<typename B>
     constexpr auto run(State<S, U> const& s, ok_type<B> const& cok, err_type<B> const& cerr, ok_type<B> const& eok, err_type<B> const& eerr) const
     {
-        const function_t<typename ParsecT_base_t::template return_type<B>(
-            List<A> const&, A const&, State<S, U> const&, ParseError const&)> walk =
+        function_t<typename ParsecT_base_t::template return_type<B>(
+            List<A> const&, A const&, State<S, U> const&, ParseError const&)> const walk =
             [this, &walk, &cok, &cerr](List<A> const& xs, A const& x, State<S, U> const& s_, ParseError const& _err){
             return p.template run<B>(s_,
                 walk << acc(x, xs),          // consumed-ok
@@ -54,13 +53,14 @@ struct manyAccum_unParser
     }
 
 private:
-    const acc_type acc;
-    const ParsecT<S, U, _M, A, P> p;
+    acc_type const acc;
+    ParsecT<S, U, _M, A, P> const p;
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>
-constexpr auto manyAccum(const typename manyAccum_unParser<S, U, _M, A, P>::acc_type &acc, ParsecT<S, U, _M, A, P> const& p){
-    return ParsecT<S, U, _M, List<A>, manyAccum_unParser<S, U, _M, A, P> >(manyAccum_unParser<S, U, _M, A, P>(acc, p));
+constexpr ParsecT<S, U, _M, List<A>, manyAccum_unParser<S, U, _M, A, P> > 
+manyAccum(const typename manyAccum_unParser<S, U, _M, A, P>::acc_type &acc, ParsecT<S, U, _M, A, P> const& p){
+    return manyAccum_unParser<S, U, _M, A, P>(acc, p);
 }
 
 /*
@@ -79,7 +79,7 @@ many p
 */
 template<typename S, typename U, typename _M, typename A, typename P>
 constexpr auto many(ParsecT<S, U, _M, A, P> const& p){
-    return _do(xs, manyAccum(_(cons<A>), p), return (Monad<_ParsecT<S, U, _M> >::mreturn(reverse(xs))););
+    return _do(xs, manyAccum(_(cons<A>), p), return (Monad<_ParsecT<S, U, _M> >::return_(reverse(xs))););
 }
 
 /*
@@ -96,8 +96,8 @@ skipMany p
 template<typename S, typename U, typename _M, typename A, typename P>
 constexpr auto skipMany(ParsecT<S, U, _M, A, P> const& p)
 {
-    const function_t<List<A>(A const&, List<A> const&)> f = [](A const&, List<A> const&){ return List<A>(); };
-    return _do(_, manyAccum(f, p), return (Monad<_ParsecT<S, U, _M> >::mreturn(EmptyData<A>())););
+    auto const f = _([](A const&, List<A> const&){ return List<A>(); });
+    return _do(_, manyAccum(f, p), return (Monad<_ParsecT<S, U, _M> >::return_(EmptyData<A>())););
 }
 
 _PARSEC_END

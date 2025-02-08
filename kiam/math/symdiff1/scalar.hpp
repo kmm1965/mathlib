@@ -19,7 +19,7 @@ struct scalar : expression<scalar<VT> >
     }
 
     template<typename T>
-    constexpr value_type operator()(const T &) const {
+    constexpr value_type operator()(T const&) const {
         return value;
     }
 
@@ -43,8 +43,11 @@ struct is_scalar : std::false_type {};
 template<typename VT>
 struct is_scalar<scalar<VT> > : std::true_type {};
 
+template<class E>
+constexpr bool is_scalar_v = is_scalar<E>::value;
+
 template<typename T>
-constexpr scalar<T> _(const T &val) {
+constexpr scalar<T> _(T const&val){
     return scalar<T>(val);
 }
 

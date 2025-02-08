@@ -80,8 +80,7 @@ constexpr auto runPT(ParsecT<S, U, _M, A, P> const& p, U const& u, SourceName co
     auto const parserReply = [](Consumed<mrep_type> const& res){
         return res.index() == Consumed_ ? *(res.consumed()) : *(res.empty());
     };
-    return _do2(res, p.run(State<S, U>(s, initialPos(name), u)),
-        r, parserReply(res),
+    return _do2(res, p.run(State<S, U>(s, initialPos(name), u)), r, parserReply(res),
         return Monad_t<_M>::mreturn(r.index() == Ok_ ?
             Either_t(_Right<A>(r.ok().value)) :
             Either_t(_Left<ParseError>(r.error().error)));

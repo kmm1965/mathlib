@@ -32,8 +32,8 @@ struct dim2_index : index_base<dim2_index<IR, IC> >
     }
 
 private:
-    const typename IR::proxy_type m_row_index;
-    const typename IC::proxy_type m_column_index;
+    typename IR::proxy_type const m_row_index;
+    typename IC::proxy_type const m_column_index;
 };
 
 _KIAM_MATH_END

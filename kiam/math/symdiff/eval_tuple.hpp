@@ -9,7 +9,7 @@ struct eval_tuple_closure
 {
     static const size_t N = std::tuple_size<std::tuple<E...> >::value;
 
-    constexpr eval_tuple_closure(const std::tuple<E...> &tp, const val_array<T, M> &x,  val_array<T, N> &result) :
+    constexpr eval_tuple_closure(std::tuple<E...> const& tp, val_array<T, M> const& x,  val_array<T, N> &result) :
         tp(tp), x(x), result(result){}
 
     template<unsigned I>
@@ -18,16 +18,16 @@ struct eval_tuple_closure
     }
 
 private:
-    const std::tuple<E...> &tp;
-    const val_array<T, M> &x;
+    std::tuple<E...> const& tp;
+    val_array<T, M> const& x;
     val_array<T, N> &result;
 };
 
 template<typename T, unsigned M, class... E>
 constexpr val_array<T, std::tuple_size<std::tuple<E...> >::value>
-eval_tuple(const std::tuple<E...> &tp, const val_array<T, M> &x)
+eval_tuple(std::tuple<E...> const& tp, val_array<T, M> const& x)
 {
-    const size_t N = std::tuple_size<std::tuple<E...> >::value;
+    size_t const N = std::tuple_size<std::tuple<E...> >::value;
     val_array<T, N> result;
     eval_tuple_closure<T, M, E...> closure(tp, x, result);
     meta_loop<N>(closure);

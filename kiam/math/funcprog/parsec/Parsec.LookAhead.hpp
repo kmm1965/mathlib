@@ -33,7 +33,7 @@ struct lookAhead_unParser
     }
 
 private:
-    const ParsecT<S, U, _M, A, P> p;
+    ParsecT<S, U, _M, A, P> const p;
 };
 
 template<typename S, typename U, typename _M, typename A, typename P>

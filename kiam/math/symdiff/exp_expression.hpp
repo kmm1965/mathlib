@@ -10,15 +10,15 @@ struct exp_expression : expression<exp_expression<E> >
     template<unsigned M>
     struct diff_type
     {
-        typedef typename mul_expression_type<
+        typedef mul_expression_t<
             exp_expression<E>,
             typename E::template diff_type<M>::type
-        >::type type;
+        > type;
     };
 
-    constexpr exp_expression(const expression<E> &e) : e(e()){}
+    constexpr exp_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     template<unsigned M>
     constexpr typename diff_type<M>::type diff() const {
@@ -26,16 +26,16 @@ struct exp_expression : expression<exp_expression<E> >
     }
 
     template<typename T, size_t _Size>
-    constexpr T operator()(const std::array<T, _Size> &vars) const {
+    constexpr T operator()(std::array<T, _Size> const& vars) const {
         return std::exp(e(vars));
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr exp_expression<E> exp(const expression<E>& e){
+constexpr exp_expression<E> exp(expression<E> const& e){
     return exp_expression<E>(e);
 }
 

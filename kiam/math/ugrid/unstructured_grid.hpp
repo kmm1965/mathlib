@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ugrid_def.h"
+#include "ugrid_def0.h"
 #include "../math_object.hpp"
 #include "../math_vector.hpp"
 #include "../math_array.hpp"
@@ -68,15 +68,15 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
 
     struct cell_value_type
     {
-        value_type volume;          // объём ячейки
-        vector_t gcenter;           // геометрический центр ячейки
-        vector_t mcenter;           // центр масс ячейки
-        vector_t dx;                // максимальные размеры ячейки
+        value_type volume;  // РѕР±СЉС‘Рј СЏС‡РµР№РєРё
+        vector_t gcenter;   // РіРµРѕРјРµС‚СЂРёС‡РµСЃРєРёР№ С†РµРЅС‚СЂ СЏС‡РµР№РєРё
+        vector_t mcenter;   // С†РµРЅС‚СЂ РјР°СЃСЃ СЏС‡РµР№РєРё
+        vector_t dx;        // РјР°РєСЃРёРјР°Р»СЊРЅС‹Рµ СЂР°Р·РјРµСЂС‹ СЏС‡РµР№РєРё
 #if UGRID_CELL_H
-        value_type h;               // характерный размер ячейки
+        value_type h;       // С…Р°СЂР°РєС‚РµСЂРЅС‹Р№ СЂР°Р·РјРµСЂ СЏС‡РµР№РєРё
 #endif
 #if UGRID_CELL_TYPE
-        unsigned cell_type;         // тип ячейки
+        unsigned cell_type; // С‚РёРї СЏС‡РµР№РєРё
 #endif
     };
 
@@ -90,38 +90,38 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
             , patch_num(-1), patch_type(-1)
 #endif
         {}
-        unsigned cell;          // номер ячейки на границе
-        unsigned interface;     // номер поверхности на границе
+        unsigned cell;          // РЅРѕРјРµСЂ СЏС‡РµР№РєРё РЅР° РіСЂР°РЅРёС†Рµ
+        unsigned interface;     // РЅРѕРјРµСЂ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РЅР° РіСЂР°РЅРёС†Рµ
 #if UGRID_CELL_B_CENTER
-        vector_t gcenter;       // геометрический центр фиктивной ячейки
-        vector_t mcenter;       // центр масс фиктивной ячейки
+        vector_t gcenter;       // РіРµРѕРјРµС‚СЂРёС‡РµСЃРєРёР№ С†РµРЅС‚СЂ С„РёРєС‚РёРІРЅРѕР№ СЏС‡РµР№РєРё
+        vector_t mcenter;       // С†РµРЅС‚СЂ РјР°СЃСЃ С„РёРєС‚РёРІРЅРѕР№ СЏС‡РµР№РєРё
 #endif
 #if UGRID_CELL_B_BC_CELL
-        unsigned bc_cell;       // номер ячейки "за границей"
+        unsigned bc_cell;       // РЅРѕРјРµСЂ СЏС‡РµР№РєРё "Р·Р° РіСЂР°РЅРёС†РµР№"
 #endif
 #if UGRID_CELL_B_PATCH
-        // Интерпретация этих двух полей - дело приложения.
-        int patch_num;          // номер патча
-        int patch_type;         // тип патча
+        // РРЅС‚РµСЂРїСЂРµС‚Р°С†РёСЏ СЌС‚РёС… РґРІСѓС… РїРѕР»РµР№ - РґРµР»Рѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.
+        int patch_num;          // РЅРѕРјРµСЂ РїР°С‚С‡Р°
+        int patch_type;         // С‚РёРї РїР°С‚С‡Р°
 #endif
     };
 
     struct interface_value_type {
-        unsigned cells[2];      // ячейки, контактирующие через поверхность
-        unsigned cell_loc_num[2]; // локальный номер поверхности в ячейке
-        vector_t normal;        // нормаль к поверхности
+        unsigned cells[2];        // СЏС‡РµР№РєРё, РєРѕРЅС‚Р°РєС‚РёСЂСѓСЋС‰РёРµ С‡РµСЂРµР· РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ
+        unsigned cell_loc_num[2]; // Р»РѕРєР°Р»СЊРЅС‹Р№ РЅРѕРјРµСЂ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РІ СЏС‡РµР№РєРµ
+        vector_t normal;          // РЅРѕСЂРјР°Р»СЊ Рє РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
 #if UGRID_INTERFACE_AREA
-        value_type area;        // площадь поверхности
+        value_type area;        // РїР»РѕС‰Р°РґСЊ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
 #endif
 #if UGRID_INTERFACE_CENTER
-        vector_t gcenter;       // геометрический центр грани
-        vector_t mcenter;       // центр масс грани
+        vector_t gcenter;       // РіРµРѕРјРµС‚СЂРёС‡РµСЃРєРёР№ С†РµРЅС‚СЂ РіСЂР°РЅРё
+        vector_t mcenter;       // С†РµРЅС‚СЂ РјР°СЃСЃ РіСЂР°РЅРё
 #endif
     };
 
     void calc_geometry(const mpi::communicator &comm);
 
-    _KIAM_MATH::math_vector<vector_t> m_nodes;  // массив координат узлов
+    _KIAM_MATH::math_vector<vector_t> m_nodes;  // РјР°СЃСЃРёРІ РєРѕРѕСЂРґРёРЅР°С‚ СѓР·Р»РѕРІ
     _KIAM_MATH::math_vector<unsigned> m_nodes_l2g;
     _KIAM_MATH::math_vector<cell_value_type> m_cells;
     _KIAM_MATH::math_vector<unsigned> m_cells_l2g;
@@ -129,10 +129,10 @@ struct unstructured_grid : _KIAM_MATH::math_object<unstructured_grid<T, DIM>, un
     _KIAM_MATH::math_vector<interface_value_type> m_interfaces;
     _KIAM_MATH::math_vector<unsigned> m_cell_node_shift, m_cell_node_index, m_cell_interface_shift, m_cell_interface_index,
         m_interface_node_shift, m_interface_node_index;
-    vector_t m_ptMin, m_ptMax;  // Минимальные и максимальные координаты вершин.
-    vector_t m_dxMin;   // Минимальные размеры ячеек.
+    vector_t m_ptMin, m_ptMax;  // РњРёРЅРёРјР°Р»СЊРЅС‹Рµ Рё РјР°РєСЃРёРјР°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РІРµСЂС€РёРЅ.
+    vector_t m_dxMin;           // РњРёРЅРёРјР°Р»СЊРЅС‹Рµ СЂР°Р·РјРµСЂС‹ СЏС‡РµРµРє.
 #if UGRID_CELL_H
-    value_type m_hMin;      // Минимальный характерный размер ячейки.
+    value_type m_hMin;          // РњРёРЅРёРјР°Р»СЊРЅС‹Р№ С…Р°СЂР°РєС‚РµСЂРЅС‹Р№ СЂР°Р·РјРµСЂ СЏС‡РµР№РєРё.
 #endif
     unsigned m_local_cells, m_global_cells, m_local_nodes, m_global_nodes;
 };

@@ -12,10 +12,10 @@ struct dual
     typedef T value_type;
 
     __DEVICE __HOST
-    CONSTEXPR dual(const value_type &value = 0, const value_type &derivative = 0) : m_value(value), m_derivative(derivative){}
+    CONSTEXPR dual(value_type const& value = 0, value_type const& derivative = 0) : m_value(value), m_derivative(derivative){}
 
     __DEVICE __HOST
-    CONSTEXPR dual(const dual &rhs) : m_value(rhs.m_value), m_derivative(rhs.m_derivative){}
+    CONSTEXPR dual(dual const& rhs) : m_value(rhs.m_value), m_derivative(rhs.m_derivative){}
 
     __DEVICE __HOST
     CONSTEXPR value_type value() const { return m_value; }
@@ -32,7 +32,7 @@ struct dual
     }
 
     __DEVICE __HOST
-    CONSTEXPR dual& operator=(const dual &rhs)
+    CONSTEXPR dual& operator=(dual const& rhs)
     {
         m_value = rhs.m_value;
         m_derivative = rhs.m_derivative;
@@ -40,48 +40,48 @@ struct dual
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator+=(const value_type &rhs){ m_value += rhs; }
+    CONSTEXPR void operator+=(value_type const& rhs){ m_value += rhs; }
 
     __DEVICE __HOST
-    CONSTEXPR void operator-=(const value_type &rhs){ m_value -= rhs; }
+    CONSTEXPR void operator-=(value_type const& rhs){ m_value -= rhs; }
 
     __DEVICE __HOST
-    CONSTEXPR void operator*=(const value_type &rhs)
+    CONSTEXPR void operator*=(value_type const& rhs)
     {
         m_value *= rhs;
         m_derivative *= rhs;
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator/=(const value_type &rhs)
+    CONSTEXPR void operator/=(value_type const& rhs)
     {
         m_value /= rhs;
         m_derivative /= rhs;
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator+=(const dual &rhs)
+    CONSTEXPR void operator+=(dual const& rhs)
     {
         m_value += rhs.m_value;
         m_derivative += rhs.m_derivative;
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator-=(const dual &rhs)
+    CONSTEXPR void operator-=(dual const& rhs)
     {
         m_value -= rhs.m_value;
         m_derivative -= rhs.m_derivative;
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator*=(const dual &rhs)
+    CONSTEXPR void operator*=(dual const& rhs)
     {
         m_derivative = m_derivative * rhs.m_value + m_value * rhs.m_derivative;
         m_value *= rhs.m_value;
     }
 
     __DEVICE __HOST
-    CONSTEXPR void operator/=(const dual &rhs)
+    CONSTEXPR void operator/=(dual const& rhs)
     {
         m_derivative = (m_derivative * rhs.m_value - m_value * rhs.m_derivative) / func::sqr(rhs.m_value);
         m_value /= rhs.m_value;

@@ -10,7 +10,9 @@ struct ugrid_operator1 : ugrid_operator<GO, _Proxy>
     typedef G grid_type;
 
 protected:
-    ugrid_operator1(grid_type const& grid) : m_grid(grid.get_proxy()){}
+    constexpr ugrid_operator1(grid_type const& grid) : m_grid(grid.get_proxy()){}
+
+    IMPLEMENT_DEFAULT_COPY_CONSRUCTOR(ugrid_operator1);
 
 public:
     __DEVICE __HOST

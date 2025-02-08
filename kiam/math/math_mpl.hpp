@@ -14,52 +14,47 @@ _KIAM_MATH_BEGIN
 #if defined(__CUDACC__)
 
 template<typename T>
-using plus = thrust::plus<T>;
+using math_plus = thrust::plus<T>;
 
 template<typename T>
-using minus = thrust::minus<T>;
+using math_minus = thrust::minus<T>;
 
 template<typename T>
-using multiplies = thrust::multiplies<T>;
+using math_multiplies = thrust::multiplies<T>;
 
 template<typename T>
-using divides = thrust::divides<T>;
+using math_divides = thrust::divides<T>;
 
 template<typename T>
-using negate = thrust::negate<T>;
+using math_negate = thrust::negate<T>;
 
 template<typename T>
-using maximum = thrust::maximum<T>;
+using math_maximum = thrust::maximum<T>;
 
 template<typename T>
-using minimum = thrust::minimum<T>;
+using math_minimum = thrust::minimum<T>;
 
 template<typename T>
-using equal_to = thrust::equal_to<T>;
+using math_equal_to = thrust::equal_to<T>;
 
 template<typename T>
-using not_equal_to = thrust::not_equal_to<T>;
+using math_not_equal_to = thrust::not_equal_to<T>;
 
 template<typename T>
-using less = thrust::less<T>;
+using math_less = thrust::less<T>;
 
 template<typename T>
-using less_equal = thrust::less_equal<T>;
+using math_less_equal = thrust::less_equal<T>;
 
 template<typename T>
-using greater = thrust::greater<T>;
+using math_greater = thrust::greater<T>;
 
 template<typename T>
-using greater_equal = thrust::greater_equal<T>;
+using math_greater_equal = thrust::greater_equal<T>;
 
-template<typename T>
-using logical_and = thrust::logical_and<T>;
-
-template<typename T>
-using logical_or = thrust::logical_or<T>;
-
-template<typename T>
-using logical_not = thrust::logical_not<T>;
+using math_logical_and = thrust::logical_and<bool>;
+using math_logical_or = thrust::logical_or<bool>;
+using math_logical_not = thrust::logical_not<bool>;
 
 #elif defined(__OPENCL__)
 
@@ -72,54 +67,49 @@ struct opencl_binary_function : _Super
 };
 
 template<typename T>
-using plus = opencl_binary_function<boost::compute::minus<T> >;
+using math_plus = opencl_binary_function<boost::compute::plus<T> >;
 
 template<typename T>
-using minus = opencl_binary_function<boost::compute::minus<T> >;
+using math_minus = opencl_binary_function<boost::compute::minus<T> >;
 
 template<typename T>
-using multiplies = opencl_binary_function<boost::compute::multiplies<T> >;
+using math_multiplies = opencl_binary_function<boost::compute::multiplies<T> >;
 
 template<typename T>
-using divides = opencl_binary_function<::boost::compute::divides<T> >;
-
-//template<typename T>
-//using negate = boost::compute::unary_minus<T>;
+using math_divides = opencl_binary_function<::boost::compute::divides<T> >;
 
 template<typename T>
-using equal_to = boost::compute::equal_to<T>;
+using math_negate = boost::compute::unary_negate<T>;
 
 template<typename T>
-using not_equal_to : boost::compute::not_equal_to<T>;
+using math_equal_to = boost::compute::equal_to<T>;
 
 template<typename T>
-using logical_and = boost::compute::logical_and<T>;
+using math_not_equal_to = boost::compute::not_equal_to<T>;
 
-template<typename T>
-using logical_or = boost::compute::logical_or<T>;
-
-template<typename T>
-using logical_not = boost::compute::logical_not<T>;
+using math_logical_and = boost::compute::logical_and<void>;
+using math_logical_or = boost::compute::logical_or<void>;
+using math_logical_not = boost::compute::logical_not<void>;
 
 #else   // __CUDACC__
 
 template<typename T>
-using plus = std::plus<T>;
+using math_plus = std::plus<T>;
 
 template<typename T>
-using minus = std::minus<T>;
+using math_minus = std::minus<T>;
 
 template<typename T>
-using multiplies = std::multiplies<T>;
+using math_multiplies = std::multiplies<T>;
 
 template<typename T>
-using divides = std::divides<T>;
+using math_divides = std::divides<T>;
 
 template<typename T>
-using negate = std::negate<T>;
+using math_negate = std::negate<T>;
 
 template<typename T>
-struct maximum
+struct math_maximum
 {
     using first_argument_type = T;
     using second_argument_type = T;
@@ -131,7 +121,7 @@ struct maximum
 };
 
 template<typename T>
-struct minimum
+struct math_minimum
 {
     using first_argument_type = T;
     using second_argument_type = T;
@@ -143,31 +133,26 @@ struct minimum
 };
 
 template<typename T>
-using equal_to = std::equal_to<T>;
+using math_equal_to = std::equal_to<T>;
 
 template<typename T>
-using not_equal_to = std::not_equal_to<T>;
+using math_not_equal_to = std::not_equal_to<T>;
 
 template<typename T>
-using less = std::less<T>;
+using math_less = std::less<T>;
 
 template<typename T>
-using less_equal = std::less_equal<T>;
+using math_less_equal = std::less_equal<T>;
 
 template<typename T>
-using greater = std::greater<T>;
+using math_greater = std::greater<T>;
 
 template<typename T>
-using greater_equal = std::greater_equal<T>;
+using math_greater_equal = std::greater_equal<T>;
 
-template<typename T>
-using logical_and = std::logical_and<T>;
-
-template<typename T>
-using logical_or = std::logical_or<T>;
-
-template<typename T>
-using logical_not = std::logical_not<T>;
+using math_logical_and = std::logical_and<>;
+using math_logical_or = std::logical_or<>;
+using math_logical_not = std::logical_not<>;
 
 #endif  // __CUDACC__
 

@@ -33,22 +33,30 @@ struct vector_grid_function : grid_function<TAG, vector_grid_function<TAG, T>, v
     vector_grid_function(vector_grid_function const& other) : vector_type(other), m_local_size(other.m_local_size){}
     vector_grid_function(vector_grid_function&&) = delete;
 
-    vector_grid_function(size_t size, size_t local_size = 0, const value_type &init = value_type()) :
+    vector_grid_function(size_t size, size_t local_size = 0, value_type const& init = value_type()) :
         vector_type(size, init), m_local_size(local_size == 0 ? size : local_size){}
 
-    void operator=(const value_type &value);
+    vector_grid_function(std::initializer_list<T> il) : super(il){}
+
+    void operator=(value_type const& value);
     void operator=(const vector_grid_function &other);
 
-    void assign(const HOST_VECTOR_T<value_type> &hvec)
+    void operator=(const HOST_VECTOR_T<value_type> &hvec)
     {
         assert(hvec.size() == vector_type::size());
         vector_type::operator=(hvec);
     }
 
-    template<typename EO>
-    void operator=(const EOBJ(EO) &eobj0);
+    template<class GEXP>
+    void operator&=(GRID_EXPR(GEXP) const& gexp);
 
-    void resize(size_t new_size, size_t local_size = 0, const value_type &init = value_type())
+    template<typename GEXP>
+    void operator=(GRID_EXPR(GEXP) const& gexp);
+
+    //template<typename GEXP>
+    //void operator=(func_grid_expression<typename GEXP::tag_type, GEXP, typename GEXP::proxy_type> const& fgexp);
+
+    void resize(size_t new_size, size_t local_size = 0, value_type const& init = value_type())
     {
         vector_type::resize(new_size, init);
         m_local_size = local_size > 0 ? local_size : new_size;
@@ -64,59 +72,35 @@ struct vector_grid_function : grid_function<TAG, vector_grid_function<TAG, T>, v
         return vector_type::operator[](i);
     }
 
-    void operator+=(const value_type &value);
-    void operator-=(const value_type &value);
-    void operator*=(const value_type &value);
-    void operator/=(const value_type &value);
+    void operator+=(value_type const& value);
+    void operator-=(value_type const& value);
+    void operator*=(value_type const& value);
+    void operator/=(value_type const& value);
 
     void operator+=(const vector_grid_function &other);
     void operator-=(const vector_grid_function &other);
     void operator*=(const vector_grid_function &other);
     void operator/=(const vector_grid_function &other);
 
-    template<class EO>
-    void operator+=(const EOBJ(EO) &eobj);
+    template<class GEXP>
+    std::enable_if_t<std::is_same<TAG, typename GEXP::tag_type>::value> operator+=(GRID_EXPR(GEXP) const& gexp);
 
-    template<class EO>
-    void operator-=(const EOBJ(EO) &eobj);
+    template<class GEXP>
+    std::enable_if_t<std::is_same<TAG, typename GEXP::tag_type>::value> operator-=(GRID_EXPR(GEXP) const& gexp);
 
-    template<class EO>
-    void operator*=(const EOBJ(EO) &eobj);
+    template<class GEXP>
+    std::enable_if_t<std::is_same<TAG, typename GEXP::tag_type>::value> operator*=(GRID_EXPR(GEXP) const& gexp);
 
-    template<class EO>
-    void operator/=(const EOBJ(EO) &eobj);
+    template<class GEXP>
+    std::enable_if_t<std::is_same<TAG, typename GEXP::tag_type>::value> operator/=(GRID_EXPR(GEXP) const& gexp);
 
     simple_slice<tag_type, value_type> operator[](std::slice const& sl);
     grid_func_gslice<tag_type, value_type> operator[](std::gslice const& gsl);
 
-    const size_t m_local_size;
+    size_t m_local_size;
 };
 
 _KIAM_MATH_END
-
-#define REIMPLEMENT_GRID_FUNCTION_OPERATORS() \
-    typedef typename super::tag_type tag_type; \
-    void operator=(const value_type &value){ super::operator=(value); } \
-    void operator=(const super &func){ super::operator=(func); } \
-    /*void operator=(const host_vector<value_type> &hvec){ super::operator=(hvec); }*/ \
-    template<class EO> \
-    void operator=(const EOBJ(EO) &eobj){ super::operator=(eobj); } \
-    void operator+=(const value_type &value){ super::operator+=(value); } \
-    void operator-=(const value_type &value){ super::operator-=(value); } \
-    void operator*=(const value_type &value){ super::operator*=(value); } \
-    void operator/=(const value_type &value){ super::operator/=(value); } \
-    void operator+=(const super &other){ super::operator+=(other); } \
-    void operator-=(const super &other){ super::operator-=(other); } \
-    void operator*=(const super &other){ super::operator*=(other); } \
-    void operator/=(const super &other){ super::operator/=(other); } \
-    template<class EO> \
-    void operator+=(const EOBJ(EO) &eobj){ super::operator+=(eobj); } \
-    template<class EO> \
-    void operator-=(const EOBJ(EO) &eobj){ super::operator-=(eobj); } \
-    template<class EO> \
-    void operator*=(const EOBJ(EO) &eobj){ super::operator*=(eobj); } \
-    template<class EO> \
-    void operator/=(const EOBJ(EO) &eobj){ super::operator/=(eobj); }
 
 #define DECLARE_MATH_VECTOR_GRID_FUNCTION(name) \
     template<typename T> \

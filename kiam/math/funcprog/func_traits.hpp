@@ -107,10 +107,18 @@ template<typename T>
 using fdecay = remove_fdata_t<remove_f0_t<typename std::decay<T>::type > >;
 
 template<typename FUNC>
-struct first_argument_type;
+struct result_type;
+
+template<typename Ret, typename... Args>
+struct result_type<function_t<Ret(Args...)> > {
+    using type = Ret;
+};
 
 template<typename FUNC>
-using first_argument_type_t = typename first_argument_type<FUNC>::type;
+using result_type_t = typename result_type<FUNC>::type;
+
+template<typename FUNC>
+struct first_argument_type;
 
 template<typename Ret, typename Arg0, typename... Args>
 struct first_argument_type<function_t<Ret(Arg0, Args...)> >{
@@ -118,15 +126,18 @@ struct first_argument_type<function_t<Ret(Arg0, Args...)> >{
 };
 
 template<typename FUNC>
-struct remove_first_arg;
+using first_argument_type_t = typename first_argument_type<FUNC>::type;
 
 template<typename FUNC>
-using remove_first_arg_t = typename remove_first_arg<FUNC>::type;
+struct remove_first_arg;
 
 template<typename Ret, typename Arg0, typename... Args>
 struct remove_first_arg<function_t<Ret(Arg0, Args...)> >{
     using type = function_t<Ret(Args...)>;
 };
+
+template<typename FUNC>
+using remove_first_arg_t = typename remove_first_arg<FUNC>::type;
 
 template<typename FUNC>
 struct function_signature;
@@ -138,7 +149,6 @@ template<typename Ret, typename... Args>
 struct function_signature<function_t<Ret(Args...)> >{
     using type = Ret(Args...);
 };
-
 
 template<typename F>
 function_type_t<F> _(F f){
@@ -152,7 +162,24 @@ f0<T> _f(T const& value){
     };
 }
 
+template<typename A>
+using value_type_t = typename A::value_type;
+
+template<typename A, typename T>
+using typeof_t = typename A::template type<T>;
+
+#define TYPEOF_T(A, T) typename A::template type<T>
+
+template<typename A, typename T>
+using typeof_dt = typeof_t<A, fdecay<T> >;
+
+template<typename F>
+using base_class_t = typename F::base_class;
+
 template<typename A, typename B>
 using is_same_as = std::is_same<fdecay<A>, fdecay<B> >;
+
+template<typename A, typename B>
+bool constexpr is_same_as_v = is_same_as<A, B>::value;
 
 _FUNCPROG_END

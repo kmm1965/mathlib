@@ -132,26 +132,22 @@ CONSTEXPR T abs2(const T &value){
 #ifdef __CUDACC__
 
 __device__ __host__
-float2 inline conj(const float2 &value)
-{
-    float2 result = { value.x, -value.y };
-    return result;
+float2 inline conj(float2 const& value){
+    return { value.x, -value.y };
 }
 
 __device__ __host__
-double2 inline conj(const double2 &value)
-{
-    double2 result = { value.x, -value.y };
-    return result;
+double2 inline conj(double2 const& value){
+    return { value.x, -value.y };
 }
 
 __device__ __host__
-float inline abs2(const float2 &value){
+float inline abs2(float2 const& value){
     return func::sqr(value.x) + func::sqr(value.y);
 }
 
 __device__ __host__
-double inline abs2(const double2 &value){
+double inline abs2(double2 const& value){
     return func::sqr(value.x) + func::sqr(value.y);
 }
 
@@ -337,13 +333,13 @@ namespace func {
 
 template<class Unit, class Y>
 __DEVICE __HOST
-CONSTEXPR typename boost::units::root_typeof_helper<boost::units::quantity<Unit, Y>, boost::units::static_rational<2> >::type sqrt(const boost::units::quantity<Unit, Y>& val) {
+CONSTEXPR typename boost::units::root_typeof_helper<boost::units::quantity<Unit, Y>, boost::units::static_rational<2> >::type sqrt(boost::units::quantity<Unit, Y> const& val) {
     return boost::units::sqrt(val);
 }
 
 template<class Unit, class Y>
 __DEVICE __HOST
-CONSTEXPR boost::units::quantity<typename boost::units::multiply_typeof_helper<Unit, Unit>::type, Y> sqr(const boost::units::quantity<Unit, Y>& val) {
+CONSTEXPR boost::units::quantity<typename boost::units::multiply_typeof_helper<Unit, Unit>::type, Y> sqr(boost::units::quantity<Unit, Y> const& val) {
     return val * val;
 }
 

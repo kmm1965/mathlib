@@ -12,7 +12,7 @@ struct square_matrix : std::array<T, N * N>
     typedef T *pointer;
     typedef const T *const_pointer;
     typedef T &reference;
-    typedef const T &const_reference;
+    typedef T const& const_reference;
 
     constexpr size_t index(size_t i, size_t j) const
     {
@@ -31,7 +31,7 @@ struct square_matrix : std::array<T, N * N>
 };
 
 template<typename T, size_t N>
-std::ostream& operator<<(std::ostream &o, const square_matrix<T, N> &m)
+std::ostream& operator<<(std::ostream &o, square_matrix<T, N> const& m)
 {
     o << '{' << std::endl;;
     for(size_t i = 0; i < N; ++i){

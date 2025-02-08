@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Identity_fwd.hpp"
+#include "fwd/Identity_fwd.hpp"
+#include "Functor.hpp"
+#include "Applicative.hpp"
 #include "Monad.hpp"
+#include "Semigroup.hpp"
 #include "Monoid.hpp"
 #include "Foldable.hpp"
 #include "Traversable.hpp"
-#include "Monad/MonadFix.hpp"
 #include "Monad/MonadZip.hpp"
 
 _FUNCPROG_BEGIN
@@ -27,7 +29,6 @@ struct Identity : _Identity
     Identity(f0<value_type> const& fvalue) : value(fvalue){}
     Identity(Identity const& ivalue) : value(ivalue.value){}
     Identity(f0<Identity> const& fivalue) : value((*fivalue).value){}
-    //Identity(f0<Identity> const& fivalue) : value(_([fivalue](){ return (*fivalue).value(); })){}
 
     constexpr value_type run() const {
         return value();
@@ -37,111 +38,101 @@ private:
     const fdata<value_type> value;
 };
 
-template<typename T>
-constexpr T runIdentity(Identity<T> const& x){
-    return x.run();
-}
-
-// Constructor
-template<typename T>
-constexpr Identity<T> Identity_(T const& value){
-    return value;
-}
-
-template<typename T>
-constexpr Identity<T> Identity_f(f0<T> const& fvalue){
-    return fvalue;
-}
-
 // Functor
-IMPLEMENT_FUNCTOR(_Identity);
-
 template<>
-struct Functor<_Identity>
+struct Functor<_Identity> : _Functor<_Identity>
 {
-    DECLARE_FUNCTOR_CLASS(Identity)
+    // <$> fmap :: Functor f => (a -> b) -> f a -> f b
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr auto fmap(function_t<Ret(Arg, Args...)> const& f, Identity<fdecay<Arg> > const& v){
+        return Identity_(invoke_f0(f << v.run()));
+    }
 };
 
 // Applicative
-IMPLEMENT_APPLICATIVE(_Identity);
-
 template<>
-struct Applicative<_Identity> : Functor<_Identity>
+struct Applicative<_Identity> : Functor<_Identity>, _Applicative<_Identity>
 {
-    typedef Functor<_Identity> super;
+    using super = Functor<_Identity>;
 
-    DECLARE_APPLICATIVE_CLASS(Identity)
+    template<typename A>
+    static constexpr Identity<fdecay<A> > pure(A const& x){
+        return x;
+    }
+
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr auto apply(Identity<function_t<Ret(Arg, Args...)> > const& f, Identity<fdecay<Arg> > const& v){
+        return super::fmap(f.run(), v);
+    }
 };
 
 // Monad
-IMPLEMENT_MONAD(_Identity);
-
 template<>
-struct Monad<_Identity> : Applicative<_Identity>
+struct Monad<_Identity> : Applicative<_Identity>, _Monad<_Identity>
 {
-    typedef Applicative<_Identity> super;
+    template<typename A>
+    using liftM_type = _Identity::template type<A>;
 
-    DECLARE_MONAD_CLASS(Identity, _Identity)
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr auto mbind(Identity<fdecay<Arg> > const& m, function_t<Identity<Ret>(Arg, Args...)> const& f){
+        return invoke_f0(f << m.run());
+    }
 };
 
 // Semigroup
-IMPLEMENT_SEMIGROUP_COND(Identity);
-
 template<>
-struct Semigroup<_Identity>
+struct Semigroup<_Identity> : _Semigroup<_Identity>
 {
     template<typename A>
-    static semigroup_type<A, Identity<A> > semigroup_op(Identity<A> const& x, Identity<A> const& y){
-        return x.run() % y.run();
-    }
+    static constexpr semigroup_type<A, Identity<A> >
+    sg_op(Identity<A> const& x, Identity<A> const& y);
 
     template<typename A>
-    static semigroup_type<A, Identity<A> > stimes(int n, Identity<A> const& m){
-        return Semigroup_t<A>::stimes(n, m.run());
-    }
+    static constexpr semigroup_type<A, Identity<A> >
+    stimes(int n, Identity<A> const& m);
 };
 
 // Moniod
-template<typename A> struct is_monoid<Identity<A> > : is_monoid<A> {};
-
 template<>
-struct Monoid<_Identity> : _Identity, Semigroup<_Identity>
+struct Monoid<_Identity> : Semigroup<_Identity>, _Monoid<_Identity>
 {
     template<typename A>
-    static monoid_type<A, Identity<A> > mempty(){
-        return Monoid_t<A>::mempty();
-    }
+    static constexpr monoid_type<A, Identity<A> > mempty();
 };
 
 // Foldable
-IMPLEMENT_FOLDABLE(_Identity);
-
 template<>
-struct Foldable<_Identity>
+struct Foldable<_Identity> : _Foldable<_Identity>
 {
-    DECLARE_FOLDABLE_CLASS(Identity)
+    // foldl :: (b -> a -> b) -> b -> t a -> b
+    template<typename Ret, typename A, typename B>
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret>
+    foldl(function_t<Ret(B, A)> const& f, Ret const& z, Identity<fdecay<A> > const& x);
+
+    // foldl1 :: (a -> a -> a) -> t a -> a
+    template<typename A, typename Arg1, typename Arg2>
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A>
+    foldl1(function_t<A(Arg1, Arg2)> const&, Identity<A> const& x);
+
+    // foldr :: (a -> b -> b) -> b -> t a -> b
+    template<typename Ret, typename A, typename B>
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret>
+    foldr(function_t<Ret(A, B)> const& f, Ret const& z, Identity<fdecay<A> > const& x);
+
+    // foldr1 :: (a -> a -> a) -> t a -> a
+    template<typename A, typename Arg1, typename Arg2>
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A>
+    foldr1(function_t<A(Arg1, Arg2)> const&, Identity<A> const& x);
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(_Identity);
-
 template<>
-struct Traversable<_Identity>
+struct Traversable<_Identity> : _Traversable<_Identity>
 {
-    DECLARE_TRAVERSABLE_CLASS(Identity)
-};
-
-template<>
-struct MonadFix<_Identity>
-{
-    // mfix :: (a -> m a) -> m a
-    // mfix f = Identity (fix (runIdentity . f))
-    template<typename Arg>
-    static Identity<fdecay<Arg> > mfix(function_t<Identity<fdecay<Arg> >(Arg)> const& f)
-    {
-        using A = fdecay<Arg>;
-        //return fix<A>(_(runIdentity<A>) & f);
-    }
+    // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
+    template<typename AP, typename Arg>
+    static constexpr applicative_type<AP, typeof_t<AP, Identity<value_type_t<AP> > > >
+    traverse(function_t<AP(Arg)> const& f, Identity<fdecay<Arg> > const& x);
 };
 
 // MonadZip
@@ -151,28 +142,13 @@ struct MonadZip<_Identity> : _MonadZip<MonadZip<_Identity> >
     // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
     // mzipWith = liftM2
     template<typename A, typename B, typename C, typename ArgA, typename ArgB>
-    static Identity<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, Identity<A> const& ma, Identity<B> const& mb)
-    {
-        static_assert(is_same_as<ArgA, A>::value, "Should be the same");
-        static_assert(is_same_as<ArgB, B>::value, "Should be the same");
-        return liftM2(f, ma, mb);
-    }
+    static constexpr Identity<C>
+    mzipWith(function_t<C(ArgA, ArgB)> const& f, Identity<A> const& ma, Identity<B> const& mb);
 
     // munzip (Identity (a, b)) = (Identity a, Identity b)
     template<typename A, typename B>
-    static pair_t<Identity<A>, Identity<B> > munzip(Identity<pair_t<A, B> > const& mab)
-    {
-        const auto [a, b] = mab.run();
-        return std::make_pair(Identity_(a), Identity_(b));
-    }
+    static constexpr pair_t<Identity<A>, Identity<B> >
+    munzip(Identity<pair_t<A, B> > const& mab);
 };
 
-template<typename T>
-struct is_identity : std::false_type {};
-
-template<typename A>
-struct is_identity<Identity<A> > : std::true_type {};
-
 _FUNCPROG_END
-
-#include "detail/Identity_impl.hpp"

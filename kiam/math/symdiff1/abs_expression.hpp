@@ -8,21 +8,21 @@ _SYMDIFF1_BEGIN
 template<class E>
 struct abs_expression : expression<abs_expression<E> >
 {
-    typedef typename mul_expression_type<
+    typedef mul_expression_t<
         sign_expression<E>,
         typename E::diff_type
-    >::type diff_type;
+    > diff_type;
 
-    constexpr abs_expression(const expression<E> &e) : e(e()) {}
+    constexpr abs_expression(expression<E> const& e) : e(e()) {}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     constexpr diff_type diff() const {
         return sign(e) * e.diff();
     }
 
     template<typename T>
-    constexpr T operator()(const T &x) const {
+    constexpr T operator()(T const& x) const {
         return std::abs(e(x));
     }
 
@@ -31,11 +31,11 @@ struct abs_expression : expression<abs_expression<E> >
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr abs_expression<E> abs(const expression<E>& e) {
+constexpr abs_expression<E> abs(expression<E> const& e) {
     return abs_expression<E>(e);
 }
 

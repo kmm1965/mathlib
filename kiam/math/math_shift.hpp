@@ -9,20 +9,20 @@ struct math_shift : math_operator<TAG, math_shift<TAG> >
 {
     math_shift(int s) : s(s){}
 
-    template<class EOP, typename CONTEXT>
+    template<class GEXP_P, typename CONTEXT>
     __DEVICE
-    get_value_type_t<EOP>
-    operator()(size_t i, const EOP &eobj_proxy, const context<TAG, CONTEXT> &context) const {
-        static_assert(std::is_same<TAG, typename EOP::tag_type>::value, "Tag types should be the same");
-        return eobj_proxy(i + s, context);
+    get_value_type_t<GEXP_P>
+    operator()(size_t i, const GEXP_P &gexp_proxy, context<TAG, CONTEXT> const& context) const {
+        static_assert(std::is_same<TAG, typename GEXP_P::tag_type>::value, "Tag types should be the same");
+        return gexp_proxy(i + s, context);
     }
 
-    template<class EOP>
+    template<class GEXP_P>
     __DEVICE
-    get_value_type_t<EOP>
-    operator()(size_t i, const EOP &eobj_proxy) const {
-        static_assert(std::is_same<TAG, typename EOP::tag_type>::value, "Tag types should be the same");
-        return eobj_proxy[i + s];
+    get_value_type_t<GEXP_P>
+    operator()(size_t i, const GEXP_P &gexp_proxy) const {
+        static_assert(std::is_same<TAG, typename GEXP_P::tag_type>::value, "Tag types should be the same");
+        return gexp_proxy[i + s];
     }
 
     IMPLEMENT_MATH_EVAL_OPERATOR(math_shift)
@@ -31,20 +31,14 @@ private:
     int s;
 };
 
-template<class EO>
-operator_evaluator<math_shift<typename EO::tag_type>, EO> operator>>(
-    const EOBJ(EO) &eobj,
-    int s
-){
-    return math_shift<typename EO::tag_type>(s)(eobj);
+template<class GEXP>
+operator_evaluator<math_shift<typename GEXP::tag_type>, GEXP> operator>>(GRID_EXPR(GEXP) const& gexp, int s){
+    return math_shift<typename GEXP::tag_type>(s)(gexp);
 }
 
-template<class EO>
-operator_evaluator<math_shift<typename EO::tag_type>, EO> operator<<(
-    const EOBJ(EO) &eobj,
-    int s
-){
-    return math_shift<typename EO::tag_type>(-s)(eobj);
+template<class GEXP>
+operator_evaluator<math_shift<typename GEXP::tag_type>, GEXP> operator<<(GRID_EXPR(GEXP) const& gexp, int s){
+    return math_shift<typename GEXP::tag_type>(-s)(gexp);
 }
 
 _KIAM_MATH_END

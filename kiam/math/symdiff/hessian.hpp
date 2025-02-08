@@ -9,7 +9,7 @@ _SYMDIFF_BEGIN
 template<class E, size_t I, size_t N>
 struct hessian1_closure
 {
-    constexpr hessian1_closure(const expression<E> &expr, square_matrix<sd_any, N> &result) : expr(expr()), result(result){}
+    constexpr hessian1_closure(expression<E> const& expr, square_matrix<sd_any, N> &result) : expr(expr()), result(result){}
 
     template<unsigned J>
     constexpr void apply(){
@@ -17,14 +17,14 @@ struct hessian1_closure
     }
 
 private:
-    const E &expr;
+    E const& expr;
     square_matrix<sd_any, N> &result;
 };
 
 template<class E, size_t N>
 struct hessian0_closure
 {
-    constexpr hessian0_closure(const expression<E> &expr, square_matrix<sd_any, N> &result) : expr(expr()), result(result){}
+    constexpr hessian0_closure(expression<E> const& expr, square_matrix<sd_any, N> &result) : expr(expr()), result(result){}
 
     template<unsigned I>
     constexpr void apply()
@@ -35,12 +35,12 @@ struct hessian0_closure
     }
 
 private:
-    const E &expr;
+    E const& expr;
     square_matrix<sd_any, N> &result;
 };
 
 template<size_t N, class E>
-constexpr square_matrix<sd_any, N> hessian(const expression<E> &expr)
+constexpr square_matrix<sd_any, N> hessian(expression<E> const& expr)
 {
     square_matrix<sd_any, N> result;
     hessian0_closure<E, N> closure(expr, result);
@@ -51,8 +51,8 @@ constexpr square_matrix<sd_any, N> hessian(const expression<E> &expr)
 template<class E, size_t I, typename T, size_t N>
 struct eval_hessian1_closure
 {
-    constexpr eval_hessian1_closure(const square_matrix<sd_any, N> &hessianx,
-        const val_array<T, N> &x, square_matrix<T, N> &result) :
+    constexpr eval_hessian1_closure(square_matrix<sd_any, N> const& hessianx,
+        val_array<T, N> const& x, square_matrix<T, N> &result) :
         hessianx(hessianx), x(x), result(result){}
 
     template<unsigned J>
@@ -64,16 +64,16 @@ struct eval_hessian1_closure
     }
 
 private:
-    const square_matrix<sd_any, N> &hessianx;
-    const val_array<T, N> &x;
+    square_matrix<sd_any, N> const& hessianx;
+    val_array<T, N> const& x;
     square_matrix<T, N> &result;
 };
 
 template<class E, typename T, size_t N>
 struct eval_hessian0_closure
 {
-    constexpr eval_hessian0_closure(const square_matrix<sd_any, N> &hessianx,
-        const val_array<T, N> &x, square_matrix<T, N> &result) :
+    constexpr eval_hessian0_closure(square_matrix<sd_any, N> const& hessianx,
+        val_array<T, N> const& x, square_matrix<T, N> &result) :
         hessianx(hessianx), x(x), result(result){}
 
     template<unsigned I>
@@ -84,13 +84,13 @@ struct eval_hessian0_closure
     }
 
 private:
-    const square_matrix<sd_any, N> &hessianx;
-    const val_array<T, N> &x;
+    square_matrix<sd_any, N> const& hessianx;
+    val_array<T, N> const& x;
     square_matrix<T, N> &result;
 };
 
 template<class E, typename T, size_t N>
-constexpr square_matrix<T, N> eval_hessian(const square_matrix<sd_any, N> &hessianx, const val_array<T, N> &x)
+constexpr square_matrix<T, N> eval_hessian(square_matrix<sd_any, N> const& hessianx, val_array<T, N> const& x)
 {
     square_matrix<T, N> result;
     eval_hessian0_closure<E, T, N> closure(hessianx, x, result);

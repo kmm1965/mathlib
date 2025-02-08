@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include "math_def.h"
 
 #ifdef __CUDACC__
 
@@ -14,16 +15,11 @@
 #if THRUST_VERSION >= 100900
 #include <thrust/system/cuda/detail/util.h>
 #define CUDA_THROW_ON_ERROR(error, msg) thrust::cuda_cub::throw_on_error(error, msg)
-#define CHECK_CUDA_ERROR(msg) CUDA_THROW_ON_ERROR(cudaDeviceSynchronize(), msg)
 #else
-#if THRUST_VERSION >= 100800
-#include <thrust/system/cuda/detail/synchronize.h>
-#else
-#include <thrust/detail/backend/cuda/synchronize.h>
-#endif
+#include <thrust/system/cuda/detail/throw_on_error.h>
 #define CUDA_THROW_ON_ERROR(error, msg) thrust::system::cuda::detail::throw_on_error(error, msg)
-#define CHECK_CUDA_ERROR(msg) thrust::system::cuda::detail::synchronize(msg)
 #endif
+#define CHECK_CUDA_ERROR(msg) CUDA_THROW_ON_ERROR(cudaGetLastError(), msg)
 
 #include <math_constants.h>
 
@@ -44,6 +40,17 @@
 #define MATH_FIND_IF(first, last, pred) thrust::find_if(first, last, pred)
 #define MATH_FOR_EACH(first, last, func) thrust::for_each(first, last, func)
 #define MATH_DISTANCE(first, last) thrust::distance(first, last)
+
+_KIAM_MATH_BEGIN
+
+struct CudaSynchronize {
+	~CudaSynchronize(){
+		CHECK_CUDA_ERROR("synchronize");
+		CUDA_THROW_ON_ERROR(cudaDeviceSynchronize(), "synchronize");
+	}
+};
+
+_KIAM_MATH_END
 
 #elif defined(__OPENCL__)
 
@@ -75,9 +82,21 @@
 #define MATH_FOR_EACH(first, last, func) boost::compute::for_each(first, last, func)
 #define MATH_DISTANCE(first, last) boost::compute::distance(first, last)
 
+_KIAM_MATH_BEGIN
+
+struct OpenCLSynchronize {
+    ~OpenCLSynchronize(){
+        boost::compute::system::default_queue().finish();
+    }
+};
+
+_KIAM_MATH_END
+
 #else // __CUDACC__
 
+#ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 
 #include <functional>

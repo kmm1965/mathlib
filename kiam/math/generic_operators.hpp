@@ -60,7 +60,7 @@ struct math_plus_value
 {
     template<typename T>
     struct apply {
-        typedef plus<T> type;
+        typedef math_plus<T> type;
     };
 };
 
@@ -68,7 +68,7 @@ struct math_minus_value
 {
     template<typename T>
     struct apply {
-        typedef minus<T> type;
+        typedef math_minus<T> type;
     };
 };
 
@@ -76,7 +76,7 @@ struct math_multiplies_value
 {
     template<typename T>
     struct apply {
-        typedef multiplies<T> type;
+        typedef math_multiplies<T> type;
     };
 };
 
@@ -84,7 +84,7 @@ struct math_divides_value
 {
     template<typename T>
     struct apply {
-        typedef divides<T> type;
+        typedef math_divides<T> type;
     };
 };
 

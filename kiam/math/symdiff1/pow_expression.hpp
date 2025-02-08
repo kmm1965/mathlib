@@ -9,23 +9,23 @@ template<class E, int N>
 struct pow_expression;
 
 template<int N, class E>
-constexpr typename std::enable_if<N == 0, int_constant<1> >::type
-pow(const expression<E>& e){
+constexpr std::enable_if_t<N == 0, int_constant<1> >
+pow(expression<E> const& e){
     return int_constant<0>();
 }
 
 template<int N, class E>
-constexpr typename std::enable_if<N == 1, const E& >::type
-pow(const expression<E>& e){
+constexpr std::enable_if_t<N == 1, E const&>
+pow(expression<E> const& e){
     return e();
 }
 
 template<int N, class E>
-constexpr typename std::enable_if<N != 0 && N != 1, pow_expression<E, N> >::type
-pow(const expression<E>& e);
+constexpr std::enable_if_t<N != 0 && N != 1, pow_expression<E, N> >
+pow(expression<E> const& e);
 
 template<int N, class E, int M>
-constexpr typename std::enable_if<N != 0 && N != 1, pow_expression<E, N * M> >::type
+constexpr std::enable_if_t<N != 0 && N != 1, pow_expression<E, N * M> >
 pow(const pow_expression<E, M>& e);
 
 template<typename E>
@@ -53,17 +53,17 @@ struct pow_expression_index<pow_expression<E, N> > : std::integral_constant<int,
 template<class E, int N>
 struct pow_expression_type
 {
-    typedef typename std::conditional<
+    typedef std::conditional_t<
         N == 0, int_constant<1>,
-        typename std::conditional<
+        std::conditional_t<
             N == 1, E,
-            typename std::conditional<
+            std::conditional_t<
                 is_pow_expression<E>::value,
                 pow_expression<typename pow_expression_expr_type<E>::type, N * pow_expression_index<E>::value>,
                 pow_expression<E, N>
-            >::type
-        >::type
-    >::type type;
+            >
+        >
+    > type;
 };
 
 template<class E, int N>
@@ -74,24 +74,24 @@ struct pow_expression : expression<pow_expression<E, N> >
 {
     typedef pow_expression type;
 
-    typedef typename mul_expression_type<
-        typename mul_expression_type<
+    typedef mul_expression_t<
+        mul_expression_t<
             int_constant<N>,
-            typename pow_expression_type<E, N - 1>::type
-        >::type,
+            pow_expression_t<E, N - 1>
+        >,
         typename E::diff_type
-    >::type diff_type;
+    > diff_type;
 
-    constexpr pow_expression(const expression<E>& e) : e(e()){}
+    constexpr pow_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     constexpr diff_type diff() const {
         return int_constant<N>() * kiam::math::symdiff1::pow<N - 1>(e) * e.diff();
     }
 
     template<typename T>
-    constexpr T operator()(const T &x) const {
+    constexpr T operator()(T const& x) const {
         return _KIAM_MATH::math_pow<N>(e(x));
     }
 
@@ -103,17 +103,17 @@ struct pow_expression : expression<pow_expression<E, N> >
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<int N, class E>
-constexpr typename std::enable_if<N != 0 && N != 1, pow_expression<E, N> >::type
-pow(const expression<E>& e){
+constexpr std::enable_if_t<N != 0 && N != 1, pow_expression<E, N> >
+pow(expression<E> const& e){
     return pow_expression<E, N>(e);
 }
 
 template<int N, class E, int M>
-constexpr typename std::enable_if<N != 0 && N != 1, pow_expression<E, N * M> >::type
+constexpr std::enable_if_t<N != 0 && N != 1, pow_expression<E, N * M> >
 pow(const pow_expression<E, M>& e) {
     return pow_expression<E, N * M>(e.expr());
 }

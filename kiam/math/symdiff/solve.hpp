@@ -44,7 +44,7 @@ val_array<T, N> solve(square_matrix<T, N> &&A, val_array<T, N> x)
         }
     }
     for(int i = N - 1; i >= 0; --i){
-        const T &Aii = A(i, i);
+        T const& Aii = A(i, i);
         T &xi = x[i];
         assert(Aii == 0 || Aii == 1);
         xi -= std::inner_product(&Aii + 1, &Aii + (N - i), &xi + 1, T());

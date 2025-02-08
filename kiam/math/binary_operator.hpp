@@ -41,38 +41,55 @@ struct binary_operator : math_operator<binary_operator<OP1, BO, OP2> >
         static_assert(std::is_same<type, typename OP2::template get_value_type2<T1, T2>::type>::value, "Value types should be the same");
     };
 
-    binary_operator(const MATH_OP(OP1) &op1, const MATH_OP(OP2) &op2) : op1_proxy(op1.get_proxy()), op2_proxy(op2.get_proxy()){}
-
-    template<class EOP>
-    __DEVICE
-    typename get_value_type<get_value_type_t<EOP>>::type
-    CONSTEXPR operator()(size_t i, const EOP &eobj_proxy) const
+    template<typename T1, typename T2, typename T3>
+    struct get_value_type3
     {
-        return typename BO::template apply<typename get_value_type<get_value_type_t<EOP>>::type>::type()(
-            op1_proxy(i, eobj_proxy), op2_proxy(i, eobj_proxy));
+        typedef typename OP1::template get_value_type3<T1, T2, T3>::type type;
+        static_assert(std::is_same<type, typename OP2::template get_value_type3<T1, T2, T3>::type>::value, "Value types should be the same");
+    };
+
+    binary_operator(MATH_OP(OP1) const& op1, MATH_OP(OP2) const& op2) : op1_proxy(op1.get_proxy()), op2_proxy(op2.get_proxy()){}
+
+    template<class GEXP_P>
+    __DEVICE
+    typename get_value_type<get_value_type_t<GEXP_P>>::type
+    operator()(size_t i, GEXP_P const& gexp_proxy) const
+    {
+        return typename BO::template apply<typename get_value_type<get_value_type_t<GEXP_P>>::type>::type()(
+            op1_proxy(i, gexp_proxy), op2_proxy(i, gexp_proxy));
     }
 
-    template<class EOP1, class EOP2>
+    template<class GEXP1_P, class GEXP2_P>
     __DEVICE
-    typename get_value_type<get_value_type_t<EOP1>>::type
-    CONSTEXPR operator()(size_t i, const EOP1 &eobj1_proxy, const EOP2 &eobj2_proxy) const
+    typename get_value_type<get_value_type_t<GEXP1_P>>::type
+    operator()(size_t i, GEXP1_P const& gexp1_proxy, GEXP2_P const& gexp2_proxy) const
     {
-        return typename BO::template apply<typename get_value_type2<get_value_type_t<EOP1>, get_value_type_t<EOP2>>::type>::type()(
-            op1_proxy(i, eobj1_proxy, eobj2_proxy), op2_proxy(i, eobj1_proxy, eobj2_proxy));
+        return typename BO::template apply<typename get_value_type2<get_value_type_t<GEXP1_P>, get_value_type_t<GEXP2_P>>::type>::type()(
+            op1_proxy(i, gexp1_proxy, gexp2_proxy), op2_proxy(i, gexp1_proxy, gexp2_proxy));
+    }
+
+    template<class GEXP1_P, class GEXP2_P, class GEXP3_P>
+    __DEVICE
+    typename get_value_type<get_value_type_t<GEXP1_P>>::type
+    operator()(size_t i, GEXP1_P const& gexp1_proxy, GEXP2_P const& gexp2_proxy, GEXP3_P const& gexp3_proxy) const
+    {
+        return typename BO::template apply<typename get_value_type3<get_value_type_t<GEXP1_P>, get_value_type_t<GEXP2_P>, get_value_type_t<GEXP3_P>>::type>::type()(
+            op1_proxy(i, gexp1_proxy, gexp2_proxy, gexp3_proxy), op2_proxy(i, gexp1_proxy, gexp2_proxy, gexp3_proxy));
     }
 
     IMPLEMENT_MATH_EVAL_OPERATOR(binary_operator)
-    IMPLEMENT_MATH_EVAL_OPERATOR2(binary_operator)
+    IMPLEMENT_MATH_EVAL_OPERATOR_N(2, binary_operator)
+    IMPLEMENT_MATH_EVAL_OPERATOR_N(3, binary_operator)
 
 private:
-    const typename OP1::proxy_type op1_proxy;
-    const typename OP2::proxy_type op2_proxy;
+    typename OP1::proxy_type const op1_proxy;
+    typename OP2::proxy_type const op2_proxy;
 };
 
 #define BINARY_GRID_OP(oper, bin_op) \
     template<class OP1, class OP2> \
     binary_operator<OP1, bin_op, OP2> \
-    operator oper(const MATH_OP(OP1)& op1, const MATH_OP(OP2)& op2){ \
+    operator oper(MATH_OP(OP1) const& op1, MATH_OP(OP2) const& op2){ \
         return binary_operator<OP1, bin_op, OP2>(op1, op2); \
     }
 

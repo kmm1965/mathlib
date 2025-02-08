@@ -10,15 +10,15 @@ struct log_expression : expression<log_expression<E> >
     template<unsigned M>
     struct diff_type
     {
-        typedef typename div_expression_type<
+        typedef div_expression_t<
             typename E::template diff_type<M>::type,
             E
-        >::type type;
+        > type;
     };
 
-    constexpr log_expression(const expression<E> &e) : e(e()){}
+    constexpr log_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     template<unsigned M>
     constexpr typename diff_type<M>::type diff() const {
@@ -26,16 +26,16 @@ struct log_expression : expression<log_expression<E> >
     }
 
     template<typename T, size_t _Size>
-    constexpr T operator()(const std::array<T, _Size> &vars) const {
+    constexpr T operator()(std::array<T, _Size> const& vars) const {
         return std::log(e(vars));
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr log_expression<E> log(const expression<E>& e){
+constexpr log_expression<E> log(expression<E> const& e){
     return log_expression<E>(e);
 }
 

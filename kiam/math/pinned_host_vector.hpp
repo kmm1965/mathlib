@@ -28,12 +28,12 @@ struct pinned_host_vector :
 
     pinned_host_vector(){}
     pinned_host_vector(size_t size) : super(size){}
-    pinned_host_vector(size_t size, const value_type &initValue) : super(size, initValue){}
-    pinned_host_vector(const pinned_host_vector &other) : super(other){}
-    pinned_host_vector(const math_vector<value_type> &other) : super(other){}
+    pinned_host_vector(size_t size, value_type const& initValue) : super(size, initValue){}
+    pinned_host_vector(pinned_host_vector const& other) : super(other){}
+    pinned_host_vector(math_vector<value_type> const& other) : super(other){}
 
-    void operator=(const pinned_host_vector &other){ super::operator=(other); }
-    void operator=(const math_vector<value_type> &other){ super::operator=(other); }
+    void operator=(pinned_host_vector const& other){ super::operator=(other); }
+    void operator=(math_vector<value_type> const& other){ super::operator=(other); }
 
 #ifdef __CUDACC__
     pointer data_pointer(){

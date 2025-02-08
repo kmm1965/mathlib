@@ -44,9 +44,9 @@ struct dim3_index : index_base<dim3_index<IX, IY, IZ> >
     }
 
 private:
-    const typename IX::proxy_type m_x_index;
-    const typename IY::proxy_type m_y_index;
-    const typename IZ::proxy_type m_z_index;
+    typename IX::proxy_type const m_x_index;
+    typename IY::proxy_type const m_y_index;
+    typename IZ::proxy_type const m_z_index;
 };
 
 _KIAM_MATH_END

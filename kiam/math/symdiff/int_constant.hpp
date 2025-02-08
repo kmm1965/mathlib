@@ -21,7 +21,7 @@ struct int_constant : expression<int_constant<N> >
     }
 
     template<typename T, size_t _Size>
-    constexpr int operator()(const std::array<T, _Size> &vars) const {
+    constexpr int operator()(std::array<T, _Size> const& vars) const {
         return value;
     }
 };
@@ -33,9 +33,15 @@ template<int N>
 struct is_int_constant<int_constant<N> > : std::true_type{};
 
 template<class E>
+constexpr bool is_int_constant_v = is_int_constant<E>::value;
+
+template<class E>
 struct int_constant_value : std::integral_constant<int, 0>{};
 
 template<int N>
 struct int_constant_value<int_constant<N> > : std::integral_constant<int, N>{};
+
+template<class E>
+constexpr int int_constant_val = int_constant_value<E>::value;
 
 _SYMDIFF_END

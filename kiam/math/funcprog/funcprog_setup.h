@@ -9,6 +9,18 @@
 #endif
 #endif
 
+#ifndef FUNCPROG_USE_CPP20
+#if FUNCPROG_USE_CPP17 && (__cplusplus >= 202000 || _HAS_CXX20)
+#define FUNCPROG_USE_CPP20 1
+#endif
+#endif
+
+#ifndef FUNCPROG_USE_CPP23
+#if FUNCPROG_USE_CPP20 && (__cplusplus > 202002 || _HAS_CXX23)
+#define FUNCPROG_USE_CPP23 1
+#endif
+#endif
+
 #include <functional>
 
 #if FUNCPROG_USE_CPP17
@@ -67,5 +79,13 @@ struct variant_t : variant_base<Types...>
 
 template<typename T>
 using list_t = std::list<T>;
+
+template<typename A>
+struct EmptyData {};
+
+using None = EmptyData<void>;
+
+template<typename F>
+using base_class_t = typename F::base_class;
 
 _FUNCPROG_END

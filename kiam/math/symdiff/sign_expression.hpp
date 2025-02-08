@@ -13,9 +13,9 @@ struct sign_expression : expression<sign_expression<E> >
         typedef int_constant<0> type;
     };
 
-    constexpr sign_expression(const expression<E> &e) : e(e()) {}
+    constexpr sign_expression(expression<E> const& e) : e(e()) {}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     template<unsigned M>
     constexpr typename diff_type<M>::type diff() const {
@@ -23,18 +23,18 @@ struct sign_expression : expression<sign_expression<E> >
     }
 
     template<typename T>
-    constexpr int operator()(const T &x) const
+    constexpr int operator()(T const& x) const
     {
         T value = e(x);
         return T < 0 ? -1 : T > 0 ? 1 : 0;
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr sign_expression<E> sign(const expression<E>& e) {
+constexpr sign_expression<E> sign(expression<E> const& e){
     return sign_expression<E>(e);
 }
 

@@ -41,7 +41,7 @@ writer :: (Monad m) => (a, w) -> WriterT w m a
 writer = WriterT . return
 */
 template<class _M, typename W, typename A>
-WriterT<W, _M, A> writer(pair_t<A, W> const& value) {
+WriterT<W, _M, A> writer(pair_t<A, W> const& value){
     return Monad<_M>::mreturn(value);
 }
 
@@ -49,13 +49,13 @@ template<typename W>
 struct __WriterT
 {
     template<class _M>
-    using mt_type = _WriterT<W, _M>;
+    using base_type = _WriterT<W, _M>;
 };
 
 template<typename W, class _M>
-struct _WriterT
+struct _WriterT : __WriterT<W>
 {
-    static_assert(_is_monad<_M>::value, "Should be a monad");
+    static_assert(_is_monad_v<_M>, "Should be a monad");
 
     using base_class = _WriterT;
 
@@ -65,7 +65,7 @@ struct _WriterT
     // -- | @'tell' w@ is an action that produces the output @w@.
     // tell :: (Monad m) => w -> WriterT w m ()
     // tell w = writer ((), w)
-    static WriterT<W, _M, None> tell(W const& w) {
+    static constexpr WriterT<W, _M, None> tell(W const& w){
         return writer<_M>(pair_t<None, W>(None(), w));
     }
 
@@ -79,7 +79,7 @@ struct _WriterT
     //   ~((a, f), w) <- runWriterT m
     //   return (a, f w)
     template<typename A>
-    static WriterT<W, _M, A> pass(WriterT<W, _M, pair_t<A, function_t<W(W const&)> > > const& m) {
+    static constexpr WriterT<W, _M, A> pass(WriterT<W, _M, pair_t<A, function_t<W(W const&)> > > const& m){
         return _do(pf, m.run(), return Monad<_M>::mreturn(pair_t<A, W>(fst(fst(pf)), snd(fst(pf))(snd(pf)))););
     }
 };
@@ -101,7 +101,7 @@ struct WriterT : _WriterT<W, _M>
     using value_type = A;
     using value_t = typename _M::template type<pair_t<A, W> >;
 
-    WriterT(value_t const& value) : value(value) {}
+    WriterT(value_t const& value) : value(value){}
 
     value_t const& run() const {
         return value;
@@ -130,7 +130,7 @@ struct WriterT : _WriterT<W, _M>
     //   return ((a, w), w)
     WriterT<W, _M, pair_t<A, W> > listen() const {
         return _do(pa, run(),
-            return Monad<_M>::mreturn(pair_t<pair_t<A, W>, W>(pair_t<A, W>(fst(pa), snd(pa)), snd(pa))););
+            return Monad<_M>::mreturn(make_pair_t(make_pair_t(fst(pa), snd(pa)), snd(pa))););
     }
 
     // -- | @'listens' f m@ is an action that executes the action @m@ and adds
@@ -144,10 +144,10 @@ struct WriterT : _WriterT<W, _M>
     //   ~(a, w) <- runWriterT m
     //   return ((a, f w), w)
     template<typename B, typename WP>
-    typename std::enable_if<is_same_as<W, WP>::value, WriterT<W, _M, pair_t<A, B> > >::type
+    std::enable_if_t<is_same_as_v<W, WP>, WriterT<W, _M, pair_t<A, B> > >
     listens(function_t<B(WP)> const& f) const {
         return _do(pa, run(),
-            return Monad<_M>::mreturn(pair_t<pair_t<A, B>, W>(pair_t<A, B>(fst(pa), f(snd(pa))), snd(pa))););
+            return Monad<_M>::mreturn(make_pair_t(make_pair_t(fst(pa), f(snd(pa))), snd(pa))););
     }
 
     // -- | @'censor' f m@ is an action that executes the action @m@ and
@@ -163,7 +163,7 @@ struct WriterT : _WriterT<W, _M>
     //   return (a, f w)
     WriterT<W, _M, A> censor(function_t<W(W const&)> const& f) const {
         return _do(pa, run(),
-            return Monad<_M>::mreturn(pair_t<A, W>(fst(pa), f(snd(pa)))););
+            return Monad<_M>::mreturn(make_pair_t(fst(pa), f(snd(pa)))););
     }
 
 private:
@@ -171,18 +171,18 @@ private:
 };
 
 template<typename W, class _M, typename A>
-WriterT<W, _M, A> WriterT_(typename _M::template type<pair_t<A, W> > const& value) {
+WriterT<W, _M, A> WriterT_(typename _M::template type<pair_t<A, W> > const& value){
     return value;
 }
 
 template<typename W, class _M, typename A>
-typename std::enable_if<_is_monad<_M>::value, typename _M::template type<pair_t<A, W> > >::type
-runWriterT(WriterT<W, _M, A> const& m) {
+std::enable_if_t<_is_monad_v<_M>, typename _M::template type<pair_t<A, W> > >
+runWriterT(WriterT<W, _M, A> const& m){
     return m.run();
 }
 
 template<typename W, class _M, typename A>
-typename _M::template type<W> execWriterT(WriterT<W, _M, A> const& m) {
+typename _M::template type<W> execWriterT(WriterT<W, _M, A> const& m){
     return m.exec();
 }
 
@@ -196,14 +196,14 @@ mapWriterT f m = WriterT $ f (runWriterT m)
 */
 template<typename MA, typename NB>
 WriterT<snd_type_t<value_type_t<NB> >, base_class_t<NB>, fst_type_t<value_type_t<NB> > >
-mapWriterT(function_t<NB(MA const&)> const& f, WriterT<snd_type_t<value_type_t<MA> >, base_class_t<MA>, fst_type_t<value_type_t<MA> > > const& m) {
+mapWriterT(function_t<NB(MA const&)> const& f, WriterT<snd_type_t<value_type_t<MA> >, base_class_t<MA>, fst_type_t<value_type_t<MA> > > const& m){
     return f(m.run());
 }
 
 template<typename W, typename MA, typename NB>
 function_t<WriterT<snd_type_t<value_type_t<NB> >, base_class_t<NB>, value_type_t<NB> >(WriterT<snd_type_t<value_type_t<MA> >, base_class_t<MA>, value_type_t<MA> > const&)>
-_mapWriterT(function_t<NB(MA const&)> const& f) {
-    return [f](WriterT<snd_type_t<value_type_t<MA> >, base_class_t<MA>, value_type_t<MA> > const& m) {
+_mapWriterT(function_t<NB(MA const&)> const& f){
+    return [f](WriterT<snd_type_t<value_type_t<MA> >, base_class_t<MA>, value_type_t<MA> > const& m){
         return mapWriterT(f, m);
     };
 }
@@ -215,12 +215,12 @@ runWriter :: Writer w a -> (a, w)
 runWriter = runIdentity . runWriterT
 */
 template<typename W, typename A>
-pair_t<A, W> runWriter(Writer<W, A> const& m) {
+pair_t<A, W> runWriter(Writer<W, A> const& m){
     return m.run().run();
 }
 
 template<typename W, typename A>
-W execWriter(Writer<W, A> const& m) {
+W execWriter(Writer<W, A> const& m){
     return snd(runWriter(m));
 }
 
@@ -234,16 +234,19 @@ struct is_writer<WriterT<W, _M, A> > : std::true_type {};
 template<typename W, class _M>
 struct _is_functor<_WriterT<W, _M> > : _is_functor<_M> {};
 
+template<typename W, class _M, typename A>
+struct is_functor<WriterT<W, _M, A> > : _is_functor<_M> {};
+
 template<typename W, class _M>
-struct Functor<_WriterT<W, _M> >
+struct Functor<_WriterT<W, _M> > : _Functor<_WriterT<W, _M> >
 {
     // <$> fmap :: Functor f => (a -> b) -> f a -> f b
     // fmap f = mapWriterT $ fmap $ \ ~(a, w) -> (f a, w)
     template<typename Ret, typename Arg, typename... Args>
-    static WriterT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
+    static constexpr WriterT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
     fmap(function_t<Ret(Arg, Args...)> const& f, WriterT<W, _M, fdecay<Arg> > const& v){
         using A = fdecay<Arg>;
-        return mapWriterT(_fmap<typename _M::template type<pair_t<A, W> > >(_([f](pair_t<A, W> const& p) {
+        return mapWriterT(_fmap<typename _M::template type<pair_t<A, W> > >(_([f](pair_t<A, W> const& p){
             return pair_t<remove_f0_t<function_t<Ret(Args...)> >, W>(invoke_f0(f << fst(p)), snd(p));
         })), v);
     }
@@ -251,38 +254,46 @@ struct Functor<_WriterT<W, _M> >
 
 // Applicative
 template<typename W, class _M>
-struct _is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_applicative<_M>::value>{};
+struct _is_applicative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> && _is_applicative_v<_M> >{};
+
+template<typename W, class _M, typename A>
+struct is_applicative<WriterT<W, _M, A> > : std::integral_constant<bool, is_monoid_v<W>&& _is_applicative_v<_M> > {};
 
 template<typename W, class _M>
-struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >
+struct Applicative<_WriterT<W, _M> > : Functor<_WriterT<W, _M> >, _Applicative<_WriterT<W, _M> >
 {
-    static_assert(is_monoid<W>::value, "Should be a Monoid");
+    static_assert(is_monoid_v<W>, "Should be a Monoid");
 
     using super = Functor<_WriterT<W, _M>>;
 
     // pure a  = WriterT $ pure (a, mempty)
     template<typename A>
-    static WriterT<W, _M, A> pure(A const& a) {
-        return Applicative<_M>::pure(pair_t<A, W>(a, Monoid_t<W>::template mempty<value_type_t<W> >()));
+    static constexpr WriterT<W, _M, A> pure(A const& a){
+        return Applicative<_M>::pure(make_pair_t(a, W::mempty()));
     }
 
     // f <*> v = WriterT $ liftA2 k (runWriterT f) (runWriterT v)
     //   where k ~(a, w) ~(b, w') = (a b, w `mappend` w')
     template<typename Ret, typename Arg, typename... Args>
-    static WriterT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
-    apply(WriterT<W, _M, function_t<Ret(Arg, Args...)> > const& f, WriterT<W, _M, fdecay<Arg> > const& v) {
-        return liftA2(_([](pair_t<function_t<Ret(Arg, Args...)>, W> const& p, pair_t<fdecay<Arg>, W> const& q) {
-            return pair_t<Ret, W>(fst(p)(fst(q)), Monoid_t<W>::mappend(snd(p), snd(q)));
+    static constexpr WriterT<W, _M, remove_f0_t<function_t<Ret(Args...)> > >
+    apply(WriterT<W, _M, function_t<Ret(Arg, Args...)> > const& f, WriterT<W, _M, fdecay<Arg> > const& v){
+        return liftA2(_([](pair_t<function_t<Ret(Arg, Args...)>, W> const& p, pair_t<fdecay<Arg>, W> const& q){
+            auto const& [a, w] = p;
+            auto const& [b, w_] = q;
+            return make_pair_t(a(b), Monoid_t<W>::mappend(w, w_));
         }), f.run(), v.run());
     }
 };
 
 // Monad
 template<typename W, class _M>
-struct _is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_monad<_M>::value> {};
+struct _is_monad<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> && _is_monad_v<_M> > {};
+
+template<typename W, class _M, typename A>
+struct is_monad<WriterT<W, _M, A> > : std::integral_constant<bool, is_monoid_v<W>&& _is_monad_v<_M> > {};
 
 template<typename W, class _M>
-struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >
+struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >, _Monad<_WriterT<W, _M> >
 {
     using super = Applicative<_WriterT<W, _M> >;
 
@@ -291,8 +302,8 @@ struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >
 
     // return a = writer (a, mempty)
     template<typename A>
-    static WriterT<W, _M, A> mreturn(A const& x) {
-        return writer<_M>(pair_t<A, W>(x, Monoid_t<W>::template mempty<value_type_t<W> >()));
+    static constexpr WriterT<W, _M, A> mreturn(A const& x){
+        return writer<_M>(make_pair_t(x, W::mempty()));
     }
 
     // m >>= k  = WriterT $ do
@@ -300,11 +311,11 @@ struct Monad<_WriterT<W, _M> > : Applicative<_WriterT<W, _M> >
     //   ~(b, w') <- runWriterT (k a)
     //   return (b, w `mappend` w')
     template<typename Ret, typename Arg, typename... Args>
-    static remove_f0_t<function_t<WriterT<W, _M, Ret>(Args...)> >
-    mbind(WriterT<W, _M, fdecay<Arg> > const& m, function_t<WriterT<W, _M, Ret>(Arg, Args...)> const& f){
-        return invoke_f0(_([m, f](Args... args) {
-            return _do2(pa, m.run(), pb, f(fst(pa), args...).run(),
-                return Monad<_M>::mreturn(pair_t<Ret, W>(fst(pb), Monoid_t<W>::mappend(snd(pa), snd(pb)))););
+    static constexpr remove_f0_t<function_t<WriterT<W, _M, Ret>(Args...)> >
+    mbind(WriterT<W, _M, fdecay<Arg> > const& m, function_t<WriterT<W, _M, Ret>(Arg, Args...)> const& k){
+        return invoke_f0(_([m, k](Args... args){
+            return _do2(pa, m.run(), pb, k(fst(pa), args...).run(),
+                return Monad<_M>::mreturn(make_pair_t(fst(pb), Monoid_t<W>::mappend(snd(pa), snd(pb)))););
         }));
     }
 };
@@ -316,34 +327,22 @@ instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
     m `mplus` n = WriterT $ runWriterT m `mplus` runWriterT n
 */
 template<typename W, class _M>
-struct _is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_monad_plus<_M>::value> {};
+struct _is_monad_plus<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> && _is_monad_plus<_M>::value> {};
 
 template<typename W, class _M>
-struct MonadPlus<_WriterT<W, _M> > : Monad<_WriterT<W, _M> >
+struct MonadPlus<_WriterT<W, _M> > : Monad<_WriterT<W, _M> >, _MonadPlus<_WriterT<W, _M> >
 {
     using super = Monad<_WriterT<W, _M> >;
 
     // mzero = WriterT mzero
     template<typename A>
-    static WriterT<W, _M, A> mzero() {
+    static constexpr WriterT<W, _M, A> mzero(){
         return MonadPlus<_M>::template mzero<pair_t<A, W> >();
     }
 
-    template<typename T>
-    struct mplus_result_type;
-
-    template<typename T>
-    using mplus_result_type_t = typename mplus_result_type<T>::type;
-
-    template<typename A>
-    struct mplus_result_type<WriterT<W, _M, A> >
-    {
-        using type = WriterT<W, _M, A>;
-    };
-
     // m `mplus` n = WriterT $ runWriterT m `mplus` runWriterT n
     template<typename A>
-    static WriterT<W, _M, A> mplus(WriterT<W, _M, A> const& m, WriterT<W, _M, A> const& n) {
+    static constexpr WriterT<W, _M, A> mplus(WriterT<W, _M, A> const& m, WriterT<W, _M, A> const& n){
         return MonadPlus<_M>::mplus(m.run(), n.run());
     }
 };
@@ -357,32 +356,20 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     {-# INLINE (<|>) #-}
 */
 template<typename W, class _M>
-struct _is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid<W>::value && _is_alternative<_M>::value> {};
+struct _is_alternative<_WriterT<W, _M> > : std::integral_constant<bool, is_monoid_v<W> && _is_alternative<_M>::value> {};
 
 template<typename W, class _M>
-struct Alternative<_WriterT<W, _M> >
+struct Alternative<_WriterT<W, _M> > : _Alternative<_WriterT<W, _M> >
 {
     // empty = WriterT empty
     template<typename A>
-    static WriterT<W, _M, A> empty() {
+    static constexpr WriterT<W, _M, A> empty(){
         return Alternative<_M>::template empty<pair_t<A, W> >();
     }
 
-    template<typename T>
-    struct alt_op_result_type;
-
-    template<typename T>
-    using alt_op_result_type_t = typename alt_op_result_type<T>::type;
-
-    template<typename A>
-    struct alt_op_result_type<WriterT<W, _M, A> >
-    {
-        using type = WriterT<W, _M, A>;
-    };
-
     // m <|> n = WriterT $ runWriterT m <|> runWriterT n
     template<typename A>
-    static WriterT<W, _M, A> alt_op(WriterT<W, _M, A> const& m, WriterT<W, _M, A> const& n){
+    static constexpr WriterT<W, _M, A> alt_op(WriterT<W, _M, A> const& m, WriterT<W, _M, A> const& n){
         return m.run() | n.run();
     }
 };
@@ -401,12 +388,12 @@ template<typename W, class _M>
 struct _is_foldable<_WriterT<W, _M> > : _is_foldable<_M> {};
 
 template<typename W, class _M>
-struct Foldable<_WriterT<W, _M> >
+struct Foldable<_WriterT<W, _M> > : _Foldable<_WriterT<W, _M> >
 {
     // foldMap :: Monoid m => (a -> m) -> t a -> m
     // foldMap f = foldMap (f . fst) . runWriterT
     template<typename M1, typename Arg>
-    static monoid_type<M1> foldMap(function_t<M1(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x){
+    static constexpr monoid_type<M1> foldMap(function_t<M1(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x){
         return Foldable<_M>::foldMap(f & _(fst<fdecay<Arg>, W>), x.run());
     }
 };
@@ -422,18 +409,18 @@ template<typename W, class _M>
 struct _is_traversable<_WriterT<W, _M> > : _is_traversable<_M> {};
 
 template<typename W, class _M>
-struct Traversable<_WriterT<W, _M> >
+struct Traversable<_WriterT<W, _M> > : _Traversable<_WriterT<W, _M> >
 {
     // traverse :: (Traversable t, Applicative f) => (a -> f b) -> t a -> f (t b)
     // traverse f = fmap WriterT . traverse f' . runWriterT where
     //   f' (a, b) = fmap (\ c -> (c, b)) (f a)
     template<typename AP, typename Arg>
-    static applicative_type<AP, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >
+    static constexpr applicative_type<AP, typeof_t<AP, WriterT<W, _M, fdecay<Arg> > > >
     traverse(function_t<AP(Arg)> const& f, WriterT<W, _M, fdecay<Arg> > const& x)
     {
         using A = fdecay<Arg>;
-        const auto f_ = _([&f](pair_t<A, W> const& p) {
-            return fmap(_([&p](A const& c) { return pair_t<A, W>(c, snd(p)); }), f(fst(p)));
+        auto const f_ = _([&f](pair_t<A, W> const& p){
+            return fmap(_([&p](A const& c){ return pair_t<A, W>(c, snd(p)); }), f(fst(p)));
         });
         return fmap(_(WriterT_<W, _M, A>), Traversable<_M>::traverse(f_, x.run()));
     }
@@ -443,36 +430,33 @@ struct Traversable<_WriterT<W, _M> >
 template<typename W, class _M>
 struct MonadZip<_WriterT<W, _M> > : _MonadZip<MonadZip<_WriterT<W, _M> > >
 {
-    static_assert(is_monoid<W>::value, "Should be a Monoid");
+    static_assert(is_monoid_v<W>, "Should be a Monoid");
 
     // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
     // mzipWith f (WriterT x) (WriterT y) = WriterT $
     //   mzipWith (\ ~(a, w) ~(b, w') -> (f a b, w `mappend` w')) x y
     template<typename C, typename AArg, typename BArg>
-    static WriterT<W, _M, C> mzipWith(function_t<C(AArg, BArg)> const& f,
+    static constexpr WriterT<W, _M, C> mzipWith(function_t<C(AArg, BArg)> const& f,
         WriterT<W, _M, fdecay<AArg> > const& x, WriterT<W, _M, fdecay<BArg> > const& y)
     {
-        return MonadZip<_M>::mzipWith(_([&f](pair_t<fdecay<AArg>, W> const& pa, pair_t<fdecay<BArg>, W> const& pb) {
+        return MonadZip<_M>::mzipWith(_([&f](pair_t<fdecay<AArg>, W> const& pa, pair_t<fdecay<BArg>, W> const& pb){
             return pair_t<C, W>(f(fst(pa), fst(pb)), Monoid_t<W>::mappend(snd(pa), snd(pb)));
         }), x.run(), y.run());
     }
 };
 
 // MonadTrans
-template<typename W, class _M>
-struct MonadTrans<_WriterT<W, _M> >
+template<typename W>
+struct MonadTrans<__WriterT<W> >
 {
-    static_assert(is_monoid<W>::value, "Should be a Monoid");
+    static_assert(is_monoid_v<W>, "Should be a Monoid");
 
     // lift m = WriterT $ do
     //   a <- m
     //   return (a, mempty)
-    template<typename MA>
-    static typename std::enable_if<
-        std::is_same<_M, base_class_t<MA> >::value,
-        WriterT<W, _M, value_type_t<MA> >
-    >::type lift(MA const& m){
-        return _do(a, m, return Monad<_M>::mreturn(pair_t<value_type_t<MA>, W>(a, Monoid_t<W>::template mempty<value_type_t<W> >())););
+    template<typename M>
+    static constexpr monad_type<M, WriterT<W, base_class_t<M>, value_type_t<M> > > lift(M const& m){
+        return _do(a, m, return Monad_t<M>::mreturn(make_pair_t(a, W::mempty())););
     }
 };
 
@@ -487,22 +471,22 @@ struct MonadReader<R, _WriterT<W, _M> > : _MonadReader<R, _WriterT<W, _M>, Monad
     using type = typename super::template type<T>;
 
     // ask = lift ask
-    static type<R> ask() {
-        return MonadTrans<base_class>::lift(MonadReader<R, _M>::ask());
+    static constexpr type<R> ask(){
+        return MonadTrans<__WriterT<W> >::lift(MonadReader<R, _M>::ask());
     }
 
     // local = mapWriterT . local
     template<typename A, typename RArg>
-    static typename std::enable_if<is_same_as<R, RArg>::value, type<A> >::type
+    static constexpr std::enable_if_t<is_same_as_v<R, RArg>, type<A> >
     local(function_t<R(RArg)> const& f, type<A> const& m){
         return (_(mapWriterT<typename _M::template type<A>, typename _M::template type<A>>) & _(MonadReader<R, _M>::template local<A, RArg>))(f, m);
     }
 
     // reader = lift . reader
     template<typename A, typename RArg>
-    static typename std::enable_if<is_same_as<R, RArg>::value, type<A> >::type
+    static constexpr std::enable_if_t<is_same_as_v<R, RArg>, type<A> >
     reader(function_t<A(RArg)> const& f){
-        return MonadTrans<base_class>::lift(MonadReader<R, _M>::reader(f));
+        return MonadTrans<__WriterT<W> >::lift(MonadReader<R, _M>::reader(f));
     }
 };
 
@@ -518,24 +502,24 @@ struct MonadWriter<W, _WriterT<W, _M> > : _MonadWriter<W, _WriterT<W, _M>, Monad
 
     // writer = Lazy.writer
     template<typename A>
-    static type<A> writer(pair_t<A, W> const& p) {
+    static constexpr type<A> writer(pair_t<A, W> const& p){
         return _FUNCPROG::writer<_M>(p);
     }
 
     // tell = Lazy.tell
-    static type<None> tell(W const& w) {
+    static constexpr type<None> tell(W const& w){
         return _WriterT<W, _M>::tell(w);
     }
 
     // listen = Lazy.listen
     template<typename A>
-    static type<pair_t<A, W> > listen(WriterT<W, _M, A> const& m) {
+    static constexpr type<pair_t<A, W> > listen(WriterT<W, _M, A> const& m){
         return m.listen();
     }
 
     // pass = Lazy.pass
     template<typename A>
-    static type<A> pass(WriterT<W, _M, pair_t<A, function_t<W(W const&)> > > const& m) {
+    static constexpr type<A> pass(WriterT<W, _M, pair_t<A, function_t<W(W const&)> > > const& m){
         return _WriterT<W, _M>::pass(m);
     }
 };
@@ -552,18 +536,18 @@ struct MonadState<S, _WriterT<W, _M> > : _MonadState<S, _WriterT<W, _M>, MonadSt
 
     // state = lift . state
     template<typename A>
-    static type<A> state(function_t<pair_t<A, S>(S const&)> const& f) {
-        return MonadTrans<base_class>::lift(MonadState<S, _M>::state(f));
+    static constexpr type<A> state(function_t<pair_t<A, S>(S const&)> const& f){
+        return MonadTrans<__WriterT<W> >::lift(MonadState<S, _M>::state(f));
     }
 
     // get = lift get
-    static type<S> get() {
-        return MonadTrans<base_class>::lift(MonadState<S, _M>::get());
+    static constexpr type<S> get(){
+        return MonadTrans<__WriterT<W> >::lift(MonadState<S, _M>::get());
     }
 
     // put = lift . put
-    static type<None> put(S const& s) {
-        return MonadTrans<base_class>::lift(MonadState<S, _M>::put(s));
+    static constexpr type<None> put(S const& s){
+        return MonadTrans<__WriterT<W> >::lift(MonadState<S, _M>::put(s));
     }
 };
 
@@ -572,7 +556,7 @@ _FUNCPROG_END
 namespace std {
 
     template<typename W, class _M, typename A>
-    ostream& operator<<(ostream& os, _FUNCPROG::WriterT<W, _M, A> const& x) {
+    ostream& operator<<(ostream& os, _FUNCPROG::WriterT<W, _M, A> const& x){
         return os <<  "WriterT[" << x.run() << ']';
     }
 

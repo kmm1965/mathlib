@@ -8,106 +8,88 @@ _KIAM_MATH_BEGIN
 template<typename TAG, class E, class _Proxy = E>
 struct executor : math_object<E, _Proxy>
 {
-    typedef TAG tag_type;
+    using tag_type = TAG;
 };
+
+#define EXECUTOR(E) executor<typename E::tag_type, E, typename E::proxy_type>
 
 #if defined(__CUDACC__)
 
 template<typename TAG>
-struct cuda_math_executor : executor<TAG, cuda_math_executor<TAG> >
+struct cuda_executor : executor<TAG, cuda_executor<TAG> >
 {
     template<class Closure>
-    void operator()(Closure &closure, size_t size) const {
-        cuda_exec_callback(closure, size);
-    }
+    void operator()(size_t size, Closure const& closure) const;
 
-    template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const {
-        cuda_exec_callback(closure, size, context_builder);
+    template<class CB, class Closure>
+    std::enable_if_t<std::is_same<TAG, typename CB::tag_type>::value>
+    operator()(size_t size, Closure const& closure, CONTEXT_BUILDER(CB) const& context_builder) const
+    {
+        closure_context_callback<CB, Closure> const callback(closure, context_builder);
+        (*this)(size, callback);
     }
 };
 
-#ifdef DONT_USE_CXX_11
 template<typename TAG>
-struct default_executor : cuda_math_executor<TAG>{};
-#else
-template<typename TAG>
-using default_executor = cuda_math_executor<TAG>;
-#endif
+using default_executor = cuda_executor<TAG>;
 
 #elif defined(__OPENCL__)
 
 template<typename TAG>
-struct opencl_math_executor : executor<TAG, opencl_math_executor<TAG> >
+struct opencl_executor : executor<TAG, opencl_executor<TAG> >
 {
+    opencl_executor(){}
+
     template<class Closure>
-    void operator()(Closure &closure, size_t size) const {
-        opencl_exec_callback(closure, size);
-    }
+    void operator()(size_t size, Closure const& closure) const;
 
-    template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const {
-        opencl_exec_callback(closure, size, context_builder);
-    }
-};
-
-#ifdef DONT_USE_CXX_11
-template<typename TAG>
-struct default_executor : opencl_math_executor<TAG> {};
-#else
-template<typename TAG>
-using default_executor = opencl_math_executor<TAG>;
-#endif
-
-#else   // __CUDACC
-
-template<class Callback>
-void serial_exec_callback(Callback& callback, size_t size);
-
-template<typename TAG>
-struct serial_executor : executor<TAG, serial_executor<TAG> >
-{
-    template<class Closure>
-    void operator()(Closure &closure, size_t size) const {
-        serial_exec_callback(closure, size);
-    }
-
-    template<class Closure, class CB>
-    void operator()(Closure &closure, size_t size, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) const
+    template<class CB, class Closure>
+    std::enable_if_t<std::is_same<TAG, typename CB::tag_type>::value>
+    operator()(size_t size, Closure const& closure, CONTEXT_BUILDER(CB) const& context_builder) const
     {
-        closure_context_callback<TAG, Closure, CB> const callback(closure, context_builder);
-        serial_exec_callback(callback, size);
+        closure_context_callback<CB, Closure> const callback(closure, context_builder);
+        (*this)(size, callback);
     }
 };
 
-#ifdef DONT_USE_CXX_11
 template<typename TAG>
-struct default_executor : serial_executor<TAG>{};
-#else
+using default_executor = opencl_executor<TAG>;
+
+#else   // __CUDACC__
+
 template<typename TAG>
-using default_executor = serial_executor<TAG>;
-#endif
+struct cpu_executor : executor<TAG, cpu_executor<TAG> >
+{
+    cpu_executor(){}
+
+    template<class Closure>
+    void operator()(size_t size, Closure const& closure) const;
+
+    template<class CB, class Closure>
+    std::enable_if_t<std::is_same<typename CB::tag_type, TAG>::value>
+    operator()(size_t size, Closure const& closure, CONTEXT_BUILDER(CB) const& context_builder) const
+    {
+        closure_context_callback<CB, Closure> const callback(closure, context_builder);
+        (*this)(size, callback);
+    }
+};
+
+template<typename TAG>
+using default_executor = cpu_executor<TAG>;
 
 #endif  // __CUDACC
 
 _KIAM_MATH_END
 
-#ifdef DONT_USE_CXX_11
-#define DECLARE_MATH_EXECUTOR(name) \
-    template<class E, class _Proxy = E> \
-    struct name##_executor : _KIAM_MATH::executor<name##_tag, E, _Proxy>{}; \
-    typedef _KIAM_MATH::default_executor<name##_tag> default_##name##_executor
-#else
 #define DECLARE_MATH_EXECUTOR(name) \
     template<class E, class _Proxy = E> \
     using name##_executor = _KIAM_MATH::executor<name##_tag, E, _Proxy>; \
-    typedef _KIAM_MATH::default_executor<name##_tag> name##_default_executor
-#endif
+    using name##_default_executor = _KIAM_MATH::default_executor<name##_tag>
 
 #if defined(__CUDACC__)
 #include "cuda_executor.inl"
 #elif defined(__OPENCL__)
 #include "opencl_executor.inl"
 #else
-#include "executor.inl"
+#include "cpu_executor.inl"
 #endif

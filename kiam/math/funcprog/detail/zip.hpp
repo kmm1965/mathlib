@@ -46,18 +46,26 @@ foldr2_left :: (a -> b -> c -> d) -> d -> a -> ([b] -> c) -> [b] -> d
 foldr2_left _k  z _x _r []     = z
 foldr2_left  k _z  x  r (y:ys) = k x y (r ys)
 */
-DEFINE_FUNCTION_4(4, function_t<T3(List<fdecay<T1> > const&)>, foldr2_left, function_t<T3(T0, T1, T2)> const&, k,
-    T3 const&, z, fdecay<T0> const&, x, function_t<fdecay<T2>(List<fdecay<T1> > const&)> const&, r,
-    return [=](List<fdecay<T1> > const& ys){
+DECLARE_FUNCTION_4(4, function_t<T3(List<fdecay<T1> > const&)>, foldr2_left, function_t<T3(T0, T1, T2)> const&,
+    T3 const&, fdecay<T0> const&, function_t<fdecay<T2>(List<fdecay<T1> > const&)> const&)
+FUNCTION_TEMPLATE(4) constexpr function_t<T3(List<fdecay<T1> > const&)> foldr2_left(function_t<T3(T0, T1, T2)> const& k,
+    T3 const& z, fdecay<T0> const& x, function_t<fdecay<T2>(List<fdecay<T1> > const&)> const& r)
+{
+    return [=](List<fdecay<T1> > const& ys) {
         return null(ys) ? z : k(x, head(ys), r(tail(ys)));
-    };)
+    };
+}
 
 // foldr2 :: (a->b->c->c)->c ->[a] ->[b]->c
 // foldr2 k z xs ys = foldr (foldr2_left k z) (\_ -> z) xs ys
-DEFINE_FUNCTION_4(4, T2, foldr2, function_t<T2(T0, T1, T3)> const&, k, T2 const&, z,
-    List<fdecay<T0> > const&, xs, List<fdecay<T1> > const&, ys,
-    static_assert(is_same_as<T2, T3>::value, "Should be the same");
-    return foldr(_foldr2_left(k, z), _([&z](List<fdecay<T0> > const&){ return z; }), xs)(ys);)
+DECLARE_FUNCTION_4(4, T2, foldr2, function_t<T2(T0, T1, T3)> const&, T2 const&,
+    List<fdecay<T0> > const&, List<fdecay<T1> > const&)
+FUNCTION_TEMPLATE(4) constexpr T2 foldr2(function_t<T2(T0, T1, T3)> const& k, T2 const& z,
+    List<fdecay<T0> > const& xs, List<fdecay<T1> > const& ys)
+{
+    static_assert(is_same_as_v<T2, T3>, "Should be the same");
+    return foldr(_foldr2_left(k, z), _([&z](List<fdecay<T0> > const&){ return z; }), xs)(ys);
+}
 
 /*
 ----------------------------------------------
@@ -77,43 +85,56 @@ DEFINE_FUNCTION_4(4, T2, foldr2, function_t<T2(T0, T1, T3)> const&, k, T2 const&
 -- > zip _|_ [] = _|_
 */
 // zip
-DEFINE_FUNCTION_2(2, List<PAIR_T(T0, T1)>, zip, List<T0> const&, l1, List<T1> const&, l2,
+DECLARE_FUNCTION_2(2, List<PAIR_T(T0, T1)>, zip, List<T0> const&, List<T1> const&)
+FUNCTION_TEMPLATE(2) constexpr List<PAIR_T(T0, T1)> zip(List<T0> const& l1, List<T1> const& l2)
+{
     List<PAIR_T(T0, T1)> result;
     typename List<T0>::const_iterator it1;
     typename List<T1>::const_iterator it2;
     for (it1 = std::cbegin(l1), it2 = std::cbegin(l2); it1 != std::cend(l1) && it2 != std::cend(l2); ++it1, ++it2)
         result.push_back(std::make_pair(*it1, *it2));
-    return result;)
+    return result;
+}
 
 // zip3
-DEFINE_FUNCTION_3(3, List<TUPLE3(T0, T1, T2)>, zip3, List<T0> const&, l1, List<T1> const&, l2, List<T2> const&, l3,
+DECLARE_FUNCTION_3(3, List<TUPLE3(T0, T1, T2)>, zip3, List<T0> const&, List<T1> const&, List<T2> const&)
+FUNCTION_TEMPLATE(3) constexpr List<TUPLE3(T0, T1, T2)> zip3(List<T0> const& l1, List<T1> const& l2, List<T2> const& l3)
+{
     List<TUPLE3(T0, T1, T2)> result;
     typename List<T0>::const_iterator it1;
     typename List<T1>::const_iterator it2;
     typename List<T2>::const_iterator it3;
     for (it1 = std::cbegin(l1), it2 = std::cbegin(l2), it3 = std::cbegin(l3); it1 != std::cend(l1) && it2 != std::cend(l2) && it3 != std::cend(l3); ++it1, ++it2, ++it3)
         result.push_back(std::make_tuple(*it1, *it2, *it3));
-    return result;)
+    return result;
+}
 
 // zipWith
-DEFINE_FUNCTION_3(3, List<T0>, zipWith, function_t<T0(T1, T2)> const&, f, List<fdecay<T1> > const&, l1, List<fdecay<T2> > const&, l2,
+DECLARE_FUNCTION_3(3, List<T0>, zipWith, function_t<T0(T1, T2)> const&, List<fdecay<T1> > const&, List<fdecay<T2> > const&)
+FUNCTION_TEMPLATE(3) constexpr List<T0> zipWith(function_t<T0(T1, T2)> const& f, List<fdecay<T1> > const& l1, List<fdecay<T2> > const& l2)
+{
     List<T0> result;
     typename List<fdecay<T1> >::const_iterator it1;
     typename List<fdecay<T2> >::const_iterator it2;
     for (it1 = std::cbegin(l1), it2 = std::cbegin(l2); it1 != std::cend(l1) && it2 != std::cend(l2); ++it1, ++it2)
         result.push_back(f(*it1, *it2));
-    return result;)
+    return result;
+}
 
 // zipWith3
-DEFINE_FUNCTION_4(4, List<T0>, zipWith3, function_t<T0(T1, T2, T3)> const&, f, List<fdecay<T1> > const&, l1,
-    List<fdecay<T2> > const&, l2, List<fdecay<T3> > const&, l3,
+DECLARE_FUNCTION_4(4, List<T0>, zipWith3, function_t<T0(T1, T2, T3)> const&, List<fdecay<T1> > const&,
+    List<fdecay<T2> > const&, List<fdecay<T3> > const&)
+FUNCTION_TEMPLATE(4) constexpr List<T0> zipWith3(function_t<T0(T1, T2, T3)> const& f, List<fdecay<T1> > const& l1,
+    List<fdecay<T2> > const& l2, List<fdecay<T3> > const& l3)
+{
     List<T0> result;
     typename List<T1>::const_iterator it1;
     typename List<T2>::const_iterator it2;
     typename List<T3>::const_iterator it3;
     for (it1 = std::cbegin(l1), it2 = std::cbegin(l2), it3 = std::cbegin(l3); it1 != std::cend(l1) && it2 != std::cend(l2) && it3 != std::cend(l3); ++it1, ++it2, ++it3)
         result.push_back(f(*it1, *it2, *it3));
-    return result;)
+    return result;
+}
 
 // unzip
 template<typename T0, typename T1>

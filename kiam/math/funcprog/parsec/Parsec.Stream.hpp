@@ -24,7 +24,7 @@ instance (Monad m) => Stream [tok] m tok where
 template<typename _M, typename T>
 struct Stream
 {
-    static_assert(is_monad<_M>::value, "_M should be a monad");
+    static_assert(_is_monad_v<_M>, "_M should be a monad");
 
     using monad_type = _M;
     using token_type = T;

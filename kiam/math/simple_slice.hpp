@@ -61,7 +61,7 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
             gf_proxy(gf_proxy), value(value), index(index){}
 
         __DEVICE
-        void operator[](size_t i){
+        void operator()(size_t i){
             gf_proxy[index(i)] = value;
         }
 
@@ -76,28 +76,28 @@ struct simple_slice : math_object<simple_slice<TAG, T> >
         default_executor<tag_type>()(closure, size());
     }
     
-    template<typename EO>
-    struct simple_slice_assign_eobj_closure
+    template<typename GEXP>
+    struct simple_slice_assign_gexp_closure
     {
-        simple_slice_assign_eobj_closure(gf_proxy_type& gf_proxy, EOBJ(EO) const& eobj, index_type const& index) :
-            gf_proxy(gf_proxy), eobj_proxy(eobj.get_proxy()), index(index){}
+        simple_slice_assign_gexp_closure(gf_proxy_type& gf_proxy, GRID_EXPR(GEXP) const& gexp, index_type const& index) :
+            gf_proxy(gf_proxy), gexp_proxy(gexp.get_proxy()), index(index){}
 
         __DEVICE
-        void operator[](size_t i){
+        void operator()(size_t i){
             size_t const ind = index(i);
-            gf_proxy[ind] = eobj_proxy[ind];
+            gf_proxy[ind] = gexp_proxy[ind];
         }
 
     private:
         gf_proxy_type gf_proxy;
-        typename EO::proxy_type const eobj_proxy;
+        typename GEXP::proxy_type const gexp_proxy;
         index_type const index;
     };
 
-    template<typename EO>
-    typename std::enable_if<std::is_same<typename EO::tag_type, TAG>::value>::type
-    operator=(EOBJ(EO) const& eobj){
-        simple_slice_assign_eobj_closure<EO> closure(gf_proxy, eobj, index);
+    template<typename GEXP>
+    typename std::enable_if<std::is_same<typename GEXP::tag_type, TAG>::value>::type
+    operator=(GRID_EXPR(GEXP) const& gexp){
+        simple_slice_assign_gexp_closure<GEXP> closure(gf_proxy, gexp, index);
         default_executor<tag_type>()(closure, size());
     }
 

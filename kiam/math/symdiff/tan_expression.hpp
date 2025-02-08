@@ -10,15 +10,15 @@ struct tan_expression : expression<tan_expression<E> >
     template<unsigned M>
     struct diff_type
     {
-        typedef typename div_expression_type<
+        typedef div_expression_t<
             typename E::template diff_type<M>::type,
             mul_expression<cos_expression<E>, cos_expression<E> >
-        >::type type;
+        > type;
     };
 
-    constexpr tan_expression(const expression<E> &e) : e(e()){}
+    constexpr tan_expression(expression<E> const& e) : e(e()){}
 
-    constexpr const E& expr() const { return e; }
+    constexpr E const& expr() const { return e; }
 
     template<unsigned M>
     constexpr typename diff_type<M>::type diff() const
@@ -33,11 +33,11 @@ struct tan_expression : expression<tan_expression<E> >
     }
 
 private:
-    const E e;
+    E const e;
 };
 
 template<class E>
-constexpr tan_expression<E> tan(const expression<E>& e){
+constexpr tan_expression<E> tan(expression<E> const& e){
     return tan_expression<E>(e);
 }
 

@@ -4,14 +4,14 @@
 
 _KIAM_MATH_BEGIN
 
-template<typename TAG, class Closure, class CB>
+template<class CB, class Closure>
 struct closure_context_callback
 {
-    closure_context_callback(Closure &closure_, const context_builder<TAG, CB, typename CB::proxy_type> &context_builder) :
+    closure_context_callback(Closure &closure_, CONTEXT_BUILDER(CB) const& context_builder) :
         closure(closure_), context_builder_proxy(context_builder.get_proxy()){}
 
     __DEVICE
-    void operator[](size_t i){
+    void operator()(size_t i){
         closure(i, context_builder_proxy);
     }
 

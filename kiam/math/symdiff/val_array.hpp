@@ -16,7 +16,7 @@ struct val_array : std::array<T, N>
     typedef T *pointer;
     typedef const T *const_pointer;
     typedef T &reference;
-    typedef const T &const_reference;
+    typedef T const& const_reference;
 
     constexpr val_array(){
         std::fill(super::begin(), super::end(), value_type());
@@ -77,7 +77,7 @@ struct val_array : std::array<T, N>
 };
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator-(const val_array<T, N> &x)
+constexpr val_array<T, N> operator-(val_array<T, N> const& x)
 {
     val_array<T, N> result;
     std::transform(x.cbegin(), x.cend(), result.begin(), [](T val){ return -val; });
@@ -85,7 +85,7 @@ constexpr val_array<T, N> operator-(const val_array<T, N> &x)
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator+(const val_array<T, N> &x, const val_array<T, N> &y)
+constexpr val_array<T, N> operator+(val_array<T, N> const& x, val_array<T, N> const& y)
 {
     val_array<T, N> result;
     std::transform(x.cbegin(), x.cend(), y.cbegin(), result.begin(), std::plus<T>());
@@ -93,7 +93,7 @@ constexpr val_array<T, N> operator+(const val_array<T, N> &x, const val_array<T,
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator-(const val_array<T, N> &x, const val_array<T, N> &y)
+constexpr val_array<T, N> operator-(val_array<T, N> const& x, val_array<T, N> const& y)
 {
     val_array<T, N> result;
     std::transform(x.cbegin(), x.cend(), y.cbegin(), result.begin(), std::minus<T>());
@@ -101,7 +101,7 @@ constexpr val_array<T, N> operator-(const val_array<T, N> &x, const val_array<T,
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator*(const val_array<T, N> &x, const T &y)
+constexpr val_array<T, N> operator*(val_array<T, N> const& x, T const& y)
 {
     val_array<T, N> result;
     std::transform(x.cbegin(), x.cend(), result.begin(), [&y](const T& v) { return v * y; });
@@ -109,15 +109,15 @@ constexpr val_array<T, N> operator*(const val_array<T, N> &x, const T &y)
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator*(const T &x, const val_array<T, N> &y)
+constexpr val_array<T, N> operator*(T const& x, val_array<T, N> const& y)
 {
     val_array<T, N> result;
-    std::transform(y.cbegin(), y.cend(), result.begin(), [&x](const T& yy) { return x * yy; });
+    std::transform(y.cbegin(), y.cend(), result.begin(), [&x](T const& yy) { return x * yy; });
     return result;
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator/(const val_array<T, N> &x, const T &y)
+constexpr val_array<T, N> operator/(val_array<T, N> const& x, T const& y)
 {
     using namespace std::placeholders;
     val_array<T, N> result;
@@ -126,7 +126,7 @@ constexpr val_array<T, N> operator/(const val_array<T, N> &x, const T &y)
 }
 
 template<typename T, size_t N>
-constexpr val_array<T, N> operator*(const square_matrix<T, N> &A, const val_array<T, N> &x)
+constexpr val_array<T, N> operator*(square_matrix<T, N> const& A, val_array<T, N> const& x)
 {
     val_array<T, N> result;
     for(size_t i = 0; i < N; ++i)
@@ -135,17 +135,17 @@ constexpr val_array<T, N> operator*(const square_matrix<T, N> &A, const val_arra
 }
 
 template<typename T, size_t N>
-constexpr T max_abs(const val_array<T, N> &x)
+constexpr T max_abs(val_array<T, N> const& x)
 {
-    return std::accumulate(x.cbegin(), x.cend(), T(), [](const T &val, const T &v)
+    return std::accumulate(x.cbegin(), x.cend(), T(), [](T const& val, T const& v)
     {
-        const T v1 = std::abs(v);
+        T const v1 = std::abs(v);
         return val > v1 ? val : v1;
     });
 }
 
 template<typename T, size_t N>
-std::ostream& operator<<(std::ostream &o, const val_array<T, N> &x)
+std::ostream& operator<<(std::ostream &o, val_array<T, N> const& x)
 {
     o << "{ ";
     for(size_t i = 0; i < N; ++i)

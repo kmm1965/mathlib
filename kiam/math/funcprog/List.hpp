@@ -1,14 +1,32 @@
 #pragma once
 
-#include "List_fwd.hpp"
+#include "fwd/List_fwd.hpp"
+#include "Functor.hpp"
+#include "Applicative.hpp"
+#include "MonadFail.hpp"
 #include "Monad.hpp"
+#include "Alternative.hpp"
 #include "MonadPlus.hpp"
+#include "Semigroup.hpp"
 #include "Monoid.hpp"
 #include "Foldable.hpp"
 #include "Traversable.hpp"
 #include "Monad/MonadZip.hpp"
+#include "detail/minmax.hpp"
 
 _FUNCPROG_BEGIN
+
+class list_error : monad_error
+{
+public:
+    list_error(const char* msg) : monad_error(msg){}
+};
+
+class empty_list_error : list_error
+{
+public:
+    empty_list_error(const char* msg) : list_error(msg){}
+};
 
 struct _List
 {
@@ -27,10 +45,13 @@ struct List : list_t<A>, _List
     List(){}
     List(std::initializer_list<value_type> const& il) : super(il){}
     List(List const& other) : super(other){}
-    List(f0<List> const& f) : super(*f) {}
+    List(f0<List> const& f) : super(*f){}
     template<class Iter> List(Iter first, Iter last) : super(first, last){}
     List(size_t _Count, const value_type& _Val) : super(_Count, _Val){}
-    List(A const& x) : super(1, x) {}
+    List(A const& x) : super(1, x){}
+
+    // Monoid
+    static List mempty(){ return List(); }
 };
 
 template<>
@@ -40,19 +61,22 @@ struct List<char> : std::string, _List
     using super = std::string;
 
     List(){}
-    List(std::initializer_list<char> const& il) : super(il) {}
+    List(std::initializer_list<char> const& il) : super(il){}
     List(const char *value) : super(value){}
     List(super const& value) : super(value){}
     List(List const& other) : super(other){}
-    List(f0<List> const& f) : super(*f) {}
+    List(f0<List> const& f) : super(*f){}
     template<class Iter> List(Iter first, Iter last) : super(first, last){}
-    List(size_t _Count, char _Val) : super(_Count, _Val) {}
-    List(char x) : super(1, x) {}
+    List(size_t _Count, char _Val) : super(_Count, _Val){}
+    List(char x) : super(1, x){}
+
+    // Monoid
+    static List mempty(){ return List(); }
 };
 
 using String = List<char>;
 
-inline bool sempty(String const& s) {
+inline bool sempty(String const& s){
     return s.empty();
 }
 
@@ -63,117 +87,177 @@ struct List<wchar_t> : std::wstring, _List
     using super = std::wstring;
 
     List(){}
-    List(std::initializer_list<wchar_t> const& il) : super(il) {}
+    List(std::initializer_list<wchar_t> const& il) : super(il){}
     List(const wchar_t *value) : super(value){}
     List(super const& value) : super(value){}
     List(List const& other) : super(other){}
-    List(f0<List> const& f) : super(*f) {}
+    List(f0<List> const& f) : super(*f){}
     template<class Iter> List(Iter first, Iter last) : super(first, last){}
-    List(size_t _Count, char _Val) : super(_Count, _Val) {}
-    List(wchar_t x) : super(1, x) {}
+    List(size_t _Count, char _Val) : super(_Count, _Val){}
+    List(wchar_t x) : super(1, x){}
+
+    // Monoid
+    static List mempty(){ return List(); }
 };
 
 using wString = List<wchar_t>;
 
 // Functor
-IMPLEMENT_FUNCTOR(_List);
-
 template<>
-struct Functor<_List>
+struct Functor<_List> : _Functor<_List>
 {
-    DECLARE_FUNCTOR_CLASS(List)
+    // <$> fmap :: Functor f => (a -> b) -> f a -> f b
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr List<remove_f0_t<function_t<Ret(Args...)> > >
+    fmap(function_t<Ret(Arg, Args...)> const& f, List<fdecay<Arg> > const& v);
 };
 
 // Applicative
-IMPLEMENT_APPLICATIVE(_List);
-
 template<>
-struct Applicative<_List> : Functor<_List>
+struct Applicative<_List> : Functor<_List>, _Applicative<_List>
 {
-    typedef Functor<_List> super;
+    template<typename T>
+    static constexpr List<fdecay<T> > pure(T const& x){
+        return x;
+    }
 
-    DECLARE_APPLICATIVE_CLASS(List)
+    template<typename Ret, typename Arg, typename... Args>
+    static constexpr List<remove_f0_t<function_t<Ret(Args...)> > >
+    apply(List<function_t<Ret(Arg, Args...)> > const& f, List<fdecay<Arg> > const& v);
+};
+
+// MonadFail
+template<>
+struct MonadFail<_List>
+{
+    template<typename A = None>
+    static constexpr List<A> fail(const char*){
+        return List<A>();
+    }
 };
 
 // Monad
-IMPLEMENT_MONAD(_List);
-
 template<>
-struct Monad<_List> : Applicative<_List>
+struct Monad<_List> : Applicative<_List>, _Monad<_List>
 {
-    typedef Applicative<_List> super;
-
     template<typename A>
-    static constexpr List<fdecay<A> > mreturn(A const& x);
+    using liftM_type = List<A>;
 
     template<typename Ret, typename Arg, typename... Args>
     static constexpr remove_f0_t<function_t<List<Ret>(Args...)> >
-    mbind(List<fdecay<Arg> > const& m, function_t<List<Ret>(Arg, Args...)> const& f);
-
-    template<typename A>
-    using liftM_type = List<A>;
+    mbind(List<fdecay<Arg> > const& l, function_t<List<Ret>(Arg, Args...)> const& f);
 };
 
 // Alternative
-IMPLEMENT_ALTERNATIVE(_List);
-
 template<>
-struct Alternative<_List>
-{
-    DECLARE_ALTERNATIVE_CLASS(List)
-};
-
-// MonadPlus
-IMPLEMENT_MONADPLUS(_List);
-
-template<>
-struct MonadPlus<_List> : Monad<_List>, Alternative<_List>
-{
-    using super = Alternative<_List>;
-
-    DECLARE_MONADPLUS_CLASS(List)
-};
-
-// Semigroup
-IMPLEMENT_SEMIGROUP(_List);
-
-template<>
-struct Semigroup<_List>
-{
-    DECLARE_SEMIGROUP_CLASS(List)
-};
-
-// Monoid
-IMPLEMENT_MONOID(_List);
-
-template<>
-struct Monoid<_List> : _Monoid, Semigroup<_List>
+struct Alternative<_List> : _Alternative<_List>
 {
     template<typename A>
-    static List<A> mempty() {
+    static constexpr List<A> empty(){
         return List<A>();
     }
 
     template<typename A>
-    static List<A> mconcat(List<List<A> > const& ls);
+    static constexpr List<A> alt_op(List<A> const& l, List<A> const& r){
+        return l + r;
+    }
+};
+
+// MonadPlus
+template<>
+struct MonadPlus<_List> : Monad<_List>, Alternative<_List>, _MonadPlus<_List>{};
+
+// Semigroup
+template<>
+struct Semigroup<_List> : _Semigroup<_List>
+{
+    template<typename A>
+    static constexpr List<A> sg_op(List<A> const& x, List<A> const& y){
+        return x + y;
+    }
+
+    //stimesList  :: Integral b => b -> [a] -> [a]
+    template<typename A>
+    static constexpr List<A> stimes(int n, List<A> const& l);
+};
+
+// Monoid
+template<>
+struct Monoid<_List> : Semigroup<_List>, _Monoid<_List>
+{
+    template<typename A>
+    static constexpr List<A> mempty(){
+        return List<A>();
+    }
+
+    template<typename A>
+    static constexpr List<A> mconcat(List<List<A> > const& ls);
 };
 
 // Foldable
-IMPLEMENT_FOLDABLE(_List);
-
 template<>
-struct Foldable<_List> : Monoid<_List>
+struct Foldable<_List> : Monoid<_List>, _Foldable<_List>
 {
-    DECLARE_FOLDABLE_CLASS(List)
+    // foldl :: (b -> a -> b) -> b -> t a -> b
+    template<typename Ret, typename A, typename B>
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret>
+    foldl(function_t<Ret(B, A)> const& f, Ret const& z, List<fdecay<A> > const& l);
+
+    // foldl1 :: (a -> a -> a) -> t a -> a
+    template<typename A, typename Arg1, typename Arg2>
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A>
+    foldl1(function_t<A(Arg1, Arg2)> const& f, List<A> const& l);
+
+    // foldr :: (a -> b -> b) -> b -> t a -> b
+    template<typename Ret, typename A, typename B>
+    static constexpr std::enable_if_t<is_same_as_v<Ret, B>, Ret>
+    foldr(function_t<Ret(A, B)> const& f, Ret const& z, List<fdecay<A> > const& l);
+
+    // foldr1 :: (a -> a -> a) -> t a -> a
+    template<typename A, typename Arg1, typename Arg2>
+    static constexpr std::enable_if_t<is_same_as_v<A, Arg1> && is_same_as_v<A, Arg2>, A>
+    foldr1(function_t<A(Arg1, Arg2)> const& f, List<A> const& l);
+
+    template<typename A>
+    static constexpr List<A> toList(List<A> const& l){
+        return l;
+    }
+
+    template<typename T>
+    static constexpr bool null(List<T> const& l){
+        return l.empty();
+    }
+
+    template<typename T>
+    static constexpr int length(List<T> const& l){
+        return (int) l.size();
+    }
+
+    template<typename A>
+    static constexpr A maximum(List<A> const& l);
+
+    template<typename A>
+    static constexpr A minimum(List<A> const& l);
+
+    //-- | The 'sum' function computes the sum of a finite list of numbers.
+    //sum :: (Num a) => [a] -> a
+    template<typename A>
+    static constexpr A sum(List<A> const& l);
+
+    //-- | The 'product' function computes the product of a finite list of numbers.
+    //product                 :: (Num a) => [a] -> a
+    template<typename A>
+    static constexpr A product(List<A> const& l);
 };
 
 // Traversable
-IMPLEMENT_TRAVERSABLE(_List);
-
 template<>
-struct Traversable<_List>
+struct Traversable<_List> : _Traversable<_List>
 {
-    DECLARE_TRAVERSABLE_CLASS(List)
+    // traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
+    template<typename AP, typename Arg>
+    static constexpr applicative_type<AP, typeof_t<AP, List<value_type_t<AP> > > >
+    traverse(function_t<AP(Arg)> const& f, List<fdecay<Arg> > const& l);
 };
 
 // MonadZip
@@ -182,70 +266,16 @@ struct MonadZip<_List> : _MonadZip<MonadZip<_List> >
 {
     // mzip :: m a -> m b -> m (a,b)
     template<typename A, typename B>
-    static List<pair_t<A, B> > mzip(List<A> const& ma, List<B> const& mb){
-        return zip(ma, mb);
-    }
+    static constexpr List<pair_t<A, B> > mzip(List<A> const& ma, List<B> const& mb);
 
     // mzipWith :: (a -> b -> c) -> m a -> m b -> m c
     // mzipWith = liftM2
     template<typename A, typename B, typename C, typename ArgA, typename ArgB>
-    static List<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, List<A> const& ma, List<B> const& mb)
-    {
-        static_assert(is_same_as<ArgA, A>::value, "Should be the same");
-        static_assert(is_same_as<ArgB, B>::value, "Should be the same");
-        return zipWith(f, ma, mb);
-    }
+    static constexpr List<C> mzipWith(function_t<C(ArgA, ArgB)> const& f, List<A> const& ma, List<B> const& mb);
 
     // munzip (Identity (a, b)) = (Identity a, Identity b)
     template<typename A, typename B>
-    static pair_t<List<A>, List<B> > munzip(List<pair_t<A, B> > const& mab){
-        return unzip(mab);
-    }
+    static constexpr pair_t<List<A>, List<B> > munzip(List<pair_t<A, B> > const& mab);
 };
-
-// List
-template<typename A>
-struct is_list : std::false_type {};
-
-template<typename A>
-struct is_list<List<A> > : std::true_type {};
-
-template<typename L>
-struct list_value_type {
-    typedef void type;
-};
-
-template<typename A>
-struct list_value_type<List<A> > {
-    typedef A type;
-};
-
-/*
-build   :: forall a. (forall b. (a -> b -> b) -> b -> b) -> [a]
-{-# INLINE [1] build #-}
-        -- The INLINE is important, even though build is tiny,
-        -- because it prevents [] getting inlined in the version that
-        -- appears in the interface file.  If [] *is* inlined, it
-        -- won't match with [] appearing in rules in an importing module.
-        --
-        -- The "1" says to inline in phase 1
-
-build g = g (:) []
-
--- | A list producer that can be fused with 'foldr'.
--- This function is merely
---
--- >    augment g xs = g (:) xs
---
--- but GHC's simplifier will transform an expression of the form
--- @'foldr' k z ('augment' g xs)@, which may arise after inlining, to
--- @g k ('foldr' k z xs)@, which avoids producing an intermediate list.
-
-augment :: forall a. (forall b. (a->b->b) -> b -> b) -> [a] -> [a]
-{-# INLINE [1] augment #-}
-augment g xs = g (:) xs
-*/
 
 _FUNCPROG_END
-
-#include "detail/List_impl.hpp"

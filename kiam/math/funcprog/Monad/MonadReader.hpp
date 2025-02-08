@@ -22,7 +22,7 @@ using MonadReader_t = MonadReader<R, base_class_t<T> >;
 template<typename R, typename _M, typename MR>
 struct _MonadReader
 {
-    static_assert(_is_monad<_M>::value, "Should be a Monad");
+    static_assert(_is_monad_v<_M>, "Should be a Monad");
 
     template<typename T>
     using type = typename _M::template type<T>;
@@ -31,7 +31,7 @@ struct _MonadReader
     // ask   :: m r
     // ask = reader id
 
-    static type<R> ask() {
+    static constexpr type<R> ask(){
         return MR::reader(_(id<R>));
     }
     /*
@@ -49,7 +49,7 @@ struct _MonadReader
       return (f r)
     */
     template<typename A, typename RArg>
-    static typename std::enable_if<is_same_as<R, RArg>::value, type<A> >::type
+    static constexpr std::enable_if_t<is_same_as_v<R, RArg>, type<A> >
     reader(function_t<A(RArg)> const& f){
         return _do(r, MR::ask(), return Monad<_M>::mreturn(f(r)););
     }
@@ -63,8 +63,8 @@ asks :: MonadReader r m
 asks = reader
 */
 template<typename R, typename _M, typename A, typename RArg>
-typename std::enable_if<is_same_as<R, RArg>::value, typename _M::template type<A> >::type
-asks(function_t<A(RArg)> const& f) {
+std::enable_if_t<is_same_as_v<R, RArg>, typename _M::template type<A> >
+asks(function_t<A(RArg)> const& f){
     return MonadReader<R, _M>::reader(f);
 }
 
